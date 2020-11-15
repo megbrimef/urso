@@ -1,0 +1,23 @@
+{
+  "name": "urso",
+  "version": "1.0.0",
+  "description": "HTML5 game engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/megbrimef/urso.git"
+  },
+  "keywords": [
+    "game",
+    "engine"
+  ],
+  "author": "megbrimef",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/megbrimef/urso/issues"
+  },
+  "homepage": "https://github.com/megbrimef/urso#readme"
+}
