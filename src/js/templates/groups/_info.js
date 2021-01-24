@@ -1,0 +1,1 @@
+Urso.Core.Templates.Groups = {};

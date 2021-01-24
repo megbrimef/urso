@@ -1,0 +1,11 @@
+Urso.Core.Modules = {};
+require('./assets/_info.js');
+require('./instances/_info.js');
+require('./logic/_info.js');
+require('./objects/_info.js');
+require('./observer/_info.js');
+require('./scenes/_info.js');
+require('./soundManager/_info.js');
+require('./statesManager/_info.js');
+require('./template/_info.js');
+require('./transport/_info.js');
