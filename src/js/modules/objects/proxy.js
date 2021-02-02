@@ -1,8 +1,9 @@
 class ModulesObjectsProxy {
     constructor() {
         this.singleton = true;
+        this._safeFlag = false;
 
-        this.apply = this.apply.bind(this);
+        this._customSetLogic = this._customSetLogic.bind(this);
         this._customGetLogic = this._customGetLogic.bind(this);
 
         this._propertyAdapter = this.getInstance('PropertyAdapter');
@@ -14,12 +15,12 @@ class ModulesObjectsProxy {
         let proxy = new Proxy(model, {
             get(target, key, receiver) {
                 const rv = Reflect.get(target, key, receiver);
-                return _this._customGetLogic({ target: target, proxy: receiver }, key, rv);;
+                return _this._customGetLogic({ target: target, proxy: receiver }, key, rv);
             },
 
             set(target, key, value, receiver) {
                 const rv = Reflect.set(target, key, value, receiver);
-                _this.apply(target, key, value);
+                _this._customSetLogic(target, key, value, proxy);
                 return rv;
             }
         });
@@ -41,41 +42,46 @@ class ModulesObjectsProxy {
     }
 
     safeSetValueToTarget(target, key, value) {
+        this._safeFlag = true;
+
         const originalValue = target._originalModel[key];
         target[key] = value;
         target._originalModel[key] = originalValue;
+
+        this._safeFlag = false;
     }
 
     //returns reflectValue = value that would be used when target[key] is called
     _customGetLogic(object, key, reflectValue) {
         const target = object.target;
         const wrapKey = this._getAliases()[key];
-        const isReflectValueObject = typeof reflectValue !== 'undefined' && typeof reflectValue !== 'boolean';
+        const isReflectValueObject = typeof reflectValue !== 'undefined'; //&& typeof reflectValue !== 'boolean'; //it was for getting width and height
 
         if ((isReflectValueObject && (typeof wrapKey != 'undefined')) || !wrapKey)
             return reflectValue;
 
         return Urso.helper.recursiveGet(wrapKey, target._baseObject, reflectValue);
-
     }
 
-    apply(target, key, value, safeFlag) {
-        if (!safeFlag && !this._getOriginalModelExceptions().includes(key))
+    _customSetLogic(target, key, value, proxy) {
+        if (!this._getOriginalModelExceptions().includes(key))
             target._originalModel[key] = value;
 
         //apply to pixi
         const propertyName = this._getAliases()[key];
 
-        if(!propertyName)
-            return true;
+        if (!propertyName)
+            return false;
 
-        if(propertyName.startsWith('function.')){
+        if (propertyName.startsWith('function.')) {
             this._runCustomFunction(propertyName, target);
             return true;
         }
 
+        this._checkSelectorProperties(key);
+
         this._setProperty(target, propertyName, value);
-      
+
         //setup dirty to recalc params
         if (typeof target._baseObject.dirty !== 'undefined')
             target._baseObject.dirty = true;
@@ -83,14 +89,23 @@ class ModulesObjectsProxy {
         return true;
     };
 
-    _runCustomFunction(property, target){
+    _runCustomFunction(property, target) {
         const funcName = property.replace('function.', '');
-        if(target[funcName])
+        if (target[funcName])
             target[funcName]();
     }
 
-    _getPositionsKeys() {
-        return this._propertyAdapter.getPositionsKeys();
+    _checkSelectorProperties(key) {
+        if (!this._safeFlag && this._getSelectorProperties().includes(key)) {
+            Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector propertie: ' + key);
+            Urso.logger.error('Notice: use functions addClass, removeClass, setId, setName');
+        }
+    }
+
+    _getSelectorProperties() {
+        return [
+            'id', 'name', 'class'
+        ];
     }
 
     _getOriginalModelExceptions() {

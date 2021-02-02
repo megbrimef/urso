@@ -41,6 +41,22 @@ class ModulesObjectsController {
         return result ? result : []; //todo make collections
     }
 
+    addIdToCache(id, object) {
+        this.getInstance('Cache').addId(id, object);
+    }
+
+    removeIdFromCache(id, object) {
+        this.getInstance('Cache').removeId(id, object);
+    }
+
+    addNameToCache(name, object) {
+        this.getInstance('Cache').addName(name, object);
+    }
+
+    removeNameFromCache(name, object) {
+        this.getInstance('Cache').removeName(name, object);
+    }
+
     addClassToCache(className, object) {
         this.getInstance('Cache').addClass(className, object);
     }

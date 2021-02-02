@@ -25,16 +25,18 @@ class PropertyAdapter {
 
         this._parentTypes = [
             Urso.types.objects.COMPONENT,
+            Urso.types.objects.CONTAINER,
             Urso.types.objects.GROUP,
-            Urso.types.objects.CONTAINER
+            Urso.types.objects.WORLD
         ];
 
         this._typesWithoutAnchor = [
-            Urso.types.objects.SPINE,
             Urso.types.objects.EMITTER,
             Urso.types.objects.GRAPHICS,
+            Urso.types.objects.HITAREA,
             Urso.types.objects.MASK,
-            Urso.types.objects.HITAREA
+            Urso.types.objects.SPINE,
+            Urso.types.objects.WORLD
         ];
     }
 
@@ -234,7 +236,7 @@ class PropertyAdapter {
         const pixiObject = object._baseObject;
 
         if (typeof object.width !== 'boolean' && object.scaleX !== 1) {
-            Urso.logger.error('Width value cannot be set. ScaleX already used!!');
+            Urso.logger.error('Width value cannot be set. ScaleX already used!!', object);
             this._setPropertyWithoutAdaption(object, 'width', false);
             return;
         }
@@ -253,7 +255,7 @@ class PropertyAdapter {
         const pixiObject = object._baseObject;
 
         if (typeof object.height !== 'boolean' && object.scaleY !== 1) {
-            Urso.logger.error('Height value cannot be set. ScaleY already used!!');
+            Urso.logger.error('Height value cannot be set. ScaleY already used!!', object);
             this._setPropertyWithoutAdaption(object, 'height', false);
             return;
         }

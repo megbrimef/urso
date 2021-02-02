@@ -2,6 +2,8 @@ class ExtraBrowserEvents {
     constructor() {
         this.singleton = true;
 
+        this.RESIZE_DELAY = 250; //delay for resize event (browser will refresh his own params)
+
         this.resizeHandler = this.resizeHandler.bind(this);
         this.visibilitychangeHandler = this.visibilitychangeHandler.bind(this);
 
@@ -15,12 +17,12 @@ class ExtraBrowserEvents {
 
     }
 
-    visibilitychangeHandler(){
+    visibilitychangeHandler() {
         this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE, document.visibilityState);
     }
 
-    resizeHandler(){
-        this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE);
+    resizeHandler() {
+        this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE, false, this.RESIZE_DELAY);
     }
 }
 

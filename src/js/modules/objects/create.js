@@ -16,12 +16,14 @@ class ModulesObjectsCreate {
     }
 
     resetWorld() {
-        this._world = this.getInstance('BaseModel', { name: 'WORLD' });
-        this._world.contents = [];
-        this._world._baseObject = Urso.scenes.getPixiWorld();
-        this.updateWorldBounds({ template: Urso.scenes.getTemplateSize() })
+        const model = this.getInstance('Models.World', { name: 'WORLD' });
+        const proxy = this.getInstance('Proxy').get(model);
 
+        this._world = proxy;
+
+        this.updateWorldBounds({ template: Urso.scenes.getTemplateSize() })
         this.getInstance('Cache').reset();
+        this._addToCache(proxy);
     }
 
     updateWorldBounds(params) {
@@ -144,6 +146,7 @@ class ModulesObjectsCreate {
         if (child.parent) {
             this.removeChild(child.parent, child, true);
         }
+
         newParent.contents.push(child);
         let childBase = child._baseObject;
         newParent._baseObject.addChild(childBase);
@@ -198,22 +201,22 @@ class ModulesObjectsCreate {
         }
     }
 
-    _addToCache(model) {
-        if (model.id)
-            this.getInstance('Cache').addId(model.id, model);
-        if (model.name)
-            this.getInstance('Cache').addName(model.name, model);
-        if (model.class)
-            this.getInstance('Cache').addClass(model.class, model);
+    _addToCache(proxy) {
+        if (proxy.id)
+            this.getInstance('Cache').addId(proxy.id, proxy);
+        if (proxy.name)
+            this.getInstance('Cache').addName(proxy.name, proxy);
+        if (proxy.class)
+            this.getInstance('Cache').addClass(proxy.class, proxy);
     }
 
-    _removeFromCache(model) {
-        if (model.id)
-            this.getInstance('Cache').removeId(model.id, model);
-        if (model.name)
-            this.getInstance('Cache').removeName(model.name, model);
-        if (model.class)
-            this.getInstance('Cache').removeClass(model.class, model);
+    _removeFromCache(proxy) {
+        if (proxy.id)
+            this.getInstance('Cache').removeId(proxy.id, proxy);
+        if (proxy.name)
+            this.getInstance('Cache').removeName(proxy.name, proxy);
+        if (proxy.class)
+            this.getInstance('Cache').removeClass(proxy.class, proxy);
     }
 }
 

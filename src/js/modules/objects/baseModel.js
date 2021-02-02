@@ -35,6 +35,10 @@ class ModulesObjectsBaseModel {
         this._templatePath = false;
     }
 
+    getAbsoluteSize() {
+        return { width: this._baseObject.width, height: this._baseObject.height };
+    }
+
     destroy() {
         Urso.objects.destroy(this);
     }
@@ -47,6 +51,36 @@ class ModulesObjectsBaseModel {
         Urso.objects.removeChild(this, childObject, doNotRefreshStylesFlag);
     }
 
+    setId(id, doNotRefreshStylesFlag) {
+        if (this.id)
+            Urso.objects.removeIdFromCache(this.id, this);
+
+        Urso.objects._safeSetValueToTarget(this, 'id', id);
+
+        if (id)
+            Urso.objects.addIdToCache(id, this);
+
+        if (!doNotRefreshStylesFlag)
+            Urso.objects.refreshStyles();
+
+        return this;
+    }
+
+    setName(name, doNotRefreshStylesFlag) {
+        if (this.name)
+            Urso.objects.removeNameFromCache(this.name, this);
+
+        Urso.objects._safeSetValueToTarget(this, 'name', name);
+
+        if (name)
+            Urso.objects.addNameToCache(name, this);
+
+        if (!doNotRefreshStylesFlag)
+            Urso.objects.refreshStyles();
+
+        return this;
+    }
+
     addClass(className, doNotRefreshStylesFlag) {
         let currentClass = this.class;
 
@@ -56,7 +90,7 @@ class ModulesObjectsBaseModel {
             if (currentClass.split(' ').includes(className))
                 return this;
 
-            this.class += ' ' + className;
+            Urso.objects._safeSetValueToTarget(this, 'class', this.class + ' ' + className);
         }
 
         Urso.objects.addClassToCache(className, this);
@@ -78,7 +112,7 @@ class ModulesObjectsBaseModel {
             return this;
 
         classArray.splice(classIndex, 1);
-        this.class = classArray.join(' ');
+        Urso.objects._safeSetValueToTarget(this, 'class', classArray.join(' '));
         Urso.objects.removeClassFromCache(className, this);
 
         if (!doNotRefreshStylesFlag)
