@@ -20,7 +20,9 @@ class PropertyAdapter {
 
         this._parentToChildDependencies = {
             'width': { own: ['anchorX'], children: ['x', 'alignX', 'width'] },
-            'height': { own: ['anchorY'], children: ['y', 'alignY', 'height'] }
+            'height': { own: ['anchorY'], children: ['y', 'alignY', 'height'] },
+            'x': { own: ['alignX'], children: [] },
+            'y': { own: ['alignY'], children: [] }
         };
 
         this._parentTypes = [
@@ -40,7 +42,7 @@ class PropertyAdapter {
         ];
     }
 
-    isAdaptiveProperty(property){
+    isAdaptiveProperty(property) {
         return Object.keys(this._dependencies).includes(property);
     };
 
@@ -56,42 +58,42 @@ class PropertyAdapter {
     propertyChanged(object, propertyName) {
         this.adaptProperty(object, propertyName);
 
-       this._adaptOwnProperties(object, propertyName);
-       this._adaptChildProperties(object, propertyName);
+        this._adaptOwnProperties(object, propertyName);
+        this._adaptChildProperties(object, propertyName);
     }
 
-    _adaptOwnProperties(object, propertyName){
+    _adaptOwnProperties(object, propertyName) {
         const { own } = this._parentToChildDependencies[propertyName] || {};
 
         if (!own)
             return;
-            
+
         for (let dependency of own)
             this.propertyChanged(object, dependency);
     }
 
-    _adaptChildProperties(object, propertyName){
+    _adaptChildProperties(object, propertyName) {
         const { children } = this._parentToChildDependencies[propertyName] || {};
         const objectHasChildren = this._canBeParent(object) && object.hasOwnProperty('contents');
 
         if (!children || !objectHasChildren)
             return;
-    
+
         for (let dependency of this._parentToChildDependencies[propertyName].children)
-            for (let child of object.contents) 
+            for (let child of object.contents)
                 this.propertyChanged(child, dependency);
     }
 
     adaptProperty(object, propertyName) {
-        if(this._dependencies[propertyName])
+        if (this._dependencies[propertyName])
             this._dependencies[propertyName](object);
     }
 
     updateChildByParent(child) {
-        if (child.parent == null) 
-                return;
+        if (child.parent == null)
+            return;
 
-        for (let propertyName of this._propertiesDependentOnParent()) 
+        for (let propertyName of this._propertiesDependentOnParent())
             this.propertyChanged(child, propertyName);
     }
 
@@ -100,7 +102,7 @@ class PropertyAdapter {
         for (let propertyName of Object.keys(this._parentToChildDependencies)) {
             const { children } = this._parentToChildDependencies[propertyName];
 
-            if (children) 
+            if (children)
                 for (let dependency of children)
                     properties.push(dependency);
         }
@@ -138,7 +140,7 @@ class PropertyAdapter {
 
         if (typeof object.anchorY !== 'number' || object.anchorY < 0 || object.anchorY > 1)
             return Urso.logger.error('AnchorY value is not valid!');
-            
+
         if (this._canBeParent(object)) {
             const objectY = this._getYAsNumber(object);
             const objectHeight = this._getHeightAsNumber(object);
@@ -159,7 +161,7 @@ class PropertyAdapter {
 
         if (typeof object.scaleX === 'number' && object.scaleX >= 0) // TODO: CHECK SCALE CAN BE NEGATIVE
             pixiObject.scale.x = object.scaleX;
-        else 
+        else
             Urso.logger.error('ScaleX value is not valid!');
     }
 
@@ -189,6 +191,7 @@ class PropertyAdapter {
 
         switch (object.alignX) {
             case 'left':
+                pixiObject.x = objectX;
                 break;
 
             case 'right':
@@ -216,6 +219,7 @@ class PropertyAdapter {
 
         switch (object.alignY) {
             case 'top':
+                pixiObject.y = objectY;
                 break;
 
             case 'bottom':
@@ -225,7 +229,7 @@ class PropertyAdapter {
             case 'center':
                 pixiObject.y = objectY + parentHeight / 2;
                 break;
-        
+
             default:
                 Urso.logger.error('AlignY string is not valid!');
                 break;
@@ -241,13 +245,13 @@ class PropertyAdapter {
             return;
         }
 
-        if(!object.width)
+        if (!object.width)
             return;
-        
-        if(!this._isValueANumberOrPercentsString(object.width))
+
+        if (!this._isValueANumberOrPercentsString(object.width))
             return Urso.logger.error('Width value is not valid!!');
 
-        if (!this._canBeParent(object)) 
+        if (!this._canBeParent(object))
             pixiObject.width = this._getWidthAsNumber(object);
     }
 
@@ -260,13 +264,13 @@ class PropertyAdapter {
             return;
         }
 
-        if(!object.height)
+        if (!object.height)
             return;
 
-        if(!this._isValueANumberOrPercentsString(object.height))
+        if (!this._isValueANumberOrPercentsString(object.height))
             return Urso.logger.error('Height value not valid!');
-       
-        if (!this._canBeParent(object)) 
+
+        if (!this._canBeParent(object))
             pixiObject.height = this._getHeightAsNumber(object);
     }
 
@@ -282,11 +286,11 @@ class PropertyAdapter {
 
             case 'false':
                 break;
-        
+
             default:
                 Urso.logger.error('StretchingType value not valid!');
                 break;
-        }      
+        }
     }
 
     _getXAsNumber(object) {
@@ -312,11 +316,11 @@ class PropertyAdapter {
         switch (propType) {
             case 'number':
                 return object[propertyName];
-            
+
             case 'string':
                 const parentValue = this._getPropertyAsNumber(object.parent, parentPropertyName, parentPropertyName);
                 return this._getRoundedPercentageOfNumber(object[propertyName], parentValue);
-            
+
             case 'boolean':
                 return this._getPropertyAsNumber(object.parent, propertyName, parentPropertyName)
 
@@ -339,7 +343,7 @@ class PropertyAdapter {
         return typeof value === 'number' || (typeof value === 'string' && value.endsWith('%'))
     }
 
-    _getObjectValues(object){
+    _getObjectValues(object) {
         const objectWidth = this._getWidthAsNumber(object);
         const objectHeight = this._getHeightAsNumber(object);
         const parentWidth = this._getWidthAsNumber(object.parent);
@@ -351,13 +355,13 @@ class PropertyAdapter {
         return { objectWidth, objectHeight, scaleX, scaleY };
     }
 
-    _setStreching(object, { scale, objectWidth, objectHeight }){
-        if (object.scaleX === 1) 
+    _setStreching(object, { scale, objectWidth, objectHeight }) {
+        if (object.scaleX === 1)
             this._setPropertyAndAdaptIt(object, 'width', objectWidth * scale);
         else
             this._setPropertyAndAdaptIt(object, 'scaleX', scale);
 
-        if (object.scaleY === 1) 
+        if (object.scaleY === 1)
             this._setPropertyAndAdaptIt(object, 'height', objectHeight * scale);
         else
             this._setPropertyAndAdaptIt(object, 'scaleY', scale);

@@ -95,22 +95,15 @@ class ModulesAssetsService {
     }
 
     _addAsset(asset, loadingGroup) {
-        //check if container
-        if (asset.contents) {
-            for (let content of asset.contents) {
-                this._addAsset(content, asset.loadingGroup);
-            }
+        //cache for all assets. We do not need to load same assets twice or more
+        if (asset.type !== Urso.types.assets.CONTAINER) {
+            let addedAssetKey = `${asset.type}_${asset.key}`;
+
+            if (this._addedAssetsCache.includes(addedAssetKey))
+                return;
+
+            this._addedAssetsCache.push(addedAssetKey);
         }
-
-        if (!asset.key)
-            return;
-
-        let addedAssetKey = `${asset.type}_${asset.key}`;
-
-        if (this._addedAssetsCache.includes(addedAssetKey))
-            return;
-
-        this._addedAssetsCache.push(addedAssetKey);
 
         let model;
 
@@ -146,11 +139,21 @@ class ModulesAssetsService {
         //set loadingGroup
         model.loadingGroup = loadingGroup || model.loadingGroup || this.getInstance('Config').loadingGroups.initial;
 
-        //add to loading group
+        //setup path if its need
+        this._setQualityPath(model); //TODO adapt for dragonbones
+
+        //check if container or dragonbones
+        if (model.contents) {
+            for (let content of model.contents) {
+                this._addAsset(content, model.loadingGroup);
+            }
+
+            return;
+        }
+
+        //add single asset to loading group
         if (!this.assets[model.loadingGroup])
             this.assets[model.loadingGroup] = [];
-
-        this._setQualityPath(model);
 
         this.assets[model.loadingGroup].push(model);
     }

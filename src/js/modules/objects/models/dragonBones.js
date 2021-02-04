@@ -8,10 +8,13 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
         this.defaultAnimation = {
             armatureName: Urso.helper.recursiveGet('defaultAnimation.armatureName', params, false),
             name: Urso.helper.recursiveGet('defaultAnimation.name', params, false),
-            loop: Urso.helper.recursiveGet('defaultAnimation.loop', params, false)
+            playTimes: Urso.helper.recursiveGet('defaultAnimation.playTimes', params, -1),
+            autoplay: Urso.helper.recursiveGet('defaultAnimation.autoplay', params, false)
         }
 
-        this.onComplete = Urso.helper.recursiveGet('onComplete', params, false);  //todo
+        this.onStart = Urso.helper.recursiveGet('onStart', params, false);
+        this.onLoop = Urso.helper.recursiveGet('onLoop', params, false);
+        this.onComplete = Urso.helper.recursiveGet('onComplete', params, false);
 
         this._addBaseObject();
     }
@@ -31,15 +34,31 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
         this._baseObject = factory.buildArmatureDisplay(this.defaultAnimation.armatureName);
 
-        if (this.defaultAnimation && this.defaultAnimation.name)
-            this._baseObject.animation.play(this.defaultAnimation.nameImage);
-
         this._setCommonFunctions.bind(this)();
+
+        if (this.onStart)
+            this._baseObject.addListener(DragonBones.EventObject.START, this.onStart);
+
+        if (this.onLoop)
+            this._baseObject.addListener(DragonBones.EventObject.LOOP_COMPLETE, this.onLoop);
+
+        if (this.onComplete)
+            this._baseObject.addListener(DragonBones.EventObject.COMPLETE, this.onComplete);
+
+        const { playTimes, name, autoplay } = this.defaultAnimation;
+
+        if (name && autoplay) {
+            this._baseObject.animation.play(this.defaultAnimation.nameImage, playTimes);
+        }
+
     };
 
-    _setCommonFunctions(){
+    play(times) {
+        this._baseObject.animation.play(this.defaultAnimation.nameImage, times || this.defaultAnimation.playTimes);
+    }
+
+    _setCommonFunctions() {
         this.stop = this._baseObject.animation.stop.bind(this._baseObject.animation);
-        this.play = this._baseObject.animation.play.bind(this._baseObject.animation);
     }
 }
 
