@@ -83,15 +83,18 @@ class ModulesObjectsBaseModel {
 
     addClass(className, doNotRefreshStylesFlag) {
         let currentClass = this.class;
+        let newClassName;
 
         if (!currentClass)
-            this.class = className;
+            newClassName = className;
         else {
             if (currentClass.split(' ').includes(className))
                 return this;
 
-            Urso.objects._safeSetValueToTarget(this, 'class', this.class + ' ' + className);
+            newClassName = this.class + ' ' + className;
         }
+
+        Urso.objects._safeSetValueToTarget(this, 'class', newClassName);
 
         Urso.objects.addClassToCache(className, this);
 

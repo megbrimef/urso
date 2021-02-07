@@ -37,7 +37,7 @@ class ModulesObjectsFind {
             if (testResult)
                 result.push(testObject);
 
-            if (findOneFlag)
+            if (testResult && findOneFlag)
                 return result;
         }
 
