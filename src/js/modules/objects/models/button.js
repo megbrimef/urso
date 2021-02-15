@@ -35,15 +35,18 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         this.disable = this.disable.bind(this);
     }
 
+    setButtonFrame(key, assetKey) {
+        this.buttonFrames[key] = assetKey;
+    }
+
     enable() {
         if (!this._isDisabled)
             return false;
 
-        if (this._isOver) {
-            if (this.textures.over)
-                this._baseObject.texture = this.textures.over;
-        } else
-            this._baseObject.texture = this.textures.out;
+        if (this._isOver)
+            this._changeTexture('over');
+        else
+            this._changeTexture('out');
 
         this._isDisabled = false;
     }
@@ -52,21 +55,13 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         if (this._isDisabled)
             return false;
 
-        if (this.textures.disabled)
-            this._baseObject.texture = this.textures.disabled;
-        else
-            this._baseObject.texture = this.textures.out;
-
+        this._changeTexture('disabled');
         this._isDisabled = true;
     }
 
     _addBaseObject() {
-        this.textures = this._createTextures();
-
-        if (!this.textures.out)
-            Urso.logger.error('ModulesObjectsModelsImage assets error: no out image ' + this.buttonFrames.out);
-
-        this._baseObject = new PIXI.Sprite(this.textures.out);
+        this._baseObject = new PIXI.Sprite();
+        this._changeTexture('out');
 
         this._baseObject.interactive = true;
         this._baseObject.buttonMode = true;
@@ -93,9 +88,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
             return false;
 
         this._isDown = true;
-
-        if (this.textures.pressed)
-            this._baseObject.texture = this.textures.pressed;
+        this._changeTexture('pressed');
     }
 
     _onButtonUp() {
@@ -104,11 +97,10 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this._isDown = false;
 
-        if (this._isOver) {
-            if (this.textures.over)
-                this._baseObject.texture = this.textures.over;
-        } else
-            this._baseObject.texture = this.textures.out;
+        if (this._isOver)
+            this._changeTexture('over');
+        else
+            this._changeTexture('out');
 
         if (this.action)
             this.action();
@@ -123,8 +115,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         if (this._isDown)
             return;
 
-        if (this.textures.over)
-            this._baseObject.texture = this.textures.over;
+        this._changeTexture('over');
     }
 
     _onButtonOut() {
@@ -136,22 +127,24 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         if (this._isDown)
             return;
 
-        this._baseObject.texture = this.textures.out;
+        this._changeTexture('out');
     }
 
-    _createTextures() {
-        let textures = {};
+    _changeTexture(key) {
+        let texture = Urso.cache.getTexture(this.buttonFrames[key]);
 
-        for (let key in this.buttonFrames) {
-            let texture = Urso.cache.getTexture(this.buttonFrames[key]);
+        if (!texture) {
+            if (key === 'out') {
+                Urso.logger.error('ModulesObjectsModelsButton assets error: no out image ' + this.buttonFrames.out);
+                return false;
+            }
 
-            if (!texture)
-                continue;
-
-            textures[key] = texture;
+            this._changeTexture('out'); // load default texture for this key
+            return false;
         }
 
-        return textures;
+        this._baseObject.texture = texture;
+        return true;
     }
 }
 

@@ -22,7 +22,9 @@ class PropertyAdapter {
             'width': { own: ['anchorX'], children: ['x', 'alignX', 'width'] },
             'height': { own: ['anchorY'], children: ['y', 'alignY', 'height'] },
             'x': { own: ['alignX'], children: [] },
-            'y': { own: ['alignY'], children: [] }
+            'y': { own: ['alignY'], children: [] },
+            'anchorX': { 'own': ['x'], children: ['x'] },
+            'anchorY': { 'own': ['y'], children: ['y'] }
         };
 
         this._parentTypes = [
@@ -79,7 +81,7 @@ class PropertyAdapter {
         if (!children || !objectHasChildren)
             return;
 
-        for (let dependency of this._parentToChildDependencies[propertyName].children)
+        for (let dependency of children)
             for (let child of object.contents)
                 this.propertyChanged(child, dependency);
     }
@@ -187,7 +189,7 @@ class PropertyAdapter {
             return Urso.logger.error('AlignX value is not string!');
 
         const objectX = this._getXAsNumber(object);
-        const parentWidth = this._getWidthAsNumber(object.parent);
+        const parentWidth = object.parent ? this._getWidthAsNumber(object.parent) : 0;
 
         switch (object.alignX) {
             case 'left':
@@ -215,7 +217,7 @@ class PropertyAdapter {
             return Urso.logger.error('AlignY value is not string!');
 
         const objectY = this._getYAsNumber(object);
-        const parentHeight = this._getHeightAsNumber(object.parent);
+        const parentHeight = object.parent ? this._getHeightAsNumber(object.parent) : 0;
 
         switch (object.alignY) {
             case 'top':

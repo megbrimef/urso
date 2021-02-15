@@ -6,6 +6,8 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
         this.type = Urso.types.objects.HITAREA;
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this.name) });
 
+        //must have x,y, width, height
+
         this._addBaseObject();
 
         this.enable = this.enable.bind(this);
