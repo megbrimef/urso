@@ -3,8 +3,13 @@ class ModulesObjectsModelsImage extends Urso.Core.Modules.Objects.BaseModel {
         super(params);
 
         this.type = Urso.types.objects.IMAGE;
-        this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
         this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
     }
 
     _addBaseObject() {

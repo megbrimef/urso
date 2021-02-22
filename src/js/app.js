@@ -1,4 +1,10 @@
 class App {
+    constructor() {
+        this.version = '0.1.8';
+
+        this.setup = this.setup.bind(this);
+    }
+
     setup() {
         //helper must be first
         Urso.helper = new Urso.Core.Lib.Helper(); //helper functions
@@ -53,8 +59,14 @@ class App {
         //set title
         document.title = Urso.config.title;
 
+        this.sayHello();
+
         //App.run
         Urso.getInstance('App').run();
+    }
+
+    sayHello() {
+        console.log(`%c Urso ${this.version} `, 'background: #222; color: #bada55');
     }
 
     run() {

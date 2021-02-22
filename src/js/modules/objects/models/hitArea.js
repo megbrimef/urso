@@ -4,14 +4,18 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
         this._isDisabled = false;
 
         this.type = Urso.types.objects.HITAREA;
-        this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this.name) });
-
-        //must have x,y, width, height
 
         this._addBaseObject();
 
         this.enable = this.enable.bind(this);
         this.disable = this.disable.bind(this);
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        //must have x,y, width, height
+        this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this.name) });
     }
 
     enable() {

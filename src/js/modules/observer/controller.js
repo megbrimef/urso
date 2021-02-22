@@ -12,6 +12,9 @@ class ModulesObserverController {
     }
 
     fire(eventName, params, delay) {
+        if (!eventName)
+            return Urso.logger.error('ModulesObserverController fire error:', eventName);
+
         if (delay)
             return setTimeout((() => { this.fire(eventName, params); }).bind(this), delay)
 
@@ -20,6 +23,9 @@ class ModulesObserverController {
     };
 
     add(eventName, callback, global) {
+        if (!eventName || !callback)
+            return Urso.logger.error('ModulesObserverController add error:', eventName, callback);
+
         if (global)
             this._addLocal(eventName, callback);
         else

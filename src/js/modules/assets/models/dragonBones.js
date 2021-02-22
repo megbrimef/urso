@@ -3,10 +3,8 @@ class ModulesAssetsModelsDragonBones extends Urso.Core.Modules.Assets.BaseModel 
         super(params);
 
         this.type = Urso.types.assets.DRAGONBONES;
-        this.skeletonJson = Urso.helper.recursiveGet('skeletonJson', params, false);
-        this.textureJson = Urso.helper.recursiveGet('textureJson', params, false);
-        this.textureImage = Urso.helper.recursiveGet('textureImage', params, false);
 
+        //for manual filenames setup
         this.contents = Urso.helper.recursiveGet('contents', params, [
             { type: Urso.types.assets.JSON, key: `${this.key}_skeletonJson`, path: this.skeletonJson },
             { type: Urso.types.assets.JSON, key: `${this.key}_textureJson`, path: this.textureJson },
@@ -15,6 +13,14 @@ class ModulesAssetsModelsDragonBones extends Urso.Core.Modules.Assets.BaseModel 
 
         this.path = false;
         this.key = false;
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        this.skeletonJson = Urso.helper.recursiveGet('skeletonJson', params, false);
+        this.textureJson = Urso.helper.recursiveGet('textureJson', params, false);
+        this.textureImage = Urso.helper.recursiveGet('textureImage', params, false);
     }
 }
 

@@ -2,6 +2,10 @@ import * as PIXI from 'pixi.js';
 window.PIXI = PIXI;
 window.PIXI.particles = require('pixi-particles');
 
+import { DropShadowFilter } from '@pixi/filter-drop-shadow';
+PIXI.filters['DropShadowFilter'] = DropShadowFilter;
+
+
 require("pixi-spine");
 
 window.DragonBones = require("pixi5-dragonbones");

@@ -3,9 +3,14 @@ class ModulesAssetsModelsContainer extends Urso.Core.Modules.Assets.BaseModel {
         super(params);
 
         this.type = Urso.types.assets.CONTAINER;
-        this.contents = Urso.helper.recursiveGet('contents', params, []);
         this.key = false;
         this.path = false;
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 }
 

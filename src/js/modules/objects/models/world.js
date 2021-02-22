@@ -3,8 +3,13 @@ class ModulesObjectsModelsWorld extends Urso.Core.Modules.Objects.BaseModel {
         super(params);
 
         this.type = Urso.types.objects.WORLD;
-        this.contents = Urso.helper.recursiveGet('contents', params, []);
         this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 
     _addBaseObject() {

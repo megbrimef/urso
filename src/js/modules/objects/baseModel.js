@@ -1,5 +1,20 @@
 class ModulesObjectsBaseModel {
     constructor(params) {
+        this.setupParams(params);
+        
+        this.parent = false;
+        this.destroyed = false;
+
+        //system
+        this._originalModel = params;
+        this._classes = [];
+        this._styles = {};
+        this._baseObject = null; //link to pixi object
+        this._uid = Urso.helper.recursiveGet('_uid', params, false); //will setup on create
+        this._templatePath = false;
+    }
+
+    setupParams(params) {
         this.type = Urso.helper.recursiveGet('type', params, null);
 
         this.id = Urso.helper.recursiveGet('id', params, false);
@@ -23,16 +38,6 @@ class ModulesObjectsBaseModel {
         this.alpha = Urso.helper.recursiveGet('alpha', params, 1);
         this.append = Urso.helper.recursiveGet('append', params, true); //if false - object will not created
         this.custom = Urso.helper.recursiveGet('custom', params, {}); //custom params
-        this.parent = false;
-        this.destroyed = false;
-
-        //system
-        this._originalModel = params;
-        this._classes = [];
-        this._styles = {};
-        this._baseObject = null; //link to pixi object
-        this._uid = Urso.helper.recursiveGet('_uid', params, false); //will setup on create
-        this._templatePath = false;
     }
 
     getAbsoluteSize() {

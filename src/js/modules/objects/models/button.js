@@ -18,7 +18,18 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         this._textures;
 
         this.type = Urso.types.objects.BUTTON;
+        this._addBaseObject();
+
+        this.enable = this.enable.bind(this);
+        this.disable = this.disable.bind(this);
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_BUTTON_PRESS, this.name) });
+        this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
+
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
             out: Urso.helper.recursiveGet('buttonFrames.out', params, false),
@@ -28,11 +39,6 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this.pixelPerfectOver = Urso.helper.recursiveGet('pixelPerfectOver', params, true);
         this.pixelPerfectClick = Urso.helper.recursiveGet('pixelPerfectClick', params, true);
-
-        this._addBaseObject();
-
-        this.enable = this.enable.bind(this);
-        this.disable = this.disable.bind(this);
     }
 
     setButtonFrame(key, assetKey) {
@@ -89,6 +95,9 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this._isDown = true;
         this._changeTexture('pressed');
+
+        if (this.keyDownAction)
+            this.keyDownAction();
     }
 
     _onButtonUp() {

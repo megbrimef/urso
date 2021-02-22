@@ -1,5 +1,10 @@
 class ModulesAssetsBaseModel {
     constructor(params) {
+        this.setupParams(params);
+        this._templatePath = false;
+    }
+
+    setupParams(params) {
         this.id = Urso.helper.recursiveGet('id', params, false);
         this.type = Urso.helper.recursiveGet('type', params, null);
         this.key = Urso.helper.recursiveGet('key', params, false);
@@ -8,7 +13,6 @@ class ModulesAssetsBaseModel {
         //lazy load params
         this.loadingGroup = Urso.helper.recursiveGet('loadingGroup', params, false); //initial or some extra name
         this.placeHolder = Urso.helper.recursiveGet('placeHolder', params, false); //placeHolder assets model //TODO
-        this._templatePath = false;
     }
 }
 

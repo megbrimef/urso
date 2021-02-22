@@ -3,7 +3,6 @@ class ModulesAssetsModelsBitmapFont extends Urso.Core.Modules.Assets.BaseModel {
         super(params);
 
         this.type = Urso.types.assets.BITMAPFONT;
-        //TODO check key from tpl, not from xml
     }
 }
 

@@ -3,12 +3,16 @@ class ModulesObjectsModelsGraphics extends Urso.Core.Modules.Objects.BaseModel {
         super(params);
 
         this.type = Urso.types.objects.GRAPHICS;
+        this._addBaseObject();
+        this._drawPoligon();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
         this.polygon = Urso.helper.recursiveGet('figure.polygon', params, []);
         this.rectangle = Urso.helper.recursiveGet('figure.rectangle', params, []);
         this.fillColor = Urso.helper.recursiveGet('figure.fillColor', params, 0x000000);
-
-        this._addBaseObject();
-        this._drawPoligon();
     }
 
     _drawPoligon() {

@@ -3,6 +3,12 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         super(params);
 
         this.type = Urso.types.objects.SPINE;
+        this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
         this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
 
         this.defaultAnimation = {
@@ -11,8 +17,6 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         }
 
         this.onComplete = Urso.helper.recursiveGet('onComplete', params, false);  //todo
-
-        this._addBaseObject();
     }
 
     _addBaseObject() {

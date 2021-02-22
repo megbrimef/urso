@@ -3,6 +3,12 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         super(params);
 
         this.type = Urso.types.objects.TEXT;
+        this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
         this.text = Urso.helper.recursiveGet('text', params, false);
 
         this.lineHeight = Urso.helper.recursiveGet('lineHeight', params, 0);
@@ -22,8 +28,6 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         this.wordWrapWidth = Urso.helper.recursiveGet('wordWrapWidth', params, 100)
 
         this.maxWidth = Urso.helper.recursiveGet('maxWidth', params, false); //todo
-
-        this._addBaseObject();
     }
 
     _addBaseObject() {

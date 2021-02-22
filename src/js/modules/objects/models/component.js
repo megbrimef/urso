@@ -3,15 +3,20 @@ class ModulesObjectsModelsComponent extends Urso.Core.Modules.Objects.BaseModel 
         super(params);
 
         this.type = Urso.types.objects.COMPONENT;
-        this.componentName = Urso.helper.recursiveGet('componentName', params, false);
-        this.options = Urso.helper.recursiveGet('options', params, false);
-        this.contents = Urso.helper.recursiveGet('contents', params, []);
         this.instance = null;
 
         //system
         this._controller = Urso.helper.recursiveGet('_controller', params, false);  //will setup on create.
 
         this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        this.componentName = Urso.helper.recursiveGet('componentName', params, false);
+        this.options = Urso.helper.recursiveGet('options', params, false);
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 
     _addBaseObject() {

@@ -3,12 +3,15 @@ class ModulesObjectsModelsMask extends Urso.Core.Modules.Objects.BaseModel {
         super(params);
 
         this.type = Urso.types.objects.MASK;
-        this.rectangle = Urso.helper.recursiveGet('rectangle', params, false); // [50, 50, 100, 100]
-        this.rectangles = Urso.helper.recursiveGet('rectangles', params, false); //array of rectangles
+        this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
 
         //NOTE: you can use just one key: rectangle or rectangles
-
-        this._addBaseObject();
+        this.rectangle = Urso.helper.recursiveGet('rectangle', params, false); // [50, 50, 100, 100]
+        this.rectangles = Urso.helper.recursiveGet('rectangles', params, false); //array of rectangles
     }
 
     _addBaseObject() {

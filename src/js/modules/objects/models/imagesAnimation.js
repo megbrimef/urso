@@ -3,13 +3,6 @@ class ModulesObjectsModelsImagesAnimation extends Urso.Core.Modules.Objects.Base
         super(params);
 
         this.type = Urso.types.objects.IMAGES_ANIMATION;
-        this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
-
-        this.duration = Urso.helper.recursiveGet('duration', params, 0);
-        this.animationKeys = Urso.helper.recursiveGet('animationKeys', params, []);
-        this.loop = Urso.helper.recursiveGet('loop', params, false);
-        this.autostart = Urso.helper.recursiveGet('autostart', params, false);
-        this.onComplete = Urso.helper.recursiveGet('onComplete', params, false);
 
         //sys
         this._tween = null;
@@ -18,6 +11,18 @@ class ModulesObjectsModelsImagesAnimation extends Urso.Core.Modules.Objects.Base
         this._animationTextures = {};
 
         this._addBaseObject();
+    }
+
+    setupParams(params) {
+        super.setupParams(params);
+
+        this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
+
+        this.duration = Urso.helper.recursiveGet('duration', params, 0);
+        this.animationKeys = Urso.helper.recursiveGet('animationKeys', params, []);
+        this.loop = Urso.helper.recursiveGet('loop', params, false);
+        this.autostart = Urso.helper.recursiveGet('autostart', params, false);
+        this.onComplete = Urso.helper.recursiveGet('onComplete', params, false);
     }
 
     _addBaseObject() {
