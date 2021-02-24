@@ -6,6 +6,9 @@ class SoundManagerController {
         this._sounds = {};
 
         this._setCodec();
+
+        this._updateSoundsCfgHandler = this._updateSoundsCfgHandler.bind(this);
+        this._doHandler = this._doHandler.bind(this);
     }
 
     _setCodec() {
@@ -72,8 +75,8 @@ class SoundManagerController {
     };  
 
     _subscribe(){
-        this.addListener(Urso.events.MODULES_SOUND_MANAGER_UPDATE_CFG, this._updateSoundsCfgHandler.bind(this), true);
-        this.addListener(Urso.events.MODULES_LOGIC_SOUNDS_DO, this._doHandler.bind(this), true);
+        this.addListener(Urso.events.MODULES_SOUND_MANAGER_UPDATE_CFG, this._updateSoundsCfgHandler, true);
+        this.addListener(Urso.events.MODULES_LOGIC_SOUNDS_DO, this._doHandler, true);
     };
 };
 

@@ -8,6 +8,10 @@ class SoundSprite {
         this._volume = 1;
         this._relaunch = false;
         this._events = [];
+        this._eventsQueue = [];
+        this._isAudioUnlocked = false;
+
+        this._reactToEvent = this._reactToEvent.bind(this);
 
         this._subscribePlayerEvents();
     };
@@ -22,7 +26,8 @@ class SoundSprite {
 
     _subscribePlayerEvents() {
         this._player.on('unlock', () => {
-            this._unlocked = true;
+            this._isAudioUnlocked = true;
+            this._onUnlock(this._name);
         });
 
         this._player.on('end', id => {
@@ -32,7 +37,7 @@ class SoundSprite {
     };
 
     canPlayCheck() {
-        return Howler.Howler._audioUnlocked;
+        return this._isAudioUnlocked;
     };
 
     play({ loop = false, volume = 1, relaunch = false }) {
@@ -98,12 +103,28 @@ class SoundSprite {
         };
     };
 
+    _onUnlock(){
+        this._runEventsFromQueue();
+    };
+
+    _runEventsFromQueue(){
+        this._eventsQueue.forEach(this._reactToEvent);
+        this._eventsQueue = [];
+    };
+
+    _addEventToQueue(data){
+        this._eventsQueue.push(data);
+    };
+
     _reactToEvent({ action, loop, relaunch }) {
         const self = this;
         const params = { loop, relaunch };
 
         if (!self[action])
             Urso.logger.error(`Sound action '${action}' not found!`);
+
+        if(!this._isAudioUnlocked)
+            this._addEventToQueue({ action, loop, relaunch });
 
         self[action](params);
     };
