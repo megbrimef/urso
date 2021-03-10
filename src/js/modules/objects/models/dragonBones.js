@@ -3,6 +3,8 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
         super(params);
 
         this.type = Urso.types.objects.DRAGONBONES;
+
+        this.setAnimationConfig(null, true);
         this._addBaseObject();
     }
 
@@ -11,14 +13,21 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
         this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
 
-        this.setAnimationConfig(params.animation, true);
+        this.animation = {
+            armatureName: Urso.helper.recursiveGet('animation.armatureName', params, false),
+            playTimes: Urso.helper.recursiveGet('animation.playTimes', params, -1),
+            autoplay: Urso.helper.recursiveGet('animation.autoplay', params, false),
+            onStart: Urso.helper.recursiveGet('animation.onStart', params, false),
+            onLoop: Urso.helper.recursiveGet('animation.onLoop', params, false),
+            onComplete: Urso.helper.recursiveGet('animation.onComplete', params, false)
+        };
     }
 
     _addBaseObject() {
         const assets = this._getAssets();
 
-        if(!this.animation.armatureName || !assets){
-            this._baseObject = new PIXI.Sprite(); 
+        if (!this.animation.armatureName || !assets) {
+            this._baseObject = new PIXI.Sprite();
             return;
         }
 
@@ -26,16 +35,16 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
         const { autoplay } = this.animation;
 
-        if (autoplay) 
+        if (autoplay)
             this.play();
     };
 
-    _getAssets(){
+    _getAssets() {
         const skeletonJson = Urso.cache.getJson(`${this.assetKey}_skeletonJson`);
         const textureJson = Urso.cache.getJson(`${this.assetKey}_textureJson`);
         const textureImage = Urso.cache.getImage(`${this.assetKey}_textureImage`);
 
-        if (!skeletonJson || !textureJson || !textureImage){
+        if (!skeletonJson || !textureJson || !textureImage) {
             Urso.logger.error('ModulesObjectsModelsDragonBones assets error: no DragonBones object ' + this.assetKey);
             return false;
         }
@@ -43,11 +52,11 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
         return { skeletonJson, textureJson, textureImage };
     }
 
-    _createAnimationObject({ skeletonJson, textureJson, textureImage }){
+    _createAnimationObject({ skeletonJson, textureJson, textureImage }) {
         const factory = DragonBones.PixiFactory.factory;
         const { armatureName } = this.animation;
 
-        if(!factory._dragonBonesDataMap[skeletonJson.data.name])
+        if (!factory._dragonBonesDataMap[skeletonJson.data.name])
             factory.parseDragonBonesData(skeletonJson.data);
 
         factory.parseTextureAtlasData(textureJson.data, textureImage.texture);
@@ -59,7 +68,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
         this._setCallbacks();
     }
 
-    _setCallbacks(){
+    _setCallbacks() {
         const { onStart, onLoop, onComplete } = this.animation;
 
         if (onStart)
@@ -72,42 +81,54 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
             this._baseObject.addListener(DragonBones.EventObject.COMPLETE, onComplete.bind(this));
     }
 
-    setAnimationConfig(config, noObjectCreate){
-        if(this.stop)
+    /**
+     * 
+     * @param {*} config 
+     * @param {boolean} [noObjectCreate] dont use this flag out of core
+     * 
+     * config keys:
+     *      armatureName
+            playTimes
+            autoplay
+            onStart
+            onLoop
+            onComplete
+     */
+    setAnimationConfig(config = {}, noObjectCreate) {
+        if (this.stop)
             this.stop();
-        
+
         this.animation = {
-            armatureName: Urso.helper.recursiveGet('armatureName', config, false),
-            name: Urso.helper.recursiveGet('name', config, false),
-            playTimes: Urso.helper.recursiveGet('playTimes', config, -1),
-            autoplay: Urso.helper.recursiveGet('autoplay', config, false),
-            onStart: Urso.helper.recursiveGet('onStart', config, false),
-            onLoop: Urso.helper.recursiveGet('onLoop', config, false),
-            onComplete: Urso.helper.recursiveGet('onComplete', config, false),
+            ...this.animation,
+            ...config
         };
 
-        if(noObjectCreate)
+        if (noObjectCreate)
             return;
 
         let parent = null;
 
-        if(this._baseObject){
+        if (this._baseObject) {
             parent = this._baseObject.parent;
             this._baseObject.destroy();
         }
 
         const assets = this._getAssets();
 
-        if(assets)
+        if (assets)
             this._createAnimationObject(assets);
 
-        if(parent)
+        if (parent)
             parent.addChild(this._baseObject);
     }
 
+    /**
+     * run play animation
+     * @param {number} times 
+     */
     play(times) {
-        if(!this._baseObject.animation){
-            Urso.logger.error(`[^${this.name}] | DragonBones animation config not found!`);
+        if (!this._baseObject.animation) {
+            Urso.logger.error(`DragonBones animation not found!`);
             return;
         }
 
