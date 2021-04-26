@@ -1,8 +1,6 @@
 class ModulesTransportController {
     constructor() {
         this._service = null;
-
-        this.init();
     }
 
     _updateService() {

@@ -37,20 +37,20 @@ class SoundManagerController {
                 const blob = new Blob([data], { type: `audio/${extension}` });
                 const url = URL.createObjectURL(blob);
 
-                const soundSptite = this.getInstance('SoundSprite', {
+                const soundSprite = this.getInstance('SoundSprite', {
                     name: soundKey,
                     url: url,
                     format: extension
                 });
 
-                this._sounds[soundKey] = soundSptite;
+                this._sounds[soundKey] = soundSprite;
 
                 this._sounds[soundKey].updateEvents(events);
             }
         }
     };
 
-    _setEventsHandler(){
+    _setEventsHandler() {
         const soundsCfg = Urso.localData.get('sounds.cfg') || {};
 
         for (const key in this._sounds)
@@ -58,8 +58,8 @@ class SoundManagerController {
                 this._sounds[key].updateEvents(soundsCfg[key]);
     };
 
-    _checkSoundExists(name){
-        if(this._sounds[name])
+    _checkSoundExists(name) {
+        if (this._sounds[name])
             return true;
 
         Urso.logger.error(`Sound with key ${name} wasn't found!`);
@@ -69,14 +69,26 @@ class SoundManagerController {
         this._createSounds(soundsCfg);
     };
 
-    _doHandler({ action, name, behavior}){
-        if(this._checkSoundExists(name))
+    _doHandler({ action, name, behavior }) {
+        if (this._checkSoundExists(name))
             this._sounds[name][action](behavior);
-    };  
+    };
 
-    _subscribe(){
+    /**
+     * 
+     * @param {Number} volume (0-1)
+     */
+    _globalVolumeChange(volume) {
+        volume = Urso.math.intMakeBetween(value, 0, 1);
+
+        for (const key in this._sounds)
+            this._sounds[key].setVolume(volume);
+    }
+
+    _subscribe() {
         this.addListener(Urso.events.MODULES_SOUND_MANAGER_UPDATE_CFG, this._updateSoundsCfgHandler, true);
         this.addListener(Urso.events.MODULES_LOGIC_SOUNDS_DO, this._doHandler, true);
+        this.addListener(Urso.events.MODULES_SOUND_MANAGER_SET_GLOBAL_VOLUME, this._globalVolumeChange.bind(this), true);
     };
 };
 

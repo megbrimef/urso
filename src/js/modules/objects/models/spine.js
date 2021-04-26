@@ -19,6 +19,10 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this.onComplete = Urso.helper.recursiveGet('onComplete', params, false);  //todo
     }
 
+    play(animationName, loopFlag = false, track = 0) {
+        this._baseObject.state.setAnimation(track, animationName, loopFlag);
+    }
+
     _addBaseObject() {
         let spineAsset = Urso.cache.getSpine(this.assetKey);
 
@@ -28,7 +32,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this._baseObject = new PIXI.spine.Spine(spineAsset.spineData);
 
         if (this.defaultAnimation && this.defaultAnimation.name)
-            this._baseObject.state.setAnimation(0, this.defaultAnimation.name, this.defaultAnimation.loop);
+            this.play(this.defaultAnimation.name, this.defaultAnimation.loop);
     };
 }
 

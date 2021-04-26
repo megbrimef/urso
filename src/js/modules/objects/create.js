@@ -81,6 +81,9 @@ class ModulesObjectsCreate {
             case Urso.types.objects.IMAGE:
                 model = this.getInstance('Models.Image', object);
                 break;
+            case Urso.types.objects.ATLASIMAGE:
+                model = this.getInstance('Models.AtlasImage', object);
+                break;
             case Urso.types.objects.IMAGES_ANIMATION:
                 model = this.getInstance('Models.ImagesAnimation', object);
                 break;

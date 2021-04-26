@@ -4,27 +4,26 @@ class PropertyAdapter {
         this.singleton = true;
 
         this._dependencies = {
-            'x': this.adaptX.bind(this),
-            'y': this.adaptY.bind(this),
-            'anchorX': this.adaptAnchorX.bind(this),
-            'anchorY': this.adaptAnchorY.bind(this),
-            'stretchingType': this.adaptStretchingType.bind(this),
-            'scaleX': this.adaptScaleX.bind(this),
-            'scaleY': this.adaptScaleY.bind(this),
-            'alignX': this.adaptAlignX.bind(this),
-            'alignY': this.adaptAlignY.bind(this),
-            'width': this.adaptWidth.bind(this),
-            'height': this.adaptHeight.bind(this),
-            'parent': this.updateChildByParent.bind(this)
+            'x': this._updateHorizontal.bind(this),
+            'y': this._updateVertical.bind(this),
+            'anchorX': this._updateHorizontal.bind(this),
+            'anchorY': this._updateVertical.bind(this),
+            'scaleX': this._adaptScaleX.bind(this),
+            'scaleY': this._adaptScaleY.bind(this),
+            'alignX': this._updateHorizontal.bind(this),
+            'alignY': this._updateVertical.bind(this),
+            'width': this._updateHorizontal.bind(this),
+            'height': this._updateVertical.bind(this),
+            'stretchingType': this.adaptStretchingType.bind(this), //todo check on parent change
+            'parent': this.parentChangeHandler.bind(this)
         };
 
         this._parentToChildDependencies = {
-            'width': { own: ['anchorX'], children: ['x', 'alignX', 'width'] },
-            'height': { own: ['anchorY'], children: ['y', 'alignY', 'height'] },
-            'x': { own: ['alignX'], children: [] },
-            'y': { own: ['alignY'], children: [] },
-            'anchorX': { 'own': ['x'], children: ['x'] },
-            'anchorY': { 'own': ['y'], children: ['y'] }
+            'width': { children: ['x'] },
+            'height': { children: ['y'] },
+            'anchorX': { children: ['x'] },
+            'anchorY': { children: ['y'] },
+            'stretchingType': { children: ['x', 'y'] }
         };
 
         this._parentTypes = [
@@ -48,30 +47,36 @@ class PropertyAdapter {
         return Object.keys(this._dependencies).includes(property);
     };
 
-    _setPropertyAndAdaptIt(object, propertyName, value) {
-        object[propertyName] = value;
-        this.propertyChanged(object, propertyName);
-    }
-
-    _setPropertyWithoutAdaption(object, propertyName, value) {
-        object[propertyName] = value;
-    }
-
-    propertyChanged(object, propertyName) {
-        this.adaptProperty(object, propertyName);
-
-        this._adaptOwnProperties(object, propertyName);
+    propertyChangeHandler(object, propertyName) {
+        this._adaptProperty(object, propertyName);
         this._adaptChildProperties(object, propertyName);
     }
 
-    _adaptOwnProperties(object, propertyName) {
-        const { own } = this._parentToChildDependencies[propertyName] || {};
+    _adaptProperty(object, propertyName) {
+        if (this._dependencies[propertyName])
+            this._dependencies[propertyName](object);
+    }
 
-        if (!own)
-            return;
+    _updateHorizontal(object) {
+        let x = this._getXAsNumber(object); //adaptX
+        x += this.adaptAnchorX(object);
+        x += this.adaptAlignX(object);
+        object._baseObject.x = x;
 
-        for (let dependency of own)
-            this.propertyChanged(object, dependency);
+        this.adaptWidth(object);
+    }
+
+    _updateVertical(object) {
+        let y = this._getYAsNumber(object); //adaptX
+        y += this.adaptAnchorY(object);
+        y += this.adaptAlignY(object);
+        object._baseObject.y = y;
+
+        this.adaptHeight(object);
+    }
+
+    _setPropertyWithoutAdaption(object, propertyName, value) { //in error case
+        object[propertyName] = value;
     }
 
     _adaptChildProperties(object, propertyName) {
@@ -83,20 +88,15 @@ class PropertyAdapter {
 
         for (let dependency of children)
             for (let child of object.contents)
-                this.propertyChanged(child, dependency);
+                this.propertyChangeHandler(child, dependency);
     }
 
-    adaptProperty(object, propertyName) {
-        if (this._dependencies[propertyName])
-            this._dependencies[propertyName](object);
-    }
-
-    updateChildByParent(child) {
+    parentChangeHandler(child) {
         if (child.parent == null)
             return;
 
         for (let propertyName of this._propertiesDependentOnParent())
-            this.propertyChanged(child, propertyName);
+            this.propertyChangeHandler(child, propertyName);
     }
 
     _propertiesDependentOnParent() {
@@ -112,47 +112,43 @@ class PropertyAdapter {
         return properties;
     }
 
-    adaptX(object) {
-        const pixiObject = object._baseObject;
-        pixiObject.x = this._getXAsNumber(object);
-    }
-
-    adaptY(object) {
-        const pixiObject = object._baseObject;
-        pixiObject.y = this._getYAsNumber(object);
-    }
-
     adaptAnchorX(object) {
         const pixiObject = object._baseObject;
 
         if (typeof object.anchorX !== 'number' || object.anchorX < 0 || object.anchorX > 1)
-            return Urso.logger.error('AnchorX value is not valid!');
+            Urso.logger.error('AnchorX value is not valid!', object);
 
         if (this._canBeParent(object)) {
-            const objectX = this._getXAsNumber(object);
             const objectWidth = this._getWidthAsNumber(object);
-            pixiObject.x = objectX - objectWidth * object.anchorX;
+            return - objectWidth * object.anchorX;
         } else if (!this._typesWithoutAnchor.includes(object.type)) {
             pixiObject.anchor.x = object.anchorX;
+        } else {
+            Urso.logger.warn(); ('AnchorX value cannot be used with this object type !', object);
         }
+
+        return 0;
     }
 
     adaptAnchorY(object) {
         const pixiObject = object._baseObject;
 
         if (typeof object.anchorY !== 'number' || object.anchorY < 0 || object.anchorY > 1)
-            return Urso.logger.error('AnchorY value is not valid!');
+            Urso.logger.error('AnchorY value is not valid!', object);
 
         if (this._canBeParent(object)) {
-            const objectY = this._getYAsNumber(object);
             const objectHeight = this._getHeightAsNumber(object);
-            pixiObject.y = objectY - objectHeight * object.anchorY;
+            return - objectHeight * object.anchorY;
         } else if (!this._typesWithoutAnchor.includes(object.type)) {
             pixiObject.anchor.y = object.anchorY;
+        } else {
+            Urso.logger.warn(); ('AnchorY value cannot be used with this object type !', object);
         }
+
+        return 0;
     }
 
-    adaptScaleX(object) {
+    _adaptScaleX(object) {
         const pixiObject = object._baseObject;
 
         if (object.scaleX !== 1 && typeof object.width !== 'boolean') {
@@ -161,13 +157,13 @@ class PropertyAdapter {
             return;
         }
 
-        if (typeof object.scaleX === 'number' && object.scaleX >= 0) // TODO: CHECK SCALE CAN BE NEGATIVE
+        if (typeof object.scaleX === 'number')
             pixiObject.scale.x = object.scaleX;
         else
             Urso.logger.error('ScaleX value is not valid!');
     }
 
-    adaptScaleY(object) {
+    _adaptScaleY(object) {
         const pixiObject = object._baseObject;
 
         if (object.scaleY !== 1 && typeof object.height !== 'boolean') {
@@ -183,58 +179,44 @@ class PropertyAdapter {
     }
 
     adaptAlignX(object) {
-        const pixiObject = object._baseObject;
+        if (typeof object.alignX !== 'string') {
+            Urso.logger.error('AlignX value is not string!');
+            return 0;
+        }
 
-        if (typeof object.alignX !== 'string')
-            return Urso.logger.error('AlignX value is not string!');
-
-        const objectX = this._getXAsNumber(object);
         const parentWidth = object.parent ? this._getWidthAsNumber(object.parent) : 0;
 
         switch (object.alignX) {
             case 'left':
-                pixiObject.x = objectX;
-                break;
-
+                return 0;
             case 'right':
-                pixiObject.x = objectX + parentWidth;
-                break;
-
+                return parentWidth;
             case 'center':
-                pixiObject.x = objectX + parentWidth / 2;
-                break;
-
+                return parentWidth / 2;
             default:
                 Urso.logger.error('AlignX string is not valid!');
-                break;
+                return 0;
         }
     }
 
     adaptAlignY(object) {
-        const pixiObject = object._baseObject;
+        if (typeof object.alignY !== 'string') {
+            Urso.logger.error('AlignY value is not string!');
+            return 0;
+        }
 
-        if (typeof object.alignY !== 'string')
-            return Urso.logger.error('AlignY value is not string!');
-
-        const objectY = this._getYAsNumber(object);
         const parentHeight = object.parent ? this._getHeightAsNumber(object.parent) : 0;
 
         switch (object.alignY) {
             case 'top':
-                pixiObject.y = objectY;
-                break;
-
+                return 0;
             case 'bottom':
-                pixiObject.y = objectY + parentHeight;
-                break;
-
+                return parentHeight;
             case 'center':
-                pixiObject.y = objectY + parentHeight / 2;
-                break;
-
+                return parentHeight / 2;
             default:
                 Urso.logger.error('AlignY string is not valid!');
-                break;
+                return 0;
         }
     }
 
@@ -274,25 +256,6 @@ class PropertyAdapter {
 
         if (!this._canBeParent(object))
             pixiObject.height = this._getHeightAsNumber(object);
-    }
-
-    adaptStretchingType(object) {
-        switch (object.stretchingType) {
-            case 'inscribed':
-                this._inscribe(object);
-                break;
-
-            case 'circumscribed':
-                this._circumscribe(object);
-                break;
-
-            case 'false':
-                break;
-
-            default:
-                Urso.logger.error('StretchingType value not valid!');
-                break;
-        }
     }
 
     _getXAsNumber(object) {
@@ -345,16 +308,32 @@ class PropertyAdapter {
         return typeof value === 'number' || (typeof value === 'string' && value.endsWith('%'))
     }
 
-    _getObjectValues(object) {
-        const objectWidth = this._getWidthAsNumber(object);
-        const objectHeight = this._getHeightAsNumber(object);
-        const parentWidth = this._getWidthAsNumber(object.parent);
-        const parentHeight = this._getHeightAsNumber(object.parent);
+    //stretchingType
+    adaptStretchingType(object) {
+        if (object.width !== '100%' || object.height !== '100%' || !object.stretchingType)
+            return;
 
-        const scaleX = parentWidth / objectWidth;
-        const scaleY = parentHeight / objectHeight;
+        switch (object.stretchingType) {
+            case 'inscribed':
+                this._inscribe(object);
+                break;
 
-        return { objectWidth, objectHeight, scaleX, scaleY };
+            case 'circumscribed':
+                this._circumscribe(object);
+                break;
+
+            case 'false':
+                break;
+
+            default:
+                Urso.logger.error('StretchingType value not valid!');
+                break;
+        }
+    }
+
+    _setPropertyAndAdaptIt(object, propertyName, value) {
+        object[propertyName] = value;
+        this.propertyChangeHandler(object, propertyName);
     }
 
     _setStreching(object, { scale, objectWidth, objectHeight }) {
@@ -369,14 +348,26 @@ class PropertyAdapter {
             this._setPropertyAndAdaptIt(object, 'scaleY', scale);
     }
 
+    _getObjectValuesForStreching(object) {
+        const objectWidth = this._getWidthAsNumber(object);
+        const objectHeight = this._getHeightAsNumber(object);
+        const parentWidth = this._getWidthAsNumber(object.parent);
+        const parentHeight = this._getHeightAsNumber(object.parent);
+
+        const scaleX = parentWidth / objectWidth;
+        const scaleY = parentHeight / objectHeight;
+
+        return { objectWidth, objectHeight, scaleX, scaleY };
+    }
+
     _inscribe(object) {
-        const { objectWidth, objectHeight, scaleX, scaleY } = this._getObjectValues(object);
+        const { objectWidth, objectHeight, scaleX, scaleY } = this._getObjectValuesForStreching(object);
         const scale = Math.min(scaleX, scaleY);
         this._setStreching(object, { scale, objectWidth, objectHeight });
     }
 
     _circumscribe(object) {
-        const { objectWidth, objectHeight, scaleX, scaleY } = this._getObjectValues(object);
+        const { objectWidth, objectHeight, scaleX, scaleY } = this._getObjectValuesForStreching(object);
         const scale = Math.max(scaleX, scaleY);
         this._setStreching(object, { scale, objectWidth, objectHeight });
     }

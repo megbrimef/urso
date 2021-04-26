@@ -6,5 +6,6 @@ Urso.Core.Lib = {
     Loader: require('./loader.js'),
     LocalData: require('./localData.js'),
     Logger: require('./logger.js'),
-    Math: require('./math.js')
+    Math: require('./math.js'),
+    Tween: require('./tween.js')
 };

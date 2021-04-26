@@ -94,10 +94,11 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
             return false;
 
         this._isDown = true;
-        this._changeTexture('pressed');
 
         if (this.keyDownAction)
             this.keyDownAction();
+
+        this._changeTexture('pressed');
     }
 
     _onButtonUp() {
@@ -106,13 +107,13 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this._isDown = false;
 
+        if (this.action)
+            this.action();
+
         if (this._isOver)
             this._changeTexture('over');
         else
             this._changeTexture('out');
-
-        if (this.action)
-            this.action();
     }
 
     _onButtonOver() {

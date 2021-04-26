@@ -12,13 +12,22 @@ class ModulesObjectsModelsImage extends Urso.Core.Modules.Objects.BaseModel {
         this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
     }
 
+    changeTexture(assetKey) {
+        this.assetKey = assetKey;
+
+        this._addBaseObject();
+    }
+
     _addBaseObject() {
         let texture = Urso.cache.getTexture(this.assetKey)
 
-        if (!texture)
+        if (!texture)  //todo autosearch in atlases
             Urso.logger.error('ModulesObjectsModelsImage assets error: no image ' + this.assetKey);
 
-        this._baseObject = new PIXI.Sprite(texture);
+        if (!this._baseObject)
+            this._baseObject = new PIXI.Sprite(texture);
+        else
+            this._baseObject.texture = texture;
     };
 }
 

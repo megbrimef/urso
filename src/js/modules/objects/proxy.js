@@ -36,7 +36,7 @@ class ModulesObjectsProxy {
         const isAdaptiveProperty = this._propertyAdapter.isAdaptiveProperty(propertyName);
 
         if (isAdaptiveProperty)
-            this._propertyAdapter.propertyChanged(target, propertyName);
+            this._propertyAdapter.propertyChangeHandler(target, propertyName);
         else
             Urso.helper.recursiveSet(propertyName, value, target._baseObject);
     }

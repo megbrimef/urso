@@ -14,6 +14,8 @@ class ModulesScenesPixiWrapper {
         this._loopLastCall = 0;
 
         this.loop = this.loop.bind(this);
+
+        this._mouseCoords = { x: 0, y: 0 };
     }
 
     init() {
@@ -98,6 +100,9 @@ class ModulesScenesPixiWrapper {
         let deltaFrame = this._getDeltaFrame(deltaTime);
         this.interaction.update(deltaFrame);
 
+        this._checkMouse();
+        this.emit(Urso.events.MODULES_SCENES_UPDATE, deltaTime);
+
         this.currentScene.update(deltaTime);
         this.currentScene.render();
         this.renderer.render(this._root);
@@ -129,6 +134,27 @@ class ModulesScenesPixiWrapper {
         this._createWorld();
         this.currentScene = model;
     }
+
+    _checkMouse() {
+        let newCoords = this._getMouseCoords();
+
+        if (Urso.helper.checkDeepEqual(this._mouseCoords, newCoords))
+            return true;
+
+        this._mouseCoords = newCoords;
+        this.emit(Urso.events.MODULES_SCENES_MOUSE_NEW_POSITION, this._mouseCoords);
+    };
+
+    getCachedMouseCoords() {
+        return this._mouseCoords;
+    }
+
+    _getMouseCoords() {
+        return {
+            x: ~~(this.interaction.mouse.global.x / this.world.scale.x),
+            y: ~~(this.interaction.mouse.global.y / this.world.scale.y)
+        };
+    };
 }
 
 module.exports = ModulesScenesPixiWrapper;

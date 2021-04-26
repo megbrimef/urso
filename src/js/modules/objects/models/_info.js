@@ -1,4 +1,5 @@
 Urso.Core.Modules.Objects.Models = {
+    AtlasImage: require('./atlasImage.js'),
     BitmapText: require('./bitmapText.js'),
     Button: require('./button.js'),
     ButtonComposite: require('./buttonComposite.js'),

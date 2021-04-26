@@ -133,6 +133,7 @@ class ModulesAssetsService {
                 model = this.getInstance('Models.Sound', asset)
                 break;
             default:
+                Urso.logger.error('ModulesAssetsService asset type error', asset);
                 break;
         };
 

@@ -1,6 +1,6 @@
 class App {
     constructor() {
-        this.version = '0.1.11';
+        this.version = '0.1.26';
 
         this.setup = this.setup.bind(this);
     }
@@ -43,6 +43,7 @@ class App {
         Urso.localData = Urso.getInstance('Lib.LocalData'); //local data storage
         Urso.logger = Urso.getInstance('Lib.Logger'); //logger
         Urso.math = Urso.getInstance('Lib.Math'); //math functions
+        Urso.tween = Urso.getInstance('Lib.Tween'); //tween lib
 
         //Modules
         Urso.assets = Urso.getInstance('Modules.Assets.Controller');

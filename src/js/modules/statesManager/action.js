@@ -24,12 +24,12 @@ class ModulesStatesManagerAction {
         if (options) {
             this.options = options;
             this.name = options.name;
-
+            
             let customAction = this.getInstance('Actions.' + Urso.helper.capitaliseFirstLetter(this.name));
 
             if (customAction) {
                 //todo this.apply (customAction)
-
+                this.guard = Urso.helper.recursiveGet('guard', customAction, this.guard);
                 //will replace any of this functions
                 //as run or guard, etc...
             }

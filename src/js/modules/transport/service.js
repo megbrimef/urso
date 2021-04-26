@@ -22,7 +22,8 @@ class ModulesTransportService {
         if (!this._checkCommunicator() || !this._checkCommunicatorReady())
             return false;
 
-        const validatedMessage = this._validateMessage(message);
+        const decoratedMessage = this.getInstance('Decorator').toServer(message);
+        const validatedMessage = this._validateMessage(decoratedMessage);
         this._communicator.send(validatedMessage);
 
         return true;
@@ -82,7 +83,8 @@ class ModulesTransportService {
     _runMiddleWare(event, data) {
         switch (event) {
             case 'response':
-                return this._validateMessage(JSON.parse(data));
+                const decoratedMessage = this.getInstance('Decorator').toFront(JSON.parse(data));
+                return this._validateMessage(decoratedMessage);
 
             case 'close':
             case 'error':

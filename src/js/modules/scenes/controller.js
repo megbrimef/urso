@@ -21,6 +21,10 @@ class ModulesScenesController {
     getTemplateSize() {
         return this.getInstance('Resolutions').getTemplateSize();
     }
+
+    getMouseCoords() {
+        return this.getInstance('PixiWrapper').getCachedMouseCoords();
+    }
 }
 
 module.exports = ModulesScenesController;

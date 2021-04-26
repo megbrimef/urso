@@ -1,5 +1,39 @@
 class LibHelper {
 
+    constructor() {
+
+        /**
+         * angle radian factor
+         * @type Number
+         */
+        this._arFactor = (Math.PI / 180);
+    }
+
+    /**
+     * getting GET param(s) by name or all params list
+     *
+     * @param {string} [name] - get param name
+     * @returns {Object}
+     */
+    parseGetParams(name) {
+        let $_GET = {};
+        const _GET = window.location.href.substring(1).split("?");
+
+        if (_GET[1]) {
+            const __GET = _GET[1].split("&");
+
+            for (let i = 0; i < __GET.length; i++) {
+                let getVar = __GET[i].split("=");
+                $_GET[getVar[0]] = typeof getVar[1] === "undefined" ? "" : getVar[1];
+            }
+        }
+
+        if (!name)
+            return $_GET;
+
+        return $_GET[name];
+    }
+
     /**
      * get uniq elements from two arrays
      * @param {Array} array1 
@@ -61,6 +95,22 @@ class LibHelper {
     }
 
     /**
+     * lead degree zero
+     * @param {Number} num
+     * @param {Number} count
+     * @returns {String}
+     */
+    ldgZero(num, count) {
+        let numZeropad = num + '';
+
+        while (numZeropad.length < count) {
+            numZeropad = "0" + numZeropad;
+        }
+
+        return numZeropad;
+    }
+
+    /**
      * merge two arrays into new array
      * @param {Array} a 
      * @param {Array} b 
@@ -74,7 +124,7 @@ class LibHelper {
     }
 
     /**
-     * 
+     * recursive set value to object by key
      * @param {String} key 
      * @param {Mixed} value 
      * @param {Object} object 
@@ -105,6 +155,12 @@ class LibHelper {
             .map(colNumber => matrix.map(rowNumber => rowNumber[colNumber]));
     }
 
+    /**
+     * recursive get value from object by key
+     * @param {String} key 
+     * @param {Object} object 
+     * @returns {Mixed}
+     */
     recursiveGet(key, object, defaultResult) {
         if (object === undefined)
             return defaultResult;
@@ -121,6 +177,12 @@ class LibHelper {
         return object;
     }
 
+    /**
+     * recursive delete value from object by key
+     * @param {String} key 
+     * @param {Object} object 
+     * @returns {Boolean}
+     */
     recursiveDelete(key, obj) {
         key = (typeof key === 'string') ? key.split(".") : key;
 
@@ -139,6 +201,13 @@ class LibHelper {
         return true;
     }
 
+    /**
+     * recursive merge two objects into one
+     * @param {Object} obj1 
+     * @param {Object} obj2 
+     * @param {Boolean} mergeInFirstFlag 
+     * @returns {Object}
+     */
     mergeObjectsRecursive(obj1, obj2, mergeInFirstFlag) {
         let newObj = (mergeInFirstFlag) ? obj1 : this.objectClone(obj1);
 
@@ -152,6 +221,12 @@ class LibHelper {
         return newObj;
     }
 
+    /**
+     * clone object
+     * @param {Object} obj 
+     * @param {Number} recursiveCalls 
+     * @returns {Object}
+     */
     objectClone(obj, recursiveCalls) {
         if (!obj || "object" !== typeof obj)
             return obj;
@@ -179,10 +254,115 @@ class LibHelper {
         return clone;
     }
 
+    /**
+     * get object size (keys length)
+     * @param {Object} obj 
+     * @returns {Number}
+     */
     getObjectSize(obj) {
         return Object.keys(obj).length;
     }
 
+    /**
+     * object apply
+     * @param {Object} fromObj
+     * @param {Object} toObj
+     * @returns {Object}
+     */
+    objectApply(fromObj, toObj, recursiveCalls = 999) {
+        if (!recursiveCalls)
+            return fromObj;
+
+        for (let k in toObj) {
+            let paramTo = toObj[k];
+
+            if (!fromObj[k]) {
+                fromObj[k] = paramTo;
+            } else if (typeof paramTo === "array" || typeof paramTo === "object") {
+                fromObj[k] = this.objectApply(fromObj[k], toObj[k], recursiveCalls - 1);
+            } else {
+                if (toObj[k] !== fromObj[k]) {
+                    fromObj[k] = paramTo;
+                }
+            }
+        }
+
+        return fromObj;
+    }
+
+    /**
+     * check deep objects equal
+     * @param {Object} obj1 
+     * @param {Object} obj2 
+     * @returns {Boolean}
+     */
+    checkDeepEqual(obj1, obj2) {
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    }
+
+    /**
+     * check objects equal
+     * @param {Object} obj1 
+     * @param {Object} obj2 
+     * @returns {Boolean}
+     */
+    checkEqual(obj1, obj2) {
+        const objSort = (o) => {
+            const sortedObj = {};
+            const keys = Object.keys(o);
+            keys.sort();
+
+            for (let index in keys) {
+                if (keys.hasOwnProperty(index)) {
+                    let key = keys[index];
+                    let value = o[key];
+
+                    if (typeof o[key] === 'object')
+                        value = objSort(value);
+
+                    sortedObj[key] = value;
+                }
+            }
+
+            return sortedObj;
+        };
+
+        const o1s = objSort(obj1);
+        const o2s = objSort(obj2);
+
+        return this.checkDeepEqual(o1s, o2s);
+    }
+
+    /**
+     * check Arrays Partial Entry
+     * @param {Object} main
+     * @param {Object} partial
+     * @returns {Boolean}
+     */
+    checkArraysPartialEntry(main, partial) {
+        if (!main || !partial)
+            return false;
+
+        main = main.sort();
+        partial = partial.sort();
+
+        let kPartial = partial.length - 1;
+
+        for (let i = main.length - 1; i >= 0; i--) {
+            if (JSON.stringify(main[i]) === JSON.stringify(partial[kPartial]))
+                kPartial--;
+
+            if (kPartial === -1)
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * check is device mobile or tablet
+     * @returns {Boolean}
+     */
     mobileAndTabletCheck() {
         let check = false;
         (function (a) {
@@ -193,6 +373,13 @@ class LibHelper {
         return check;
     }
 
+    /**
+     * make objects property reactive
+     * @param {Object} targetObject 
+     * @param {String} key 
+     * @param {Function} callback 
+     * @returns 
+     */
     reactive(targetObject, key, callback) {
         let descriptor = Object.getOwnPropertyDescriptor(targetObject, key);
         let targetObjectTemp = targetObject;
@@ -233,6 +420,60 @@ class LibHelper {
     }
 
 
+    /**
+     * calc length between two points
+     *
+     * @param {Object} point1
+     * @param {Object} point1
+     * @return {Number}
+     */
+    getLengthBy2Points(point1, point2) {
+        return Math.sqrt((point2.x - point1.x) * (point2.x - point1.x) +
+            (point2.y - point1.y) * (point2.y - point1.y));
+    }
+
+    /**
+     * calc angle between three points (in radians)
+     *
+     * @param {Object} point1
+     * @param {Object} point2
+     * @param {Object} point3
+     * @return {Number}
+     */
+    getAngleBy3Points(point1, point2, point3) {
+        let angle = 0;
+        const c = this.getLengthBy2Points(point1, point3);
+        const a = this.getLengthBy2Points(point1, point2);
+        const b = this.getLengthBy2Points(point2, point3);
+
+        if (a !== 0 && b !== 0) {
+            const cornerRcos = (a * a + b * b - c * c) / (2 * a * b);
+            angle = Math.acos(cornerRcos);
+        }
+
+        return angle;
+    }
+
+
+    /**
+     * get angle in radians from degrees
+     *
+     * @param {Number} angle
+     * @return {Number}
+     */
+    getRadian(angle) {
+        return (angle * this._arFactor);
+    }
+
+    /**
+     * get angle in degrees from radians
+     *
+     * @param {Number} radian
+     * @return {Number}
+     */
+    getAngle(radian) {
+        return (radian / this._arFactor);
+    }
 }
 
 module.exports = LibHelper;

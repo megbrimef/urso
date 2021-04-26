@@ -40,7 +40,7 @@ class SoundSprite {
         return this._isAudioUnlocked;
     };
 
-    play({ loop = false, volume = 1, relaunch = false }) {
+    play({ loop = false, volume = this._volume, relaunch = false }) {
         if (!this.canPlayCheck() || (this._id && !relaunch))
             return false;
 

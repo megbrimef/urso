@@ -12,7 +12,7 @@ class ModulesTransportConfig {
             autoReconnection: true,
             autoReconnectionDelay: 5000,
             hosts: {
-                wsHost: 'ws://localhost:9100/',
+                wsHost: Urso.helper.parseGetParams('wsHost') || 'ws://localhost:9100/',
                 xhrHost: 'https://reqres.in/api/users/2'
             }
         };
