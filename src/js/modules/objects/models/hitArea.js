@@ -16,6 +16,8 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
 
         //must have x,y, width, height
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this.name) });
+        this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
+        this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
     }
 
     enable() {
@@ -37,7 +39,7 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
 
         this._baseObject.lineStyle(0);
         this._baseObject.beginFill(0xffffff);
-        this._baseObject.drawRect(this.x, this.y, this.width, this.height);
+        this._baseObject.drawRect(0, 0, this.width, this.height);
         this._baseObject.endFill();
         this._baseObject.alpha = 0;
         this._baseObject.cacheAsBitmap = true;
@@ -46,7 +48,9 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
         this._baseObject.buttonMode = true;
 
         this._baseObject
-            .on('pointerup', this._onPressUp.bind(this));
+            .on('pointerup', this._onPressUp.bind(this))
+            .on('pointerover', this._onOver.bind(this))
+            .on('pointerout', this._onOut.bind(this));
     };
 
     _onPressUp() {
@@ -55,6 +59,22 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
 
         if (this.action)
             this.action();
+    }
+
+    _onOver() {
+        if (this._isDisabled)
+            return false;
+
+        if (this.onOverCallback)
+            this.onOverCallback();
+    }
+
+    _onOut() {
+        if (this._isDisabled)
+            return false;
+
+        if (this.onOutCallback)
+            this.onOutCallback();
     }
 
 }

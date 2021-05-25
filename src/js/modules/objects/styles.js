@@ -88,6 +88,10 @@ class ModulesObjectsStyles {
         let template = Urso.template.get();
         let styles = template.styles[selector];
 
+        if(!styles){
+            return;
+        }
+
         for (let [key, value] of Object.entries(styles)) {
             this._restoreValueByKey(key, object);
         }

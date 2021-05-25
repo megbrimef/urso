@@ -71,8 +71,10 @@ class ModulesTemplateController {
         let path = 'Components.' + Urso.helper.capitaliseFirstLetter(obj.componentName) + '.Controller';
         let componentInstance = Urso.getInstance(path, obj.options);
 
-        if (!componentInstance)
+        if (!componentInstance) {
             Urso.logger.error(`ModulesTemplateController Component error. Component ${obj.componentName} not found. Please check components _info.js file.`);
+            Urso.logger.error(`To use only templates use Groups please.`);
+        }
 
         let data = componentInstance.assetsMount();
 

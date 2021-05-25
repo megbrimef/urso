@@ -21,8 +21,8 @@ class ModulesObjectsModelsImage extends Urso.Core.Modules.Objects.BaseModel {
     _addBaseObject() {
         let texture = Urso.cache.getTexture(this.assetKey)
 
-        if (!texture)  //todo autosearch in atlases
-            Urso.logger.error('ModulesObjectsModelsImage assets error: no image ' + this.assetKey);
+        if (!texture)
+            Urso.logger.error('ModulesObjectsModelsImage assets error: no image with key: ' + this.assetKey);
 
         if (!this._baseObject)
             this._baseObject = new PIXI.Sprite(texture);

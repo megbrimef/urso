@@ -50,7 +50,7 @@ class ModulesScenesService {
         this._sceneModel = this.getInstance('Model');
 
         //write model by template (functions)  //todo set in model (this.getInstance('Model', params);)
-        this._sceneModel.loadUpdate = () => { this._currentSceneTemplate.components.forEach(component => component.loadUpdate()); }
+        this._sceneModel.loadUpdate = (loadProgress) => { this._currentSceneTemplate.components.forEach(component => component.loadUpdate(loadProgress)); }
         this._sceneModel.create = () => { this._currentSceneTemplate.components.forEach(component => component.create()); }
         this._sceneModel.update = (deltaTime) => { this._currentSceneTemplate.components.forEach(component => component.update(deltaTime)); }
         this._sceneModel.destroy = () => { this._currentSceneTemplate.components.forEach(component => component.destroy()); }
@@ -60,6 +60,14 @@ class ModulesScenesService {
         this.emit(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, name);
 
         Urso.assets.preload(this._currentSceneTemplate.assets, this._assetsLoadedHandler);
+
+    }
+    
+    loadUpdate(loadProgress){
+        if(!this._sceneModel)
+            return;
+
+        this._sceneModel.loadUpdate(loadProgress);
     }
 
     _assetsLoadedHandler() {

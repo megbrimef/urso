@@ -10,7 +10,7 @@ class ModulesObjectsController {
         this._resetWorld = this._resetWorld.bind(this);
     };
 
-    create(objects, parent, doNotRefreshStylesFlag) {
+    create(objects, parent, doNotRefreshStylesFlag) { //TODO parse template for assets and objects (groups, components)
         let result;
 
         if (Array.isArray(objects)) {
@@ -92,6 +92,10 @@ class ModulesObjectsController {
     //do not use outside engine
     _safeSetValueToTarget(target, key, value) {
         this.getInstance('Proxy').safeSetValueToTarget(target, key, value);
+    }
+
+    _updateCommonProperties(object) {
+        this.getInstance('Create')._updateCommonProperties(object);
     }
 
     _newResolutionHandler(params) {

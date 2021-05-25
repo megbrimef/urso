@@ -24,16 +24,55 @@ class ModulesAssetsService {
         )
     }
 
-    loadGroup(group, callback) {
-        let loader = Urso.getInstance('Lib.Loader');
+    loadUpdate(param){
+        Urso.scenes.loadUpdate(Math.floor(param.progress));
+    }
 
+    loadGroup(group, callback) {
         if (!this.assets[group])
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
-        for (let assetModel of this.assets[group])
+        //we need load and parse atlases at first (!)
+        this._loadGroupAtlases(group, () => { this._loadGroupRestAssets(group, callback) });
+    }
+
+    _loadGroupAtlases(group, callback) {
+        const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+
+        if (!atlases.length)
+            return callback();
+
+        let loader = Urso.getInstance('Lib.Loader');
+
+        for (let assetModel of atlases)
             this._addAssetToLoader(assetModel, loader);
 
+        loader.start(() => { this._processLoadedAtlases(group); callback(); });
+    }
+
+    _loadGroupRestAssets(group, callback) {
+        let loader = Urso.getInstance('Lib.Loader');
+        loader.setOnLoadUpdate(this.loadUpdate.bind(this));
+
+        for (let assetModel of this.assets[group])
+            if (assetModel.type !== Urso.types.assets.ATLAS)
+                this._addAssetToLoader(assetModel, loader);
+
         loader.start(() => { this._processLoadedAssets(group); this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group); callback(); });
+    }
+
+    _processLoadedAtlases(group) {
+log(100, group)
+        const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+
+        for (let assetModel of atlases){
+            const assetKey = assetModel.key;
+            let imageData = Urso.cache.getAtlas(assetKey);
+
+
+log(101, imageData, imageData.spritesheet._frames)
+        }
+
     }
 
     _processLoadedAssets(group) {
@@ -77,7 +116,11 @@ class ModulesAssetsService {
 
         const assetKey = assetModel.key;
         //textures cache
-        let imageData = Urso.cache.getImage(assetKey)
+        let imageData = Urso.cache.getImage(assetKey);
+
+        if (!imageData)
+            return Urso.logger.error('ModulesAssetsService process Loaded Image error: no image ', assetModel);
+
         const baseTexture = new PIXI.BaseTexture(imageData.data, { resolution: qualityTextureResolution });
         const texture = new PIXI.Texture(baseTexture);
 

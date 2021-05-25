@@ -8,6 +8,10 @@ class ModulesScenesResolutions {
 
         this.refreshSceneSize = this.refreshSceneSize.bind(this);
         this.refreshSceneSize();
+
+        //TODO optimization (performance)
+        /*if (devicePixelRatio > 2)
+            devicePixelRatio = 2;*/ // when we are calculating canvas size
     }
 
     _subscribeOnce() {

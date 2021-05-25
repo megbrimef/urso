@@ -79,7 +79,7 @@ class SoundManagerController {
      * @param {Number} volume (0-1)
      */
     _globalVolumeChange(volume) {
-        volume = Urso.math.intMakeBetween(value, 0, 1);
+        volume = Urso.math.intMakeBetween(volume, 0, 1);
 
         for (const key in this._sounds)
             this._sounds[key].setVolume(volume);

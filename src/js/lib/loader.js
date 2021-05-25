@@ -2,6 +2,7 @@ class LibLoader {
     constructor() {
         this._isRunning = false;
         this._assetsQuery = [];
+        this._onLoadUpdate = () => {};
     };
 
     isRunning() {
@@ -20,6 +21,10 @@ class LibLoader {
      * store loaded asset in cache
      */
     _storeAsset(asset, resource) {
+        if (resource.error) {
+            return Urso.logger.warn('LibLoader error: ', resource.error, asset);
+        }
+
         switch (asset.type) {
             case Urso.types.assets.ATLAS:
                 Urso.cache.addAtlas(asset.key, resource);
@@ -48,6 +53,15 @@ class LibLoader {
     }
 
     /**
+     * setup onload callback
+     * @param {Function} onLoad
+     */
+    setOnLoadUpdate(onLoadUpdate){
+        if(onLoadUpdate)
+            this._onLoadUpdate = onLoadUpdate;
+    }
+
+    /**
      * start loading assets from assets query
      * @param {Function} callback 
      */
@@ -60,12 +74,17 @@ class LibLoader {
         const loader = new PIXI.Loader();
         this._assetsQuery.forEach(asset => {
             // TODO: check to load
-         
+
             const params = asset.params || false; // TODO: Set params field in base mode
             loader.add(asset.key, asset.path, params, (resource) => this._storeAsset(asset, resource))
         });
 
+        this._onLoadUpdate({progress: 0});
+        loader.onProgress.add(this._onLoadUpdate);
+
         loader.load(function (loader, resources) {
+            this._onLoadUpdate({progress: 100});
+
             callback();
 
             this._assetsQuery = [];

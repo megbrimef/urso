@@ -1,6 +1,6 @@
 class App {
     constructor() {
-        this.version = '0.1.26';
+        this.version = '0.1.32';
 
         this.setup = this.setup.bind(this);
     }
@@ -16,12 +16,6 @@ class App {
         Urso.getInstancesModes = instances.getModes;
         Urso.addInstancesMode = instances.addMode;
         Urso.removeInstancesMode = instances.removeMode;
-
-        //TODO
-        //Urso.Core must be in npm
-        //Urso.SlotGame //npm
-        //Urso.SomeBaseGame //??
-        //Urso.SomeNewGame //from _src code
 
         //build from extendingChain and merge all into Urso.Game
         Urso.Game = {};

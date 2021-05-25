@@ -14,6 +14,10 @@ class ModulesScenesController {
         this._service.display(name);
     }
 
+    loadUpdate(loadProgress) {
+        this._service.loadUpdate(loadProgress);
+    }
+
     getPixiWorld() {
         return this.getInstance('PixiWrapper').getPixiWorld();
     }
