@@ -24,7 +24,7 @@ class ModulesAssetsService {
         )
     }
 
-    loadUpdate(param){
+    loadUpdate(param) {
         Urso.scenes.loadUpdate(Math.floor(param.progress));
     }
 
@@ -56,21 +56,27 @@ class ModulesAssetsService {
 
         for (let assetModel of this.assets[group])
             if (assetModel.type !== Urso.types.assets.ATLAS)
-                this._addAssetToLoader(assetModel, loader);
+                if (!Urso.cache.getFile(assetModel.path))
+                    this._addAssetToLoader(assetModel, loader);
 
         loader.start(() => { this._processLoadedAssets(group); this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group); callback(); });
     }
 
     _processLoadedAtlases(group) {
-log(100, group)
         const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
 
-        for (let assetModel of atlases){
+        for (let assetModel of atlases) {
             const assetKey = assetModel.key;
             let imageData = Urso.cache.getAtlas(assetKey);
+            const folderPath = imageData.url.split('/').slice(0, -1).join('/');
 
+            for (let i = 0; i < imageData.spritesheet._frames.length; i++) {
+                let frame = imageData.spritesheet._frames[i];
+                let texture = imageData.textures[i];
+                let newFilename = folderPath + '/' + frame.filename;
 
-log(101, imageData, imageData.spritesheet._frames)
+                Urso.cache.addFile(newFilename, texture);
+            }
         }
 
     }
@@ -118,13 +124,20 @@ log(101, imageData, imageData.spritesheet._frames)
         //textures cache
         let imageData = Urso.cache.getImage(assetKey);
 
-        if (!imageData)
-            return Urso.logger.error('ModulesAssetsService process Loaded Image error: no image ', assetModel);
+        if (!imageData) {
+            //from atlas ?!
+            let texture = Urso.cache.getFile(assetModel.path);
 
-        const baseTexture = new PIXI.BaseTexture(imageData.data, { resolution: qualityTextureResolution });
-        const texture = new PIXI.Texture(baseTexture);
+            if (!texture)
+                return Urso.logger.error('ModulesAssetsService process Loaded Image error: no image ', assetModel);
 
-        Urso.cache.addTexture(assetKey, texture);
+            Urso.cache.addTexture(assetKey, texture); //TODO change resolution of base texture
+        } else {
+            //regular image
+            const baseTexture = new PIXI.BaseTexture(imageData.data, { resolution: qualityTextureResolution });
+            const texture = new PIXI.Texture(baseTexture);
+            Urso.cache.addTexture(assetKey, texture);
+        }
 
         if (assetModel.preloadGPU) {
             let tempOblect = Urso.objects.create({

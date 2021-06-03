@@ -36,6 +36,7 @@ class ModulesObjectsBaseModel {
         this.angle = Urso.helper.recursiveGet('angle', params, 0);
         this.visible = Urso.helper.recursiveGet('visible', params, true);
         this.alpha = Urso.helper.recursiveGet('alpha', params, 1);
+        this.blendMode = Urso.helper.recursiveGet('blendMode', params, 1);
         this.append = Urso.helper.recursiveGet('append', params, true); //if false - object will not created  //TODO
         this.custom = Urso.helper.recursiveGet('custom', params, {}); //custom params
     }

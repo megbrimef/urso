@@ -85,8 +85,8 @@ class ModulesObjectsController {
         this.getInstance('Create').removeChild(parent, child, doNotRefreshStylesFlag);
     }
 
-    destroy(object) {
-        this.getInstance('Create').destroy(object);
+    destroy(object, doNotRefreshStylesFlag) {
+        this.getInstance('Create').destroy(object, doNotRefreshStylesFlag);
     }
 
     //do not use outside engine

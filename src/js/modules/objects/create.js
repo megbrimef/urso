@@ -169,14 +169,14 @@ class ModulesObjectsCreate {
             Urso.objects.refreshStyles(); //todo optimization
     }
 
-    destroy(object) {
+    destroy(object, doNotRefreshStylesFlag) {
         if (object.parent)
-            this.removeChild(object.parent, object);
+            this.removeChild(object.parent, object, doNotRefreshStylesFlag);
 
         //children
         if (object.contents)
             for (const child of object.contents)
-                this.destroy(child);
+                this.destroy(child, doNotRefreshStylesFlag);
 
         object._baseObject.destroy();
         this._removeFromCache(object);

@@ -20,6 +20,12 @@ class ModulesStatesManagerHelper {
 
                 actionParams = this.getInstance('ActionModel', actionParamsConfig); //replace params to action model
             }
+
+            let customActionInstance = this.getInstance('Actions.' + Urso.helper.capitaliseFirstLetter(actionName), actionParams);
+
+            if (customActionInstance) {
+                return customActionInstance;
+            }
         }
 
         let className = Urso.helper.capitaliseFirstLetter(actionType);

@@ -23,6 +23,21 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this._baseObject.state.setAnimation(track, animationName, loopFlag);
     }
 
+    addToSlot(object, slotName) {
+        const spine = this._baseObject;
+        const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
+        const currentSlot = spine.slotContainers[slotIndex];
+
+        if (currentSlot) {
+            object._baseObject.scale.y = -1;
+
+            Urso.objects.removeChild(object.parent, object)
+            currentSlot.addChild(object._baseObject);
+        } else {
+            Urso.logger.warn('ModulesObjectsModelsSpine addToSlot error: no spine slot ' + slotName);
+        }
+    }
+
     _addBaseObject() {
         let spineAsset = Urso.cache.getSpine(this.assetKey);
 

@@ -4,6 +4,7 @@ class ModulesObserverConfig {
 
         this.list = {
             MODULES_ASSETS_GROUP_LOADED: 'modules.assets.group.loaded',
+            MODULES_ASSETS_LOAD_PROGRESS: 'modules.assets.load.progress',
             MODULES_ASSETS_LAZYLOAD_FINISHED: 'modules.assets.lazyLoad.finished',
             MODULES_OBJECTS_BUTTON_PRESS: 'modules.objects.button.press',
             MODULES_OBJECTS_HIT_AREA_PRESS: 'modules.objects.hitArea.press',

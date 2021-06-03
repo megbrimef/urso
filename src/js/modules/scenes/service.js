@@ -66,8 +66,8 @@ class ModulesScenesService {
     loadUpdate(loadProgress){
         if(!this._sceneModel)
             return;
-
         this._sceneModel.loadUpdate(loadProgress);
+        this.emit(Urso.events.MODULES_ASSETS_LOAD_PROGRESS, loadProgress);
     }
 
     _assetsLoadedHandler() {

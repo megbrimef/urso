@@ -14,6 +14,7 @@ class PropertyAdapter {
             'alignY': this._updateVertical.bind(this),
             'width': this._updateHorizontal.bind(this),
             'height': this._updateVertical.bind(this),
+            'angle': this._updateAngle.bind(this),
             'stretchingType': this.adaptStretchingType.bind(this), //todo check on parent change
             'parent': this.parentChangeHandler.bind(this)
         };
@@ -64,6 +65,17 @@ class PropertyAdapter {
         object._baseObject.x = x;
 
         this.adaptWidth(object);
+    }
+
+    _updateAngle(object) {
+        object._baseObject.angle = object.angle;
+
+        if (!this._canBeParent(object)) {
+            return;
+        }
+
+        this._updateHorizontal(object);
+        this._updateVertical(object);
     }
 
     _updateVertical(object) {
@@ -119,6 +131,13 @@ class PropertyAdapter {
             Urso.logger.error('AnchorX value is not valid!', object);
 
         if (this._canBeParent(object)) {
+            if (object.anchorY === 0)
+                return 0;
+
+            if (object.angle) {
+                return this._getAnchorOffsetByAngle(object, 'x');
+            }
+
             const objectWidth = this._getWidthAsNumber(object);
             return - objectWidth * object.anchorX;
         } else if (!this._typesWithoutAnchor.includes(object.type)) {
@@ -137,6 +156,13 @@ class PropertyAdapter {
             Urso.logger.error('AnchorY value is not valid!', object);
 
         if (this._canBeParent(object)) {
+            if (object.anchorY === 0)
+                return 0;
+
+            if (object.angle) {
+                return this._getAnchorOffsetByAngle(object, 'y');
+            }
+
             const objectHeight = this._getHeightAsNumber(object);
             return - objectHeight * object.anchorY;
         } else if (!this._typesWithoutAnchor.includes(object.type)) {
@@ -146,6 +172,21 @@ class PropertyAdapter {
         }
 
         return 0;
+    }
+
+    _getAnchorOffsetByAngle(object, side) { //side can be x or y
+        const objectWidth = this._getWidthAsNumber(object);
+        const objectHeight = this._getHeightAsNumber(object);
+        const xCatet = (objectWidth * object.anchorX);
+        const yCatet = (objectHeight * object.anchorY);
+        const offsetRadius = Math.sqrt(Math.pow(xCatet, 2) + Math.pow(yCatet, 2));
+        const angleRadian = Math.atan(xCatet / yCatet);  //todo or yCatet/xCatet ?
+        const angle = Urso.helper.getAngle(angleRadian);
+        const offsetAngle = object.angle + angle;
+        const offsetFunction = side === 'x' ? 'cos' : 'sin';
+        const angleOffset = - offsetRadius * Math[offsetFunction](Urso.helper.getRadian(offsetAngle));
+
+        return angleOffset;
     }
 
     _adaptScaleX(object) {

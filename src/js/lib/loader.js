@@ -76,7 +76,7 @@ class LibLoader {
             // TODO: check to load
 
             const params = asset.params || false; // TODO: Set params field in base mode
-            loader.add(asset.key, asset.path, params, (resource) => this._storeAsset(asset, resource))
+            loader.add(asset.key, asset.path, params, (resource) => this._storeAsset(asset, resource))  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
         });
 
         this._onLoadUpdate({progress: 0});

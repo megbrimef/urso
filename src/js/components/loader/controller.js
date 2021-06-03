@@ -1,11 +1,32 @@
 class ComponentsLoaderController extends Urso.Core.Components.Base.Controller {
 
+    constructor(options){
+        super(options);
+
+        //load own assets
+
+        //then create loader objects
+        Urso.objects.create(this.getInstance('Template').objects)
+
+        
+    }
+
+    assetsMount() {
+        return false;
+    }
+
+    objectsMount() {
+        return false;
+    }
+
     loadUpdate(loadProgress) {
         this.setLoadProgress(loadProgress);
     }
 
     create(){
         this.setMask();
+
+        //todo remove all objects
     }
     
     setMask(){

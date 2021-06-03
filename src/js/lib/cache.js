@@ -8,8 +8,13 @@ class LibCache {
             spine: {},
             bitmapFont: {},
             sound: {},
-            texture: {}
+            texture: {},
+            file: {}
         };
+    };
+
+    addFile(key, someData) {
+        this.assetsList.file[key] = someData;
     };
 
     addAtlas(key, someData) {
@@ -46,6 +51,10 @@ class LibCache {
 
     addSpine(key, someData) {
         this.assetsList.spine[key] = someData;
+    };
+
+    getFile(key) {
+        return this.assetsList.file[key];
     };
 
     getAtlas(key) {

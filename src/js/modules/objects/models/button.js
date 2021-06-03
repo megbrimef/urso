@@ -98,6 +98,9 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         if (this.keyDownAction)
             this.keyDownAction();
 
+        if (this._isDisabled) //can be disabled after keyDownAction
+            return false;
+
         this._changeTexture('pressed');
     }
 
@@ -109,6 +112,9 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         if (this.action)
             this.action();
+
+        if (this._isDisabled) //can be disabled after action
+            return false;
 
         if (this._isOver)
             this._changeTexture('over');

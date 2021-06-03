@@ -53,12 +53,12 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
             .on('pointerout', this._onOut.bind(this));
     };
 
-    _onPressUp() {
+    _onPressUp(event) {
         if (this._isDisabled)
             return false;
 
         if (this.action)
-            this.action();
+            this.action(event);
     }
 
     _onOver() {

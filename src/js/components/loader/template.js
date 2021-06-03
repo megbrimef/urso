@@ -7,7 +7,9 @@ class ComponentsLoaderTemplate {
                 fontWeight: 'bold'
             }
         };
+
         this.assets = [];
+
         this.objects = [
             {
                 type: Urso.types.objects.CONTAINER,

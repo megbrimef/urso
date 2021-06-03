@@ -18,6 +18,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
         this.assetKey = Urso.helper.recursiveGet('assetKey', params, false);
 
         this.animation = {
+            timeScale: 1,
             animationName: Urso.helper.recursiveGet('animation.animationName', params, false),
             armatureName: Urso.helper.recursiveGet('animation.armatureName', params, false),
             autoplay: Urso.helper.recursiveGet('animation.autoplay', params, false),
@@ -137,6 +138,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
      *      animationName
      *      armatureName
             autoplay
+            timeScale
             onStart
             onLoop
             onComplete
@@ -150,6 +152,9 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
             ...this.animation,
             ...config
         };
+
+        if (config.timeScale)
+            this._baseObject.animation.timeScale = config.timeScale;
 
         if (config.onStart || config.onLoop || config.onComplete || config.onCompleteOnce) {
             this._removeCallbacks(config);

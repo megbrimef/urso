@@ -1,6 +1,6 @@
 class App {
     constructor() {
-        this.version = '0.1.32';
+        this.version = '0.1.41';
 
         this.setup = this.setup.bind(this);
     }
@@ -57,11 +57,13 @@ class App {
         this.sayHello();
 
         //App.run
-        Urso.getInstance('App').run();
+        Urso.device.whenReady(() => {
+            Urso.getInstance('App').run();
+        });
     }
 
     sayHello() {
-        console.log(`%c Urso ${this.version} `, 'background: #222; color: #bada55');
+        console.log(`%c ${String.fromCodePoint(0x1F43B)} Urso ${this.version} `, 'background: #222; color: #bada55');
     }
 
     run() {
