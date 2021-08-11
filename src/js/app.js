@@ -1,11 +1,13 @@
 class App {
     constructor() {
-        this.version = '0.1.41';
+        this.version = '0.1.68';
 
         this.setup = this.setup.bind(this);
     }
 
     setup() {
+        this.sayHello();
+
         //helper must be first
         Urso.helper = new Urso.Core.Lib.Helper(); //helper functions
 
@@ -37,6 +39,7 @@ class App {
         Urso.localData = Urso.getInstance('Lib.LocalData'); //local data storage
         Urso.logger = Urso.getInstance('Lib.Logger'); //logger
         Urso.math = Urso.getInstance('Lib.Math'); //math functions
+        Urso.time = Urso.getInstance('Lib.Time'); //time functions
         Urso.tween = Urso.getInstance('Lib.Tween'); //tween lib
 
         //Modules
@@ -53,8 +56,6 @@ class App {
 
         //set title
         document.title = Urso.config.title;
-
-        this.sayHello();
 
         //App.run
         Urso.device.whenReady(() => {

@@ -9,7 +9,8 @@ class ModulesTemplateTypes {
                 SPINE: 5,
                 BITMAPFONT: 6,
                 SOUND: 7,
-                DRAGONBONES: 8
+                DRAGONBONES: 8,
+                FONT: 9
             },
 
             objects: {

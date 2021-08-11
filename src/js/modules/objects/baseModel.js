@@ -1,7 +1,7 @@
 class ModulesObjectsBaseModel {
     constructor(params) {
         this.setupParams(params);
-        
+
         this.parent = false;
         this.destroyed = false;
 
@@ -45,8 +45,8 @@ class ModulesObjectsBaseModel {
         return { width: this._baseObject.width, height: this._baseObject.height };
     }
 
-    destroy() {
-        Urso.objects.destroy(this);
+    destroy(doNotRefreshStylesFlag) {
+        Urso.objects.destroy(this, doNotRefreshStylesFlag);
     }
 
     addChild(childObject, doNotRefreshStylesFlag) {

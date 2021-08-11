@@ -474,6 +474,40 @@ class LibHelper {
     getAngle(radian) {
         return (radian / this._arFactor);
     }
+
+    /**
+     * arguments {oblect} (ClassInstance, functionName, param1, param2, ...)
+     * needs {Object} obj._logicBlocks;
+     * creates {Object} obj._logicBlocksInstances;
+     * @returns {Array} execution results
+     */
+    logicBlocksDo() {
+        const params = Array.prototype.slice.call(arguments);
+        const entity = params.shift();
+        const funcName = params.shift();
+
+        //if no instances we will create them
+        if (!entity._logicBlocksInstances) {
+            entity._logicBlocksInstances = {};
+
+            for (let k in entity._logicBlocks) {
+                const name = entity._logicBlocks[k];
+                const nameCap = this.capitaliseFirstLetter(name);
+                entity._logicBlocksInstances[name] = entity.getInstance(nameCap);
+            }
+        }
+
+        let results = [];
+        //game
+        for (let name in entity._logicBlocksInstances) {
+            if (entity._logicBlocksInstances[name][funcName]) {
+                const res = entity._logicBlocksInstances[name][funcName].apply(this, params);
+                results.push(res);
+            }
+        }
+
+        return results;
+    }
 }
 
 module.exports = LibHelper;

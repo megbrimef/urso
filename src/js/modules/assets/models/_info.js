@@ -6,5 +6,6 @@ Urso.Core.Modules.Assets.Models = {
     Image: require('./image.js'),
     Json: require('./json.js'),
     Sound: require('./sound.js'),
+    Font: require('./font.js'),
     Spine: require('./spine.js')
 };

@@ -7,8 +7,9 @@ PIXI.filters['DropShadowFilter'] = DropShadowFilter;
 
 
 require("pixi-spine");
+require("pixi-projection");
 
-window.DragonBones = require("pixi5-dragonbones");
+Urso.DragonBones = require("pixi5-dragonbones");
 
 import { gsap } from 'gsap';
 window.gsap = gsap;

@@ -7,12 +7,12 @@ class ModulesLogicConfigSounds {
     getSoundsConfig(){
         return {
             main: [
-                { s: 'sound1', e: 'sound1.play.once', action: 'play' },
-                { s: 'sound_check', e: 'soundCheck.play.once', action: 'play' },
-                { s: 'sound_check', e: 'soundCheck.stop', action: 'stop' },
-                { s: 'sound_check', e: 'soundCheck.pause', action: 'pause' },
-                { s: 'sound_check', e: 'soundCheck.resume', action: 'resume' },
-                { s: 'sound_check', e: 'soundCheck.play.loop', action: 'play', relaunch: true, loop: true }
+                { soundKey: 'sound1', event: 'sound1.play.once', action: 'play' },
+                { soundKey: 'sound_check', event: 'soundCheck.play.once', action: 'play' },
+                { soundKey: 'sound_check', event: 'soundCheck.stop', action: 'stop' },
+                { soundKey: 'sound_check', event: 'soundCheck.pause', action: 'pause' },
+                { soundKey: 'sound_check', event: 'soundCheck.resume', action: 'resume' },
+                { soundKey: 'sound_check', event: 'soundCheck.play.loop', action: 'play', relaunch: true, loop: true }
             ]
         };
     };

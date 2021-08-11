@@ -63,6 +63,7 @@ class SoundSprite {
 
     setVolume(volume = 1) {
         this._volume = volume;
+        this._player._volume = volume;
         this._player.volume(volume, this._id);
     };
 

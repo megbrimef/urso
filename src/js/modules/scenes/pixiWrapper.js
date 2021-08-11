@@ -14,6 +14,7 @@ class ModulesScenesPixiWrapper {
         this._loopLastCall = 0;
 
         this.loop = this.loop.bind(this);
+        this.passiveCallIntervalId = null;
 
         this._mouseCoords = { x: 0, y: 0 };
     }
@@ -150,11 +151,44 @@ class ModulesScenesPixiWrapper {
     }
 
     _getMouseCoords() {
-        return {
+        const coords = {
             x: ~~(this.interaction.mouse.global.x / this.world.scale.x),
             y: ~~(this.interaction.mouse.global.y / this.world.scale.y)
         };
+
+        coords.x = this._validateCoordinate(coords.x);
+        coords.y = this._validateCoordinate(coords.y);
+
+        return coords;
     };
+
+    _validateCoordinate(c) {
+        return c > 0 ? c : 0;
+    }
+
+    /**
+     * reserve loop, when browser tab is inactive
+     * @param {Boolean} isVisible
+     */
+    visibilityChangeHandler(isVisible) {
+        if (isVisible) {
+            if (this.passiveCallIntervalId) {
+                clearInterval(this.passiveCallIntervalId);
+                this.passiveCallIntervalId = null;
+                return;
+            }
+        }
+
+        this.passiveCallIntervalId = setInterval(() => {
+            if (!this._loopStopped && !this._loopPaused) {
+                this.update();
+            }
+        }, 16);
+    }
+
+    _subscribeOnce() {
+        this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE, this.visibilityChangeHandler.bind(this), true);
+    }
 }
 
 module.exports = ModulesScenesPixiWrapper;

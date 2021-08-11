@@ -88,9 +88,20 @@ class ModulesAssetsService {
 
             if (assetModel.type === Urso.types.assets.BITMAPFONT)
                 this._processLoadedBitmapFont(assetModel);
+
+            if (assetModel.type === Urso.types.assets.FONT)
+                this._processLoadedFont(assetModel);
         }
 
         delete this.assets[group];
+    }
+
+    _processLoadedFont(source) {
+        const data = Urso.cache.getFile(source.key);
+        const font = new FontFace(source.key, data.data);
+        font.load().then(() => {
+            document.fonts.add(font);
+        });
     }
 
     _processLoadedBitmapFont(assetModel) {
@@ -184,6 +195,9 @@ class ModulesAssetsService {
                 break;
             case Urso.types.assets.BITMAPFONT:
                 model = this.getInstance('Models.BitmapFont', asset)
+                break;
+            case Urso.types.assets.FONT:
+                model = this.getInstance('Models.Font', asset)
                 break;
             case Urso.types.assets.SOUND:
                 model = this.getInstance('Models.Sound', asset)

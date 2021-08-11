@@ -168,7 +168,10 @@ class ModulesObjectsProxy {
             'wordWrap': 'style.wordWrap',
             'wordWrapWidth': 'style.wordWrapWidth',
             'enabled': 'input.enabled',
-            'cacheAsBitmap': 'cacheAsBitmap'
+            'cacheAsBitmap': 'cacheAsBitmap',
+
+            //baseObject functions
+            'toGlobal': 'toGlobal'
         };
     }
 }

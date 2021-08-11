@@ -14,9 +14,8 @@ class ModulesObjectsModelsEmitter extends Urso.Core.Modules.Objects.BaseModel {
         super.setupParams(params);
 
         this.autostart = Urso.helper.recursiveGet('autostart', params, false);
-        // json asset key with emitter config
-        this.cfg = Urso.helper.recursiveGet('cfg', params, false);
-        this.textures = Urso.helper.recursiveGet('textures', params, []);
+        this.cfg = Urso.helper.recursiveGet('cfg', params, false); // json asset key with emitter config
+        this.textures = Urso.helper.recursiveGet('textures', params, []); // array of image asset keys
     }
 
     _addBaseObject() {
@@ -45,6 +44,10 @@ class ModulesObjectsModelsEmitter extends Urso.Core.Modules.Objects.BaseModel {
         this.emitter = new PIXI.particles.Emitter(this._baseObject, textures, cfg.data);
         this.emitter.emit = this.autostart;
         this.emitter.autoUpdate = true;
+    }
+
+    play() {
+        this.emitter.emit = true;
     }
 }
 

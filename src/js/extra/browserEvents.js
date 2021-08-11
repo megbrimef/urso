@@ -12,9 +12,12 @@ class ExtraBrowserEvents {
 
     init() {
         document.addEventListener("visibilitychange", this.visibilitychangeHandler);
+
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('orientationchange', this.resizeHandler);
-
+        document.addEventListener('fullscreenchange', this.resizeHandler);
+        document.addEventListener('webkitfullscreenchange', this.resizeHandler);
+        document.addEventListener('mozfullscreenchange', this.resizeHandler);
     }
 
     visibilitychangeHandler() {

@@ -20,11 +20,11 @@ class PropertyAdapter {
         };
 
         this._parentToChildDependencies = {
-            'width': { children: ['x'] },
-            'height': { children: ['y'] },
+            'width': { children: ['width'] },
+            'height': { children: ['height'] },
             'anchorX': { children: ['x'] },
             'anchorY': { children: ['y'] },
-            'stretchingType': { children: ['x', 'y'] }
+            'stretchingType': { children: ['width', 'height'] }
         };
 
         this._parentTypes = [

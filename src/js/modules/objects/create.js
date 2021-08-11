@@ -171,12 +171,13 @@ class ModulesObjectsCreate {
 
     destroy(object, doNotRefreshStylesFlag) {
         if (object.parent)
-            this.removeChild(object.parent, object, doNotRefreshStylesFlag);
+            this.removeChild(object.parent, object, true);
 
         //children
         if (object.contents)
-            for (const child of object.contents)
-                this.destroy(child, doNotRefreshStylesFlag);
+            //for (const child of object.contents)
+            while (object.contents.length > 0)
+                this.destroy(object.contents[0], true);
 
         object._baseObject.destroy();
         this._removeFromCache(object);
@@ -191,6 +192,9 @@ class ModulesObjectsCreate {
             object._controller = null;
             object.instance = null;
         }
+
+        if (!doNotRefreshStylesFlag)
+            Urso.objects.refreshStyles(); //todo optimization
 
         object.destroyed = true;
     }

@@ -89,7 +89,7 @@ class ModulesTemplateController {
         if (componentsObjects)
             this._parseObjects(componentsObjects, path);
 
-        obj.contents = obj.contents ? Urso.helper.mergeArrays(obj.contents, componentsObjects) : componentsObjects;
+        obj.contents = obj.contents ? Urso.helper.mergeArrays(obj.contents, componentsObjects) : (componentsObjects || []);
 
         //instance to object
         obj._controller = componentInstance;

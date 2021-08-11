@@ -25,12 +25,12 @@ class ModulesLogicSounds {
                     loop: obj.loop || false
                 };
 
-                if (!mappedCfg[obj.s])
-                    mappedCfg[obj.s] = {
+                if (!mappedCfg[obj.soundKey])
+                    mappedCfg[obj.soundKey] = {
                         events: {}
                     };
 
-                mappedCfg[obj.s].events[obj.e] = params;
+                mappedCfg[obj.soundKey].events[obj.event] = params;
             });
         });
 

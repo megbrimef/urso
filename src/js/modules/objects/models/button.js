@@ -29,6 +29,8 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_BUTTON_PRESS, this.name) });
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
+        this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
+        this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
 
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
@@ -131,6 +133,9 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         if (this._isDown)
             return;
 
+        if (this.mouseOverAction)
+            this.mouseOverAction();
+
         this._changeTexture('over');
     }
 
@@ -142,6 +147,9 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         if (this._isDown)
             return;
+
+        if (this.mouseOutAction)
+            this.mouseOutAction();
 
         this._changeTexture('out');
     }

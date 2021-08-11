@@ -55,8 +55,7 @@ class ModulesObserverController {
         const uid = this._getUid();
         callback._ouid = uid;
 
-        if (global)
-            this._observers[name][uid] = callback;
+        this._observers[name][uid] = callback;
     }
 
     _removeLocal(name, callback) {

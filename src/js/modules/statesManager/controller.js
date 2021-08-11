@@ -76,7 +76,7 @@ class ModulesStatesManagerController {
 
         this.emit(Urso.events.MODULES_STATES_MANAGER_STATE_CHANGE, this._currentState);
 
-        log('%c State ' + this._currentState, 'background: #222; color: #bada55')
+        log('%c State ' + this._currentState, 'background: #bada55; color: #000')
 
         let config = this._configStates[this._currentState];
         let classInstance = this.getInstance('Helper').getActionByConfig(config);

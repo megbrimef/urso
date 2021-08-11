@@ -32,6 +32,9 @@ class LibLoader {
             case Urso.types.assets.BITMAPFONT:
                 Urso.cache.addBitmapFont(asset.key, resource);
                 break;
+            case Urso.types.assets.FONT:
+                Urso.cache.addFile(asset.key, resource);
+                break;
             case Urso.types.assets.CONTAINER:
                 Urso.cache.addContainer(asset.key, resource);
                 break;

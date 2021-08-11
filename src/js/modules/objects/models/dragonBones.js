@@ -22,6 +22,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
             animationName: Urso.helper.recursiveGet('animation.animationName', params, false),
             armatureName: Urso.helper.recursiveGet('animation.armatureName', params, false),
             autoplay: Urso.helper.recursiveGet('animation.autoplay', params, false),
+            loop: Urso.helper.recursiveGet('animation.loop', params, false),
             onStart: Urso.helper.recursiveGet('animation.onStart', params, false),
             onLoop: Urso.helper.recursiveGet('animation.onLoop', params, false),
             onComplete: Urso.helper.recursiveGet('animation.onComplete', params, false),
@@ -39,10 +40,10 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
         this._createAnimationObject(assets);
 
-        const { autoplay } = this.animation;
+        const { animationName, autoplay, loop } = this.animation;
 
         if (autoplay)
-            this.play();
+            this.play(animationName, loop);
     };
 
     _getAssets() {
@@ -59,7 +60,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
     }
 
     _createAnimationObject({ skeletonJson, textureJson, textureImage }) {
-        const factory = DragonBones.PixiFactory.factory;
+        const factory = Urso.DragonBones.PixiFactory.factory;
         const { armatureName } = this.animation;
 
         if (!factory._dragonBonesDataMap[skeletonJson.data.name])
@@ -76,17 +77,17 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
     _removeCallbacks(config) {
         if (this._onStart && config.onStart) {
-            this._baseObject.removeListener(DragonBones.EventObject.START, this._onStart);
+            this._baseObject.removeListener(Urso.DragonBones.EventObject.START, this._onStart);
             this._onStart = null;
         }
 
         if (this._onLoop && config.onLoop) {
-            this._baseObject.removeListener(DragonBones.EventObject.LOOP_COMPLETE, this._onLoop);
+            this._baseObject.removeListener(Urso.DragonBones.EventObject.LOOP_COMPLETE, this._onLoop);
             this._onLoop = null;
         }
 
         if (this._onComplete && config.onComplete) {
-            this._baseObject.removeListener(DragonBones.EventObject.COMPLETE, this._onComplete);
+            this._baseObject.removeListener(Urso.DragonBones.EventObject.COMPLETE, this._onComplete);
             this._onComplete = null;
         }
 
@@ -96,24 +97,24 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
     };
 
     _removeOnCompleteOnce() {
-        this._baseObject.removeListener(DragonBones.EventObject.COMPLETE, this._onCompleteOnce);
+        this._baseObject.removeListener(Urso.DragonBones.EventObject.COMPLETE, this._onCompleteOnce);
         this._onCompleteOnce = null;
     }
 
     _setCallbacks() {
         if (this.animation.onStart) {
             this._onStart = this.animation.onStart.bind(this);
-            this._baseObject.addListener(DragonBones.EventObject.START, this._onStart);
+            this._baseObject.addListener(Urso.DragonBones.EventObject.START, this._onStart);
         }
 
         if (this.animation.onLoop) {
             this._onLoop = this.animation.onLoop.bind(this);
-            this._baseObject.addListener(DragonBones.EventObject.LOOP_COMPLETE, this._onLoop);
+            this._baseObject.addListener(Urso.DragonBones.EventObject.LOOP_COMPLETE, this._onLoop);
         }
 
         if (this.animation.onComplete) {
             this._onComplete = this.animation.onComplete.bind(this);
-            this._baseObject.addListener(DragonBones.EventObject.COMPLETE, this._onComplete);
+            this._baseObject.addListener(Urso.DragonBones.EventObject.COMPLETE, this._onComplete);
         }
 
         if (this.animation.onCompleteOnce) {
@@ -126,14 +127,14 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
                 onCompleteOnce();
             };
 
-            this._baseObject.once(DragonBones.EventObject.COMPLETE, this._onCompleteOnce);
+            this._baseObject.once(Urso.DragonBones.EventObject.COMPLETE, this._onCompleteOnce);
         }
     }
     /**
-     * 
-     * @param {*} config 
+     *
+     * @param {*} config
      * @param {boolean} [noObjectCreate] dont use this flag out of core
-     * 
+     *
      * config keys:
      *      animationName
      *      armatureName

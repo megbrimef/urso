@@ -18,6 +18,7 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this.name) });
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
+        this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
     }
 
     enable() {
@@ -50,15 +51,25 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
         this._baseObject
             .on('pointerup', this._onPressUp.bind(this))
             .on('pointerover', this._onOver.bind(this))
-            .on('pointerout', this._onOut.bind(this));
+            .on('pointerout', this._onOut.bind(this))
+            .on('touchmove', this._onTouchmove.bind(this));
     };
+
+    _onTouchmove(event) {
+        const position = this._getEventLocalPosition(event);
+
+        if (this.onTouchMoveCallback)
+            this.onTouchMoveCallback(position);
+    }
 
     _onPressUp(event) {
         if (this._isDisabled)
             return false;
 
-        if (this.action)
-            this.action(event);
+        if (this.action) {
+            const position = this._getEventLocalPosition(event);
+            this.action(position);
+        }
     }
 
     _onOver() {
@@ -77,6 +88,15 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
             this.onOutCallback();
     }
 
+    _getEventLocalPosition(event) {
+        const world = Urso.objects.getWorld();
+        const worldScale = world._baseObject.scale;
+
+        const x = event.data.global.x / worldScale.x;
+        const y = event.data.global.y / worldScale.y;
+
+        return { x, y };
+    }
 }
 
 module.exports = ModulesObjectsModelsHitArea;
