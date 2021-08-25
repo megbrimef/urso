@@ -1,5 +1,8 @@
 const path = require('path');
+const packageJson = require('./package.json');
 const root = process.cwd();
+
+const version = packageJson.version;
 
 module.exports = () => {
   const config = {
@@ -13,6 +16,14 @@ module.exports = () => {
     },
     module: {
       rules: [
+        {
+          test: /app\.js$/,
+          loader: 'string-replace-loader',
+          options: {
+            search: 'APP_VERSION',
+            replace: version,
+          }
+        },
         {
           test: /\.css$/,
           use: ['style-loader', 'css-loader'],

@@ -187,6 +187,9 @@ class ModulesAssetsService {
             case Urso.types.assets.ATLAS:
                 model = this.getInstance('Models.Atlas', asset)
                 break;
+            case Urso.types.assets.AUDIOSPRITE:
+                model = this.getInstance('Models.Audiosprite', asset)
+                break;
             case Urso.types.assets.JSON:
                 model = this.getInstance('Models.Json', asset)
                 break;

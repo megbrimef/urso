@@ -1,4 +1,5 @@
 Urso.Core.Modules.Assets.Models = {
+    Audiosprite: require('./audiosprite.js'),
     Atlas: require('./atlas.js'),
     BitmapFont: require('./bitmapFont.js'),
     Container: require('./container.js'),

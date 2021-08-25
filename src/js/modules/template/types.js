@@ -10,7 +10,8 @@ class ModulesTemplateTypes {
                 BITMAPFONT: 6,
                 SOUND: 7,
                 DRAGONBONES: 8,
-                FONT: 9
+                FONT: 9,
+                AUDIOSPRITE: 10
             },
 
             objects: {

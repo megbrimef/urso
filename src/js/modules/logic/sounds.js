@@ -22,7 +22,8 @@ class ModulesLogicSounds {
                 const params = {
                     action: obj.action || 'play',
                     relaunch: obj.relaunch || false,
-                    loop: obj.loop || false
+                    loop: obj.loop || false,
+                    volume: obj.volume || 1
                 };
 
                 if (!mappedCfg[obj.soundKey])
@@ -37,47 +38,53 @@ class ModulesLogicSounds {
         return mappedCfg;
     };
 
-    _getUploadedSounds(allSounds) {
-        const newSounds = {};
+    _getUploadedSounds(audiospriteData) {
+        const newAudiospriteData = {};
 
-        for (const key in allSounds) {
-            const { data, extension, name, url } = allSounds[key];
-
-            if (this._loadedSounds[key] && this._loadedSounds[key] !== url)
-                Urso.logger.error('Duplicate sound key detected!')
-
+        for (const key in audiospriteData) {
             if (!this._loadedSounds[key]) {
-                this._loadedSounds[key] = url;
-                newSounds[key] = { data, extension, name };
+                this._loadedSounds[key] = audiospriteData[key];
+                newAudiospriteData[key] = audiospriteData[key];
             }
         }
 
-        return newSounds;
+        return newAudiospriteData;
     };
 
-    _groupLoadedHandler() {
-        const allSounds = Urso.cache.assetsList.sound;
 
-        if (Object.keys(allSounds).length === 0)
-            return false;
+    _getLoadedAudiospritesData() {
+        const allAudiosprites = Urso.cache.assetsList.sound;
+        const audiospriteData = {};
 
-        const uploadedSounds = this._getUploadedSounds(allSounds);
+        for (let [key, audiosprite] of Object.entries(allAudiosprites)) {
+            const audiospriteKey = key.replace('_audiospriteSound', '');
+            const jsonKey = audiospriteKey + '_audiospriteJson';
+            const json = Urso.cache.assetsList.json[jsonKey];
 
-        if (Object.keys(uploadedSounds).length === 0)
-            return false;
+            if (!json)
+                continue;
 
-        const mappedCfg = this._parseConfig();
-        const mergedSoundsCfg = {};
-
-        for (const soundKey in uploadedSounds) {
-            const uplodedSound = uploadedSounds[soundKey];
-            const soundCfg = mappedCfg[soundKey];
-
-            if (uplodedSound && soundCfg)
-                mergedSoundsCfg[soundKey] = { ...uplodedSound, ...soundCfg };
+            audiospriteData[audiospriteKey] = { json: json.data, audiosprite: audiosprite.data };
         }
 
-        this.emit(Urso.events.MODULES_SOUND_MANAGER_UPDATE_CFG, mergedSoundsCfg);
+        return audiospriteData;
+    }
+
+    _groupLoadedHandler() {
+        const audiospriteData = this._getLoadedAudiospritesData();
+
+        if (Object.keys(audiospriteData).length === 0)
+            return false;
+
+        const uploadedAudiospriteData = this._getUploadedSounds(audiospriteData);
+
+        if (Object.keys(uploadedAudiospriteData).length === 0)
+            return false;
+
+        const eventsCfg = this._parseConfig();
+        const soundData = { sounds: { ...uploadedAudiospriteData }, eventsCfg };
+
+        this.emit(Urso.events.MODULES_SOUND_MANAGER_UPDATE_CFG, soundData);
         return true;
     };
 

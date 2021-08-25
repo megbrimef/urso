@@ -1,143 +1,199 @@
 class SoundSprite {
-    constructor({ name, url, format }) {
-        this._player = this._makePlayer(url, format);
-        this._name = name;
+    constructor({ name, sprite, audiosprite }) {
+        this._player = null;
+        this._totalVolume = 0;
+        this._makePlayer(sprite, audiosprite);
 
-        this._id = null;
-        this._loop = false;
-        this._volume = 1;
-        this._relaunch = false;
-        this._events = [];
+        this._name = name;
+        this._sprite = sprite;
+
+        this._soundsState = this._initSoundsState();
+
+        this._eventsCfg = {};
         this._eventsQueue = [];
         this._isAudioUnlocked = false;
 
         this._reactToEvent = this._reactToEvent.bind(this);
-
-        this._subscribePlayerEvents();
     };
 
-    _makePlayer(url, extension) {
-        return new Howl({
-            src: [url],
-            format: extension,
-            preload: true
+
+    _initSoundsState() {
+        const soundsNames = Object.keys(this._sprite);
+        const soundsStateObj = {};
+
+        soundsNames.forEach(soundName => {
+            soundsStateObj[soundName] = {
+                id: null,
+                loop: false,
+                volume: 1,
+                relaunch: false
+            }
         });
+
+        return soundsStateObj;
+    }
+
+    _makePlayer(sprite, audiosprite) {
+        var reader = new FileReader();
+        reader.readAsDataURL(audiosprite);
+        reader.onloadend = () => {
+            var base64data = reader.result;
+            this._player = new Howl({
+                src: base64data,
+                sprite
+            });
+            this._subscribePlayerEvents();
+        }
     };
 
     _subscribePlayerEvents() {
         this._player.on('unlock', () => {
             this._isAudioUnlocked = true;
-            this._onUnlock(this._name);
+            this._onUnlock();
         });
 
         this._player.on('end', id => {
-            if (id === this._id && !this._loop)
-                this._id = null;
+            const soundState = this._getSoundStateById(id);
+
+            if (!soundState.loop)
+                soundState.id = null;
         });
     };
+
+    _getSoundStateById(id) {
+        for (const [name, state] of Object.entries(this._soundsState)) {
+            if (state.id === id) {
+                return {
+                    id: { ...state, name }
+                }
+            }
+        }
+    }
 
     canPlayCheck() {
         return this._isAudioUnlocked;
     };
 
-    play({ loop = false, volume = this._volume, relaunch = false }) {
-        if (!this.canPlayCheck() || (this._id && !relaunch))
+    play({ loop = false, volume = this._volume, relaunch = false, soundKey }) {
+        if (!this.canPlayCheck() || (this._soundsState[soundKey].id !== null && !relaunch))
             return false;
 
-        this.stop();
+        this.stop({ soundKey });
 
-        const soundName = this._player._sprite[name] ? name : '__default';
-        this._id = this._player.play(soundName);
+        this._soundsState[soundKey].id = this._player.play(soundKey);
 
-        this.setRelaunch(relaunch);
-        this.setLoop(loop);
-        this.setVolume(volume);
+        this.setRelaunch(soundKey, relaunch);
+        this.setLoop(soundKey, loop);
+        this.setVolume(soundKey, volume);
 
         return true;
     };
 
-    setLoop(loop = false) {
-        this._loop = loop;
-        this._player.loop(loop, this._id);
+    setLoop(soundKey, loop = false) {
+        this._soundsState[soundKey].loop = loop;
+        this._player.loop(loop, this._soundsState[soundKey].id);
     };
 
-    setVolume(volume = 1) {
-        this._volume = volume;
+    setVolume(soundKey, volume = 1) {
+        this._soundsState[soundKey].volume = volume;
+
         this._player._volume = volume;
-        this._player.volume(volume, this._id);
+        this._player.volume(volume, this._soundsState[soundKey].id);
     };
 
-    setRelaunch(needRelaunch = false) {
-        this._relaunch = needRelaunch;
+    setAllVolume(volume) {
+        this._totalVolume = volume;
+
+        if (this.canPlayCheck()) {
+            this._updateVolume();
+        }
+    }
+
+    _updateVolume() {
+        const keys = Object.keys(this._soundsState);
+        keys.forEach(key => this.setVolume(key, this._totalVolume));
+    }
+
+    setRelaunch(soundKey, needRelaunch = false) {
+        this._soundsState[soundKey].relaunch = needRelaunch;
     };
 
-    stop() {
-        if (!this._id)
+    stop({ soundKey }) {
+        if (!this._soundsState[soundKey].id)
             return;
 
-        this._player.stop(this._id);
-        this._id = null;
+        this._player.stop(this._soundsState[soundKey].id);
+        this._soundsState[soundKey].id = null;
     };
 
-    pause() {
-        if (this.canPlayCheck() || this._player.playing(this._id))
-            this._player.pause(this._id);
+    pause({ soundKey }) {
+        if (this.canPlayCheck() || this._player.playing(this._soundsState[soundKey].id))
+            this._player.pause(this._soundsState[soundKey].id);
     };
 
-    resume() {
-        if (this.canPlayCheck() && !this._player.playing(this._id))
-            this._player.play(this._id);
+    resume({ soundKey }) {
+        if (this.canPlayCheck() && !this._player.playing(this._soundsState[soundKey].id))
+            this._player.play(this._soundsState[soundKey].id);
     };
 
-    updateEvents(events) {
+    updateEvents(eventsCfg) {
         this._customUnsubscribe();
-
-        this._events = events;
-
+        this._saveEvents(eventsCfg);
         this._customSubscribe();
     };
 
-    _setEventCallback(event) {
+    _saveEvents(eventsCfg) {
+        this._eventsCfg = eventsCfg;
+    }
+
+    _setEventCallback(soundKey, event) {
         return function () {
-            const params = this._events[event];
-            this._reactToEvent(params);
+            const params = this._eventsCfg[soundKey].events[event];
+
+            this._reactToEvent(soundKey, params);
         };
     };
 
-    _onUnlock(){
+    _onUnlock() {
+        this._updateVolume();
         this._runEventsFromQueue();
     };
 
-    _runEventsFromQueue(){
-        this._eventsQueue.forEach(this._reactToEvent);
+    _runEventsFromQueue() {
+        this._eventsQueue.forEach(event => this._reactToEvent(event.soundKey, event));
         this._eventsQueue = [];
     };
 
-    _addEventToQueue(data){
+    _addEventToQueue(data) {
         this._eventsQueue.push(data);
     };
 
-    _reactToEvent({ action, loop, relaunch }) {
+    _reactToEvent(soundKey, { action, loop, relaunch, volume = 0 }) {
+        volume *= this._totalVolume;
         const self = this;
-        const params = { loop, relaunch };
+        const params = { loop, relaunch, volume, soundKey };
 
         if (!self[action])
             Urso.logger.error(`Sound action '${action}' not found!`);
 
-        if(!this._isAudioUnlocked)
-            this._addEventToQueue({ action, loop, relaunch });
+        if (!this._isAudioUnlocked)
+            this._addEventToQueue({ ...params, action });
 
         self[action](params);
     };
 
     _customSubscribe() {
-        for (const event in this._events) {
-            this.addListener(event, this._setEventCallback(event).bind(this), true);
+        for (const soundKey in this._eventsCfg) {
+            const { events = {} } = this._eventsCfg[soundKey];
+
+            for (const event in events) {
+                this.addListener(event, this._setEventCallback(soundKey, event).bind(this), true);
+            }
         }
     };
 
     _customUnsubscribe() {
-        for (const event in this._events) {
+        for (const event in this._eventsCfg) {
             this.removeListener(event, this._setEventCallback(event).bind(this), true);
         }
     };

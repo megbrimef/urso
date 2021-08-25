@@ -1,6 +1,6 @@
 class App {
     constructor() {
-        this.version = '0.1.68';
+        this.version = 'APP_VERSION';
 
         this.setup = this.setup.bind(this);
     }

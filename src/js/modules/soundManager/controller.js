@@ -1,5 +1,8 @@
 class SoundManagerController {
     constructor() {
+        this._systemVolume = 1;
+        this._globalVolume = 0;
+
         this._howler = null;
         this._codecsToCheck = ['ogg', 'm4a', 'mp3', 'wav'];
         this._selectedCodec = null;
@@ -20,33 +23,25 @@ class SoundManagerController {
         }
     };
 
-    _checkCodec(codec) {
-        const checkResult = Howler.Howler.codecs(codec);
+    _createSounds(soundData) {
+        const { eventsCfg, sounds } = soundData;
 
-        if (!checkResult)
-            Urso.logger.error(`Codec ${codec} is not supperted!`);
-
-        return checkResult;
-    };
-
-    _createSounds(sounds) {
         for (const soundKey in sounds) {
-            const { data, extension, events = [] } = sounds[soundKey];
 
-            if (!this._sounds[soundKey] && this._checkCodec(extension)) {
-                const blob = new Blob([data], { type: `audio/${extension}` });
-                const url = URL.createObjectURL(blob);
+            if (this._sounds[soundKey])
+                continue;
 
-                const soundSprite = this.getInstance('SoundSprite', {
-                    name: soundKey,
-                    url: url,
-                    format: extension
-                });
+            const { audiosprite, json } = sounds[soundKey];
 
-                this._sounds[soundKey] = soundSprite;
+            const soundSptite = this.getInstance('SoundSprite', {
+                sprite: json.sprite,
+                name: soundKey,
+                audiosprite
+            });
 
-                this._sounds[soundKey].updateEvents(events);
-            }
+            this._sounds[soundKey] = soundSptite;
+
+            soundSptite.updateEvents(eventsCfg);
         }
     };
 
@@ -79,16 +74,25 @@ class SoundManagerController {
      * @param {Number} volume (0-1)
      */
     _globalVolumeChange(volume) {
-        volume = Urso.math.intMakeBetween(volume, 0, 1);
+        this._globalVolume = Urso.math.intMakeBetween(volume, 0, 1);
+        this._updateSoundVolume();
+    }
 
+    _visibilityChange(state) {
+        this._systemVolume = ~~(state === 'visible');
+        this._updateSoundVolume();
+    }
+    _updateSoundVolume() {
+        const totalVolume = this._globalVolume * this._systemVolume;
         for (const key in this._sounds)
-            this._sounds[key].setVolume(volume);
+            this._sounds[key].setAllVolume(totalVolume);
     }
 
     _subscribe() {
         this.addListener(Urso.events.MODULES_SOUND_MANAGER_UPDATE_CFG, this._updateSoundsCfgHandler, true);
         this.addListener(Urso.events.MODULES_LOGIC_SOUNDS_DO, this._doHandler, true);
         this.addListener(Urso.events.MODULES_SOUND_MANAGER_SET_GLOBAL_VOLUME, this._globalVolumeChange.bind(this), true);
+        this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE, this._visibilityChange.bind(this), true);
     };
 };
 
