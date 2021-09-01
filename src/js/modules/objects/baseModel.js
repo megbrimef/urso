@@ -49,6 +49,8 @@ class ModulesObjectsBaseModel {
         Urso.objects.destroy(this, doNotRefreshStylesFlag);
     }
 
+    _customDestroy() { }
+
     addChild(childObject, doNotRefreshStylesFlag) {
         Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
     }
@@ -129,6 +131,31 @@ class ModulesObjectsBaseModel {
 
         return this;
     };
+
+    toGlobal() {
+        const world = Urso.objects.getWorld();
+        const worldScale = world._baseObject.scale;
+        const worldPoint = { x: world.x, y: world.y };
+        const globalPoint = this._baseObject.toGlobal(worldPoint);
+
+        const x = Math.floor(globalPoint.x / worldScale.x);
+        const y = Math.floor(globalPoint.y / worldScale.y);
+
+        return { x, y };
+    }
+
+    toLocal(from) {
+        const world = Urso.objects.getWorld();
+        const worldPoint = { x: world.x, y: world.y };
+        const parent = this.parent ? this.parent._baseObject : world._baseObject;
+        const fromObj = from ? from._baseObject : parent;
+        const localPoint = this._baseObject.toLocal(worldPoint, fromObj);
+
+        const x = -~~localPoint.x;
+        const y = -~~localPoint.y;
+
+        return { x, y };
+    }
 }
 
 module.exports = ModulesObjectsBaseModel;

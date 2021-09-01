@@ -1,6 +1,11 @@
+const POOL_NAME = 'core.ObjectsModelsDragonBones.pool';
+
 class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseModel {
     constructor(params) {
         super(params);
+
+        this._pool = this._checkPool();
+        this._poolMember = null;
         this.type = Urso.types.objects.DRAGONBONES;
 
         this._onStart = null;
@@ -59,20 +64,33 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
         return { skeletonJson, textureJson, textureImage };
     }
 
-    _createAnimationObject({ skeletonJson, textureJson, textureImage }) {
-        const factory = Urso.DragonBones.PixiFactory.factory;
+    _createAnimationObject(assets) {
         const { armatureName } = this.animation;
+        this._poolMember = this._pool.getElement(armatureName, assets);
+        this._baseObject = this._poolMember.data;
+        this._setCommonFunctions.bind(this)();
+        this._setCallbacks();
+    }
+
+    _constructorFunction(armatureName, assets) {
+        const { skeletonJson, textureJson, textureImage } = assets;
+
+        const factory = Urso.DragonBones.PixiFactory.factory;
 
         if (!factory._dragonBonesDataMap[skeletonJson.data.name])
             factory.parseDragonBonesData(skeletonJson.data);
 
         factory.parseTextureAtlasData(textureJson.data, textureImage.texture);
 
-        this._baseObject = factory.buildArmatureDisplay(armatureName);
+        return factory.buildArmatureDisplay(armatureName);
+    }
 
-        this._setCommonFunctions.bind(this)();
-
-        this._setCallbacks();
+    _resetAnimationFunction(object) {  //this._baseObject
+        object.removeAllListeners(Urso.DragonBones.EventObject.START);
+        object.removeAllListeners(Urso.DragonBones.EventObject.LOOP_COMPLETE);
+        object.removeAllListeners(Urso.DragonBones.EventObject.COMPLETE);
+        object.filters = [];
+        return object;
     }
 
     _removeCallbacks(config) {
@@ -130,6 +148,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
             this._baseObject.once(Urso.DragonBones.EventObject.COMPLETE, this._onCompleteOnce);
         }
     }
+
     /**
      *
      * @param {*} config
@@ -169,7 +188,7 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
         if (this._baseObject) {
             parent = this._baseObject.parent;
-            this._baseObject.destroy();
+            this._customDestroy();
         }
 
         const assets = this._getAssets();
@@ -204,6 +223,27 @@ class ModulesObjectsModelsDragonBones extends Urso.Core.Modules.Objects.BaseMode
 
     _setCommonFunctions() {
         this.stop = this._baseObject.animation.stop.bind(this._baseObject.animation);
+    }
+
+    _customDestroy() {
+        this._pool.putElement(this._poolMember);
+
+        if (this._baseObject.parent)
+            this._baseObject.parent.removeChild(this._baseObject);
+
+        this._baseObject = null;
+    }
+
+    _checkPool() {
+        const pool = Urso.localData.get(POOL_NAME);
+
+        if (pool)
+            return pool;
+
+        const newPool = new Urso.Game.Lib.ObjectPool(this._constructorFunction.bind(this), this._resetAnimationFunction.bind(this));
+        Urso.localData.set(POOL_NAME, newPool);
+
+        return newPool;
     }
 }
 

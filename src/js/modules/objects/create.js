@@ -179,7 +179,8 @@ class ModulesObjectsCreate {
             while (object.contents.length > 0)
                 this.destroy(object.contents[0], true);
 
-        object._baseObject.destroy();
+        object._customDestroy();
+        object._baseObject && object._baseObject.destroy();
         this._removeFromCache(object);
         this.getInstance('Styles').removeFromCache(object);
 
