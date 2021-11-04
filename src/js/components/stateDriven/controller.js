@@ -1,7 +1,7 @@
 ComponentsBaseController = require('./../base/controller.js');
 
 class ComponentsStateDrivenController extends ComponentsBaseController {
-
+//TODO subscribe to N actions
     constructor(options) {
         super(options);
         //todo set guard

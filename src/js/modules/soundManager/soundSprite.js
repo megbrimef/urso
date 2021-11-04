@@ -47,10 +47,10 @@ class SoundSprite {
     };
 
     _subscribePlayerEvents() {
-        this._player.on('unlock', () => {
+        this._player.on('unlock', () => setTimeout(() => {
             this._isAudioUnlocked = true;
             this._onUnlock();
-        });
+        }, 1000));
 
         this._player.on('end', id => {
             const soundState = this._getSoundStateById(id);
@@ -97,12 +97,12 @@ class SoundSprite {
     setVolume(soundKey, volume = 1) {
         this._soundsState[soundKey].volume = volume;
 
-        this._player._volume = volume;
         this._player.volume(volume, this._soundsState[soundKey].id);
     };
 
     setAllVolume(volume) {
         this._totalVolume = volume;
+        this._player._volume = volume;
 
         if (this.canPlayCheck()) {
             this._updateVolume();
@@ -111,6 +111,7 @@ class SoundSprite {
 
     _updateVolume() {
         const keys = Object.keys(this._soundsState);
+        this._player._volume = this._totalVolume;
         keys.forEach(key => this.setVolume(key, this._totalVolume));
     }
 
@@ -155,8 +156,8 @@ class SoundSprite {
     };
 
     _onUnlock() {
-        this._updateVolume();
         this._runEventsFromQueue();
+        this._updateVolume();
     };
 
     _runEventsFromQueue() {

@@ -19,8 +19,8 @@ class ComponentsSoundInitialPopupController extends ComponentsBaseController {
         button._baseObject.tint = (pointerOver) ? 0xd4be69 : 0xFFFFFF;
     }
 
-    _buttonPressHandler(btnName) {
-        switch (btnName) {
+    _buttonPressHandler({ name }) {
+        switch (name) {
             case 'soundInitialPopupButtonYesHit':
                 this.emit(Urso.events.MODULES_SOUND_MANAGER_SET_GLOBAL_VOLUME, 1);
                 break;

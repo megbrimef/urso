@@ -1,6 +1,6 @@
 class ModulesLogicButtons {
-    constructor(){
-        this.DEFAULT_STATE_NAME  = 'default'; //MOVE TO CFG
+    constructor() {
+        this.DEFAULT_STATE_NAME = 'default'; //MOVE TO CFG
         this._buttonsFactors = {};
         this._cfg = null;
 
@@ -10,13 +10,13 @@ class ModulesLogicButtons {
             console.error('Modules.Logic.Buttons error: invalid Modules.Logic.Config.Buttons');
     }
 
-    _updateCfg(){
+    _updateCfg() {
         this._cfg = this.getInstance('Config.Buttons');
     };
-    
-    _getButtonState(button, state){
+
+    _getButtonState(button, state) {
         const buttonStates = this._cfg.buttonStates;
-        
+
         if (!buttonStates[button] || !buttonStates[button][state])
             return false;
 
@@ -75,10 +75,10 @@ class ModulesLogicButtons {
         this._changeButtonState(button, state);
     };
 
-    beforeUpdateHandler () {};
-    afterUpdateHandler () {};
+    beforeUpdateHandler() { };
+    afterUpdateHandler() { };
 
-    _changeButtonState (button, params) {
+    _changeButtonState(button, params) {
         console.log(100, button, params)
         params.disableFrame = params.frames.disableFrame;
 
@@ -91,7 +91,7 @@ class ModulesLogicButtons {
         this.afterUpdateHandler(params);
     };
 
-    _subscribeButtonToEvents(buttonKey, buttonSubscribeCfg){
+    _subscribeButtonToEvents(buttonKey, buttonSubscribeCfg) {
         for (let i = 0; i < buttonSubscribeCfg.length; i++) {
             const { event } = buttonSubscribeCfg[i];
             this.addListener(event, () => this._eventHandler(buttonKey, buttonSubscribeCfg[i]), true);
@@ -99,19 +99,19 @@ class ModulesLogicButtons {
     };
 
     _subscribeButtonsToEvents() {
-        for (let k in this._cfg.eventsCfg){
+        for (let k in this._cfg.eventsCfg) {
             this._subscribeButtonToEvents(k, this._cfg.eventsCfg[k])
         }
     };
 
-    _pressHandler(btnName){
-        const state = this._getButtonState(btnName, this.DEFAULT_STATE_NAME);
+    _pressHandler(btn = {}) {
+        const state = this._getButtonState(btn.name, this.DEFAULT_STATE_NAME);
 
-        if(state && state.callback)
+        if (state && state.callback)
             state.callback();
     };
 
-    _subscribe(){
+    _subscribe() {
         this._subscribeButtonsToEvents();
         this.addListener(Urso.events.MODULES_OBJECTS_BUTTON_PRESS, this._pressHandler.bind(this), true);
     };

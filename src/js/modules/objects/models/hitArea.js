@@ -15,7 +15,9 @@ class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
         super.setupParams(params);
 
         //must have x,y, width, height
-        this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this.name) });
+        this.action = Urso.helper.recursiveGet(
+            'action', params, (position) => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, { position, name: this.name, class: this.class }) }
+        );
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);

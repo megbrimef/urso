@@ -6,6 +6,10 @@ class ModulesInstancesController {
         this.getInstance = this.getInstance.bind(this);
         this.getPath = this.getPath.bind(this);
         this._setComonFunctions = this._setComonFunctions.bind(this);
+
+        this.getModes = this.getModes.bind(this);
+        this.addMode = this.addMode.bind(this);
+        this.removeMode = this.removeMode.bind(this);
     }
 
     getPath(path, noModes, modeName) {
@@ -25,16 +29,17 @@ class ModulesInstancesController {
             return false;
 
         this._modes.push(mode);
+
         return true;
     }
 
     removeMode(mode) {
-        let index = modes.indexOf(mode);
+        let index = this._modes.indexOf(mode);
 
         if (index === -1)
             return false;
 
-        modes.splice(index, 1);
+        this._modes.splice(index, 1);
         return true;
     }
 
@@ -141,11 +146,8 @@ class ModulesInstancesController {
         if (cacheKey in this._cache)
             return this._cache[cacheKey] ? params.callback(this._cache[cacheKey]) : false;
 
-        let pathArr = params.path.split('.');
-        let arrayOfPatches = [];
-
-        //TODO modes
-        let classObject = Urso.helper.recursiveGet(params.path, Urso.Game);
+        //no class in cache - we will find class by path
+        let classObject = this._getClassByPath(params.path);
 
         if (!classObject)
             return false;
@@ -162,6 +164,54 @@ class ModulesInstancesController {
         this._cache[cacheKey] = classObject;
 
         return params.callback(this._cache[cacheKey]);
+    }
+
+    _getClassByPath(path) {
+        let pathArr = path.split('.');
+        let entitiesArray = Urso.helper.mergeArrays(['Urso', 'Game'], pathArr);
+        return this._checkPathExist(entitiesArray);
+    }
+
+    /**
+     * check if object exist
+     * @param {Object} entitiesArray like ['Urso', 'Game', 'Lib', 'Helper']
+     * @returns {mixed}
+     */
+    _checkPathExist(entitiesArray) {
+        let currentTestObject = window;
+        let testMode;
+
+        for (let entitiesIndex = 0; entitiesIndex < entitiesArray.length; entitiesIndex++) {
+            if (this._modes && entitiesIndex === entitiesArray.length - 1)
+                testMode = this._checkPathWithModes(currentTestObject, entitiesArray, entitiesIndex);
+
+            if (testMode)
+                currentTestObject = testMode;
+            else if (currentTestObject[entitiesArray[entitiesIndex]])
+                currentTestObject = currentTestObject[entitiesArray[entitiesIndex]];
+            else
+                return false;
+        }
+
+        return currentTestObject;
+    }
+
+    _checkPathWithModes(currentTestObject, entitiesArray, entitiesIndex) {
+        for (let mode of this._modes) {
+            const capMode = Urso.helper.capitaliseFirstLetter(mode);
+
+            if (currentTestObject[capMode]) {
+                const checkResult = this._checkPathWithModes(currentTestObject[capMode], entitiesArray, entitiesIndex);
+
+                if (checkResult)
+                    return checkResult;
+            }
+        }
+
+        if (currentTestObject[entitiesArray[entitiesIndex]])
+            return currentTestObject[entitiesArray[entitiesIndex]];
+
+        return false;
     }
 }
 

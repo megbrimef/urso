@@ -18,8 +18,12 @@ class ModulesStatesManagerSequence extends All {
     _checkFinish() {
         if (!this._terminating)
             for (let action of this._actions)
-                if (!action.finished)
-                    return action.run(this._actionSuccessHandler);
+                if (!action.finished) {
+                    if (action.guard())
+                        return action.run(this._actionSuccessHandler);
+                    else
+                        action.finished = true;
+                }
 
         this._onFinish();
 

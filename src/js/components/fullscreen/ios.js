@@ -38,17 +38,10 @@ class ComponentsFullscreenIos {
         return;
       }
     });
-
-    window.addEventListener('touchend', (e) => {
-      setTimeout(() => {
-        this._updateResize();
-        this._scrollY = 0;
-      }, 50);
-    });
   }
 
   get _isFullscreen() {
-    const minFactor = 0.513;
+    const minFactor = 0.51;
     const deviceFactor = screen.width / screen.height;
     const factor = this._isPortrait ?
       innerWidth / innerHeight :
@@ -91,19 +84,16 @@ class ComponentsFullscreenIos {
   }
 
   set isVisible(needShowDiv) {
-    this._div.style.visibility = needShowDiv ? 'visible' : 'hidden';
-  }
-
-  set _scrollY(toY) {
-    clearTimeout(this._scrollTimeout);
+    this._div.style.zIndex = needShowDiv ? 1 : -1;
+    clearTimeout(this._scrollTimeout)
     this._scrollTimeout = setTimeout(() => {
-      scrollTo(0, toY);
-    }, 20);
+      if(needShowDiv)
+        window.scrollTo(0,0);
+    }, 200);
   }
 
   _resizeHandler() {
     this._updateResize();
-    this._scrollY = 0;
   }
 
   _fullscreenSwitchHandler(needGoFullscreen = null) {

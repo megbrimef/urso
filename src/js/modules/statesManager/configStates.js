@@ -16,7 +16,22 @@ class ModulesStatesManagerConfigStates {
 
             WINLINES_ANIMATE_ALL: { action: 'showWinlinesAnimationAll' },
 
-            PICK_GAME: { action: 'showPickGame' },
+            PICK_GAME1: {
+                sequence: [
+                    { action: 'someAction' },
+                    { action: 'showPickGame' },        //showPickGame --> setGuardAction, setGuardState(PICK_GAME1)
+                    { action: 'showBIGWin' }
+                ],
+                nextState: ["PICK_GAME2", "PICK_GAME1", "IDLE"]
+            },
+
+            PICK_GAME2: {
+                sequence: [
+                    { action: 'showWheel' },          //showWheel --> setGuardAction, setGuardState(PICK_GAME2)
+                    { action: 'showBIGWin' }
+                ],
+                nextState: ["PICK_GAME1", "IDLE"]
+            },
 
             WINLINES_ANIMATE_BY_ONE: { action: 'showWinlinesAnimation' },
 

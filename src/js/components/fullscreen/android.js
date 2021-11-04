@@ -91,6 +91,8 @@ class ComponentsFullscreenAndroid {
     window.addEventListener('touchend', (e) => {
       if (!this.isFullscreen)
         this._requestFullscreen();
+
+      this._updateResize();
     });
   }
 
