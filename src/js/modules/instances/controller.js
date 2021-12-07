@@ -4,7 +4,7 @@ class ModulesInstancesController {
         this._cache = {};
 
         this.getInstance = this.getInstance.bind(this);
-        this.getPath = this.getPath.bind(this);
+        this.getByPath = this.getByPath.bind(this);
         this._setComonFunctions = this._setComonFunctions.bind(this);
 
         this.getModes = this.getModes.bind(this);
@@ -12,12 +12,12 @@ class ModulesInstancesController {
         this.removeMode = this.removeMode.bind(this);
     }
 
-    getPath(path, noModes, modeName) {
+    getByPath(path, noModes, modeName) {
         let callback = (a) => {
             return a;
         };
 
-        return this._findClass({ path: path, callback: callback, noModes: noModes, modeName: modeName });
+        return this._findClass({ path, callback, noModes, modeName });
     }
 
     getModes() {
@@ -64,7 +64,7 @@ class ModulesInstancesController {
             return instance;
         };
 
-        return this._findClass({ path: path, callback: callback, noModes: noModes, modeName: modeName });
+        return this._findClass({ path, callback, noModes, modeName });
     }
 
     _setComonFunctions(classObject, path) {
@@ -147,7 +147,7 @@ class ModulesInstancesController {
             return this._cache[cacheKey] ? params.callback(this._cache[cacheKey]) : false;
 
         //no class in cache - we will find class by path
-        let classObject = this._getClassByPath(params.path);
+        let classObject = this._getClassByPath(params.path, params.noModes);
 
         if (!classObject)
             return false;
@@ -166,10 +166,10 @@ class ModulesInstancesController {
         return params.callback(this._cache[cacheKey]);
     }
 
-    _getClassByPath(path) {
+    _getClassByPath(path, noModes) {
         let pathArr = path.split('.');
         let entitiesArray = Urso.helper.mergeArrays(['Urso', 'Game'], pathArr);
-        return this._checkPathExist(entitiesArray);
+        return this._checkPathExist(entitiesArray, noModes);
     }
 
     /**
@@ -177,12 +177,12 @@ class ModulesInstancesController {
      * @param {Object} entitiesArray like ['Urso', 'Game', 'Lib', 'Helper']
      * @returns {mixed}
      */
-    _checkPathExist(entitiesArray) {
+    _checkPathExist(entitiesArray, noModes) {
         let currentTestObject = window;
         let testMode;
 
         for (let entitiesIndex = 0; entitiesIndex < entitiesArray.length; entitiesIndex++) {
-            if (this._modes && entitiesIndex === entitiesArray.length - 1)
+            if (!noModes && this._modes && entitiesIndex === entitiesArray.length - 1)
                 testMode = this._checkPathWithModes(currentTestObject, entitiesArray, entitiesIndex);
 
             if (testMode)

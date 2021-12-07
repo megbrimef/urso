@@ -18,6 +18,26 @@ class LibLoader {
     }
 
     /**
+     * gets part of loading path
+     */
+    _getLoadPath(asset){
+        const { path } = asset;
+
+        if(!Urso.config.useBinPath) {
+            return `assets/${path}`;
+        }
+
+        const quality = Urso.getInstance('Modules.Assets.Service').getQuality();
+        const splitted = path.split('/');
+
+        if (splitted[0] === 'images') {
+            splitted.splice(1, 0, quality);
+        }
+        
+        return `bin/${splitted.join('/')}`;
+    };
+
+    /**
      * store loaded asset in cache
      */
     _storeAsset(asset, resource) {
@@ -79,7 +99,8 @@ class LibLoader {
             // TODO: check to load
 
             const params = asset.params || false; // TODO: Set params field in base mode
-            loader.add(asset.key, asset.path, params, (resource) => this._storeAsset(asset, resource))  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
+            const loadPath = this._getLoadPath(asset);
+            loader.add(asset.key, loadPath, params, (resource) => this._storeAsset(asset, resource))  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
         });
 
         this._onLoadUpdate({progress: 0});

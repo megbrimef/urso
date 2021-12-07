@@ -1,4 +1,4 @@
-class ModulesTemplateController {
+class ModulesTemplateService {
     constructor() {
         this.singleton = true;
 
@@ -58,8 +58,11 @@ class ModulesTemplateController {
         if (!groupTemplate)
             Urso.logger.error('ModulesTemplateController group Template error ' + obj.groupName);
 
-        this._parseAssets(groupTemplate.assets, groupTemplate._templatePath);
-        this._parseObjects(groupTemplate.objects, groupTemplate._templatePath);
+        if (groupTemplate.assets)
+            this._parseAssets(groupTemplate.assets, groupTemplate._templatePath);
+
+        if (groupTemplate.objects)
+            this._parseObjects(groupTemplate.objects, groupTemplate._templatePath);
 
         this._mergeStylesAndAssets({ styles: groupTemplate.styles, assets: groupTemplate.assets })
 
@@ -119,4 +122,4 @@ class ModulesTemplateController {
 
 }
 
-module.exports = ModulesTemplateController;
+module.exports = ModulesTemplateService;

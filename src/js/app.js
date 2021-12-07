@@ -14,7 +14,7 @@ class App {
         //setup Instances
         let instances = new Urso.Core.Modules.Instances.Controller();
         Urso.getInstance = instances.getInstance;
-        Urso.getPath = instances.getPath;
+        Urso.getByPath = instances.getByPath;
         Urso.getInstancesModes = instances.getModes;
         Urso.addInstancesMode = instances.addMode;
         Urso.removeInstancesMode = instances.removeMode;
@@ -34,7 +34,7 @@ class App {
 
         //libs
         Urso.cache = Urso.getInstance('Lib.Cache'); //all assets cache
-        Urso.device = Urso.getPath('Lib.Device'); //all device info
+        Urso.device = Urso.getByPath('Lib.Device'); //all device info
         Urso.loader = Urso.getInstance('Lib.Loader'); //assets loader class
         Urso.localData = Urso.getInstance('Lib.LocalData'); //local data storage
         Urso.logger = Urso.getInstance('Lib.Logger'); //logger
@@ -59,6 +59,7 @@ class App {
 
         //App.run
         Urso.device.whenReady(() => {
+            Urso.assets.updateQuality();
             Urso.getInstance('App').run();
         });
     }

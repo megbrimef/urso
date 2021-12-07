@@ -24,11 +24,6 @@ class ModulesStatesManagerRace extends Action {
         return true;
     }
 
-    //can action be terminated ?
-    isTerminable() {
-        return true;
-    }
-
     run(onFinishCallback) {
         log(`%c action run ---> ${this.name}`, 'color: orange', this.params);
 
@@ -40,8 +35,6 @@ class ModulesStatesManagerRace extends Action {
                 action.run(this._actionSuccessHandler);
             else
                 action.finished = true;
-
-        this._checkFinish();
     }
 
     _actionSuccessHandler() {
@@ -73,9 +66,6 @@ class ModulesStatesManagerRace extends Action {
     }
 
     _onFinish() {
-        if (this.finished)
-            return;
-
         this.finished = true;
         log(`%c action finish <--- ${this.name}`, 'color: orange');
         this._onFinishCallback();

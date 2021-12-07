@@ -202,6 +202,17 @@ class LibHelper {
     }
 
     /**
+     * tranpose matrix (rows to cols)
+     * @param {Array} matrix 
+     * @returns {Array}
+     */
+    transpose(matrix) {
+        return Object.keys(matrix[0])
+        .map(colNumber => matrix
+            .map(rowNumber => rowNumber[colNumber]));
+    }
+
+    /**
      * recursive merge two objects into one
      * @param {Object} obj1 
      * @param {Object} obj2 

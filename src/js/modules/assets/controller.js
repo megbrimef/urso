@@ -4,6 +4,22 @@ class ModulesAssetsController {
     };
 
     /**
+     * Update quality
+     */
+    updateQuality(){
+        if(Urso.config.useBinPath){
+            this.getInstance('Service').updateQuality();
+        }
+    }
+
+    /**
+     * Current quality getter
+     */
+    getQuality(){
+        this.getInstance('Service').getQuality();
+    }
+
+    /**
      * instantly load initial assets and start lazy loading process, if needed
      * @param {Mixed} assets - asset or array of assets
      * @param {Function} callback 

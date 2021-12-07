@@ -19,18 +19,18 @@ class ModulesStatesManagerConfigStates {
             PICK_GAME1: {
                 sequence: [
                     { action: 'someAction' },
-                    { action: 'showPickGame' },        //showPickGame --> setGuardAction, setGuardState(PICK_GAME1)
+                    { action: 'showPickGame' },        //showPickGame --> addActionGuard(showPickGame, funk)
                     { action: 'showBIGWin' }
                 ],
-                nextState: ["PICK_GAME2", "PICK_GAME1", "IDLE"]
+                nextState: ["PICK_GAME2", "PICK_GAME1", "IDLE"]  //nextState is optional //setGuardState(PICK_GAME2, func)
             },
 
             PICK_GAME2: {
                 sequence: [
-                    { action: 'showWheel' },          //showWheel --> setGuardAction, setGuardState(PICK_GAME2)
+                    { action: 'showWheel' },          //showWheel --> addActionGuard(showWheel, funk)
                     { action: 'showBIGWin' }
                 ],
-                nextState: ["PICK_GAME1", "IDLE"]
+                nextState: ["PICK_GAME1", "IDLE"]        //nextState is optional
             },
 
             WINLINES_ANIMATE_BY_ONE: { action: 'showWinlinesAnimation' },
@@ -60,21 +60,6 @@ class ModulesStatesManagerConfigStates {
                 ]
             }
         };
-
-        // this.actionsParams = {
-        //     showWinPopup: {
-        //         name: 'showWinPopup',
-        //         events: {
-        //             onStart: 'action.showWinPopup.start',
-        //             toComplete: 'winPopup.display.finished'
-        //         },
-        //         isTerminable: true,
-        //         terminateEvents: {
-        //             onStart: 'action.showWinPopup.terminate',
-        //             toComplete: 'winPopup.display.terminated'
-        //         }
-        //     }
-        // };
     }
 
     get() {

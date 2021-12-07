@@ -1,11 +1,21 @@
 class ModulesAssetsService {
     constructor() {
         this.singleton = true;
-
+        
         this.assets = {};
 
+        this._currentQuality = 'auto';
         this._addedAssetsCache = [];
     };
+
+    getQuality(){
+        return this._currentQuality;
+    }
+
+    updateQuality(){
+        this._currentQuality = this._detectQuality();
+        Urso.addInstancesMode(this._currentQuality);
+    }
 
     sortAssets(assets) {
         this.assets[this.getInstance('Config').loadingGroups.initial] = [];
@@ -125,13 +135,9 @@ class ModulesAssetsService {
     }
 
     _processLoadedImage(assetModel) {
-        const { params, current } = this._getQualityParams();
-        let imageQualityKey = assetModel.useBinPath;
+        const { qualityFactors } = this.getInstance('Config');
 
-        if (imageQualityKey === true)
-            imageQualityKey = current;
-
-        let qualityTextureResolution = params[imageQualityKey] || 1;
+        const resolution = qualityFactors[this._currentQuality] || 1;
 
         const assetKey = assetModel.key;
         //textures cache
@@ -140,14 +146,14 @@ class ModulesAssetsService {
         if (!imageData) {
             //from atlas ?!
             let texture = Urso.cache.getFile(assetModel.path);
-
+            
             if (!texture)
                 return Urso.logger.error('ModulesAssetsService process Loaded Image error: no image ', assetModel);
 
             Urso.cache.addTexture(assetKey, texture); //TODO change resolution of base texture
         } else {
             //regular image
-            const baseTexture = new PIXI.BaseTexture(imageData.data, { resolution: qualityTextureResolution });
+            const baseTexture = new PIXI.BaseTexture(imageData.data, { resolution });
             const texture = new PIXI.Texture(baseTexture);
             Urso.cache.addTexture(assetKey, texture);
         }
@@ -215,9 +221,6 @@ class ModulesAssetsService {
         //set loadingGroup
         model.loadingGroup = loadingGroup || model.loadingGroup || this.getInstance('Config').loadingGroups.initial;
 
-        //setup path if its need
-        this._setQualityPath(model); //TODO adapt for dragonbones
-
         //check if container or dragonbones
         if (model.contents) {
             for (let content of model.contents) {
@@ -253,41 +256,65 @@ class ModulesAssetsService {
         this.loadGroup(groupName, () => { this._continueLazyLoad(step + 1); })
     }
 
-    // TODO: MOVE TO CFG OR HELPER?
-    _getQualityParams() {
-        const params = {
-            high: 1,
-            hd: 0.75,
-            medium: 0.5,
-            low: 0.25
-        }
-        const current = 'hd';
-        return { params, current };
+    _qualityReducer(qualityFactors, widthFactor){
+        return [(acc, val) => {
+            if (acc === null) {
+                return val;
+            }
+
+            const currentQuality = qualityFactors[acc];
+            const qualityFactor = qualityFactors[val];
+
+            const nextQuality = (currentQuality > qualityFactor && qualityFactor >= widthFactor)
+                || (qualityFactor >= widthFactor && widthFactor > currentQuality)
+                || (widthFactor >= qualityFactor && qualityFactor > currentQuality);
+            
+            return nextQuality ? val : acc;
+                
+        }, null]
     }
 
-    _setQualityPath(asset) {
-        if (!asset.useBinPath)
-            return;
+    _detectQuality(){
+        const { qualityFactors } = this.getInstance('Config');
+        const userQuality = Urso.helper.parseGetParams()['quality'];
+        
+        if(userQuality && qualityFactors[userQuality]){
+            return userQuality;
+        }
+        
+        return this._calculateQuality(qualityFactors);
+    }
 
-        const { params, current } = this._getQualityParams();
+    _calculateQuality(qualityFactors){
+        const { android, iOS, iPad, macOS } = Urso.device;
+        const isMobile = android || iOS || iPad;
 
-        const setQuality = asset => {
-            const qualityPath = (typeof asset.useBinPath === 'string' && params[asset.useBinPath]) ? asset.useBinPath : current;
-            asset.path = asset.path.replace('assets', `bin/${qualityPath}`);
+        if (macOS && !isMobile) {
+            return 'high';
         }
 
-        if (!asset.contents) {
-            setQuality(asset);
-            return;
+        if(macOS && iPad) {
+            return 'medium';
         }
 
-        for (const childAsset of asset.contents) {
-            const binPath = (childAsset.useBinPath && childAsset.useBinPath !== asset.useBinPath)
-                ? childAsset.useBinPath : asset.useBinPath;
+        const resCfg = Urso.getInstance('Modules.Scenes.ResolutionsConfig').contents[0];
+        
+        const { devicePixelRatio } = window;
+        let { width, height } = screen;
 
-            childAsset.useBinPath = binPath;
-            setQuality(childAsset);
+        if (isMobile) {
+            width = (width > height) ? width : height;
         }
+
+        if (iOS) {
+            width *= devicePixelRatio;
+        }
+
+        const widthFactor = width / resCfg.width;
+    
+        return Object
+            .keys(qualityFactors)
+            .reduce(...this._qualityReducer(qualityFactors, widthFactor));
     }
 
     _addAssetToLoader(assetModel, loader) {

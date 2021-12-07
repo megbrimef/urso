@@ -32,7 +32,12 @@ class ModulesTemplateTypes {
                 GROUP: 15,
                 IMAGES_ANIMATION: 16,
                 DRAGONBONES: 17,
-                ATLASIMAGE: 18
+                ATLASIMAGE: 18,
+                SLIDER: 19,
+                TOGGLE: 20,
+                CHECKBOX: 21,
+                SCROLLBOX: 22,
+                TEXTINPUT: 23
             }
         }
     }

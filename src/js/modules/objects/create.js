@@ -105,12 +105,27 @@ class ModulesObjectsCreate {
             case Urso.types.objects.EMITTER:
                 model = this.getInstance('Models.Emitter', object);
                 break;
+            case Urso.types.objects.SLIDER:
+                model = this.getInstance('Models.Slider', object);
+                break;
+            case Urso.types.objects.TOGGLE:
+                model = this.getInstance('Models.Toggle', object);
+                break;
+            case Urso.types.objects.CHECKBOX:
+                model = this.getInstance('Models.Checkbox', object);
+                break;
+            case Urso.types.objects.SCROLLBOX:
+                model = this.getInstance('Models.Scrollbox', object);
+                break;
+            case Urso.types.objects.TEXTINPUT:
+                model = this.getInstance('Models.TextInput', object);
+                break;
             default:
                 break;
         }
 
         if (!model)
-            Urso.logger.error('ModulesObjectsCreate model type error');
+            Urso.logger.error('ModulesObjectsCreate model type error', object.type, object);
 
         if (!model._baseObject)
             Urso.logger.error('ModulesObjectsCreate baseObject error', model);
