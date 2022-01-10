@@ -18,10 +18,10 @@ class ModulesStatesManagerRace extends Action {
     //can we start this action?
     guard() {
         for (let action of this._actions)
-            if (!action.guard())
-                return false;
+            if (action.guard())
+                return true;
 
-        return true;
+        return false;
     }
 
     run(onFinishCallback) {

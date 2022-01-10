@@ -5,7 +5,7 @@ class ComponentsDebugController extends ComponentsBaseController {
         super(params);
 
         this._logicBlocks = [
-            'coords', 'fps', /*'renderStats', 'resolution'*/ //TODO
+            'coords', 'fps', 'timescale' /*'renderStats', 'resolution'*/ //TODO
         ];
 
         this._visible = true;

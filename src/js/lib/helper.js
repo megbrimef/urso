@@ -124,6 +124,21 @@ class LibHelper {
     }
 
     /**
+     * Swap key with value in object
+     * @param {Object} obj
+     * @returns {Object}
+     */
+    objectFlip(obj) {
+        const ret = {};
+
+        Object.keys(obj).forEach(key => {
+            ret[obj[key]] = key;
+        });
+
+        return ret;
+    }
+
+    /**
      * recursive set value to object by key
      * @param {String} key 
      * @param {Mixed} value 
@@ -208,8 +223,8 @@ class LibHelper {
      */
     transpose(matrix) {
         return Object.keys(matrix[0])
-        .map(colNumber => matrix
-            .map(rowNumber => rowNumber[colNumber]));
+            .map(colNumber => matrix
+                .map(rowNumber => rowNumber[colNumber]));
     }
 
     /**

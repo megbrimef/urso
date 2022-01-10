@@ -22,17 +22,16 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
         this.contents = [];
 
         this.action = Urso.helper.recursiveGet('action', params, () => { 
-            this.emit(Urso.events.MODULES_OBJECTS_CHECKBOX_PRESS, { name: this.name, status: this._toggleStatus }) 
+            this.emit(Urso.events.MODULES_OBJECTS_CHECKBOX_PRESS, { name: this.name, status: this.status, class: this.class }) 
         });
 
-        this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_CHECKBOX_PRESS, this.name) });
         this.lable = Urso.helper.recursiveGet('lable', params, false);
 
         this.defaultStatus = Urso.helper.recursiveGet('defaultStatus', params, 'unpressed'); //pressed or unpressed
     }
 
     _createCheckbox() {
-        this._toggleStatus = this.defaultStatus;
+        this.status = this.defaultStatus;
         this._checkbox = this._createObject(this.buttonFrames[`${this.defaultStatus}Out`])
 
         if (this.lable)
@@ -78,14 +77,15 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
 
     _changeTexture(key) {
         if (!this.buttonFrames[key]) {
-            if (key === `${this._toggleStatus}Out`) {
+            if (key === `${this.status}Out`) {
                 Urso.logger.error('ModulesObjectsModelsButton assets error: no out image ' + this.buttonFrames.out);
                 return false;
             }
 
-            this._changeTexture(`${this._toggleStatus}Out`); // load default texture for this key
+            this._changeTexture(`${this.status}Out`); // load default texture for this key
             return false;
         }
+        
         if (this.buttonFrames[key].type === Urso.types.objects.GRAPHICS)
             this._drawGraphics(this.buttonFrames[key].figure);
         else

@@ -1,22 +1,13 @@
 class ModulesTransportConfig {
-    constructor() {
-        this._setDefaultConfig();
-    }
 
     getConfig() {
-        return this._config;
-    };
-
-    _setDefaultConfig() {
-        this._config = {
-            autoReconnection: true,
-            autoReconnectionDelay: 5000,
-            hosts: {
-                wsHost: Urso.helper.parseGetParams('wsHost') || 'ws://localhost:9100/',
-                xhrHost: 'https://reqres.in/api/users/2'
+        return {
+                autoReconnect: true,
+                reconnectTimeout: 5000,
+                type: 'websocket', // websocket | xhr
+                host: Urso.helper.parseGetParams('wsHost')
             }
-        };
-    };
+        }
 }
 
 module.exports = ModulesTransportConfig;

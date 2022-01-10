@@ -44,8 +44,11 @@ class ModulesObjectsProxy {
     safeSetValueToTarget(target, key, value) {
         this._safeFlag = true;
 
-        const originalValue = target._originalModel[key];
+        const originalValue = target._originalModel[key]; // we need to save original value in the end
+
+        //setting value
         target[key] = value;
+
         target._originalModel[key] = originalValue;
 
         this._safeFlag = false;

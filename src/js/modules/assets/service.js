@@ -1,20 +1,20 @@
 class ModulesAssetsService {
     constructor() {
         this.singleton = true;
-        
+
         this.assets = {};
 
         this._currentQuality = 'auto';
         this._addedAssetsCache = [];
     };
 
-    getQuality(){
+    getQuality() {
         return this._currentQuality;
     }
 
-    updateQuality(){
+    updateQuality() {
         this._currentQuality = this._detectQuality();
-        Urso.addInstancesMode(this._currentQuality);
+        Urso.addInstancesMode(this._currentQuality + 'Quality');
     }
 
     sortAssets(assets) {
@@ -63,18 +63,44 @@ class ModulesAssetsService {
     _loadGroupRestAssets(group, callback) {
         let loader = Urso.getInstance('Lib.Loader');
         loader.setOnLoadUpdate(this.loadUpdate.bind(this));
+        const noAtlasSpines = [];
 
         for (let assetModel of this.assets[group])
             if (assetModel.type !== Urso.types.assets.ATLAS)
-                if (!Urso.cache.getFile(assetModel.path))
-                    this._addAssetToLoader(assetModel, loader);
+                if (!Urso.cache.getFile(assetModel.path)) {
+                    //filter noAtlas Spine files
+                    if (assetModel.type === Urso.types.assets.SPINE && assetModel.noAtlas) {
+                        noAtlasSpines.push(assetModel);
+                    } else
+                        this._addAssetToLoader(assetModel, loader);
+                }
 
-        loader.start(() => { this._processLoadedAssets(group); this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group); callback(); });
+        loader.start(
+            () => {
+                this._processLoadedAssets(group);
+                this._loadNoAtlasSpines(noAtlasSpines, () => {
+                    this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group);
+                    callback();
+                });
+            }
+        );
+    }
+
+    _loadNoAtlasSpines(noAtlasSpines, callback) {
+        if (!noAtlasSpines.length)
+            return callback();
+
+        let loader = Urso.getInstance('Lib.Loader');
+
+        for (let assetModel of noAtlasSpines)
+            this._addAssetToLoader(assetModel, loader);
+
+        loader.start(callback);
     }
 
     _processLoadedAtlases(group) {
         const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
-        
+
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
             let imageData = Urso.cache.getAtlas(assetKey);
@@ -85,7 +111,7 @@ class ModulesAssetsService {
                 let texture = imageData.textures[i];
                 let newFilename = frame.filename;
 
-                if(frame.filename.indexOf('/') === -1)
+                if (frame.filename.indexOf('/') === -1)
                     newFilename = folderPath + '/' + frame.filename;
 
                 Urso.cache.addFile(newFilename, texture);
@@ -146,7 +172,7 @@ class ModulesAssetsService {
         if (!imageData) {
             //from atlas ?!
             let texture = Urso.cache.getFile(assetModel.path);
-            
+
             if (!texture)
                 return Urso.logger.error('ModulesAssetsService process Loaded Image error: no image ', assetModel);
 
@@ -189,9 +215,6 @@ class ModulesAssetsService {
             case Urso.types.assets.CONTAINER:
                 model = this.getInstance('Models.Container', asset)
                 break;
-            case Urso.types.assets.DRAGONBONES:
-                model = this.getInstance('Models.DragonBones', asset)
-                break;
             case Urso.types.assets.ATLAS:
                 model = this.getInstance('Models.Atlas', asset)
                 break;
@@ -221,7 +244,7 @@ class ModulesAssetsService {
         //set loadingGroup
         model.loadingGroup = loadingGroup || model.loadingGroup || this.getInstance('Config').loadingGroups.initial;
 
-        //check if container or dragonbones
+        //check if container
         if (model.contents) {
             for (let content of model.contents) {
                 this._addAsset(content, model.loadingGroup);
@@ -256,7 +279,7 @@ class ModulesAssetsService {
         this.loadGroup(groupName, () => { this._continueLazyLoad(step + 1); })
     }
 
-    _qualityReducer(qualityFactors, widthFactor){
+    _qualityReducer(qualityFactors, widthFactor) {
         return [(acc, val) => {
             if (acc === null) {
                 return val;
@@ -268,24 +291,24 @@ class ModulesAssetsService {
             const nextQuality = (currentQuality > qualityFactor && qualityFactor >= widthFactor)
                 || (qualityFactor >= widthFactor && widthFactor > currentQuality)
                 || (widthFactor >= qualityFactor && qualityFactor > currentQuality);
-            
+
             return nextQuality ? val : acc;
-                
+
         }, null]
     }
 
-    _detectQuality(){
+    _detectQuality() {
         const { qualityFactors } = this.getInstance('Config');
         const userQuality = Urso.helper.parseGetParams()['quality'];
-        
-        if(userQuality && qualityFactors[userQuality]){
+
+        if (userQuality && qualityFactors[userQuality]) {
             return userQuality;
         }
-        
+
         return this._calculateQuality(qualityFactors);
     }
 
-    _calculateQuality(qualityFactors){
+    _calculateQuality(qualityFactors) {
         const { android, iOS, iPad, macOS } = Urso.device;
         const isMobile = android || iOS || iPad;
 
@@ -293,12 +316,12 @@ class ModulesAssetsService {
             return 'high';
         }
 
-        if(macOS && iPad) {
+        if (macOS && iPad) {
             return 'medium';
         }
 
         const resCfg = Urso.getInstance('Modules.Scenes.ResolutionsConfig').contents[0];
-        
+
         const { devicePixelRatio } = window;
         let { width, height } = screen;
 
@@ -311,7 +334,7 @@ class ModulesAssetsService {
         }
 
         const widthFactor = width / resCfg.width;
-    
+
         return Object
             .keys(qualityFactors)
             .reduce(...this._qualityReducer(qualityFactors, widthFactor));

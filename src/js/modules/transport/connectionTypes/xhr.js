@@ -4,6 +4,7 @@ class ModulesTransportConnectionTypesXhr extends Urso.Core.Modules.Transport.Bas
 
         this._xhr = null;
         this._ready = true;
+        this._runCallback('ready');
     }
 
     send(message){
@@ -13,13 +14,15 @@ class ModulesTransportConnectionTypesXhr extends Urso.Core.Modules.Transport.Bas
         log('[XHR] SEND:', preparedMessage);
     };
 
+    _getMethod(){
+        return 'POST';
+    };
 
     _createXhr(){
         this._xhr = new XMLHttpRequest();
         this._xhr.onerror = this._onError.bind(this);
         this._xhr.onreadystatechange = this._onReadyStateChange.bind(this);
-        this._xhr.open('GET', this._host, true);
-        log('[XHR]: CREATED');
+        this._xhr.open(this._getMethod(), this._host, true);
     };
 
     _onMessage(message){

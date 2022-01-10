@@ -11,6 +11,8 @@ class LibCache {
             texture: {},
             file: {}
         };
+
+        this.globalAtlas = new PIXI.spine.TextureAtlas();
     };
 
     addFile(key, someData) {
@@ -47,6 +49,7 @@ class LibCache {
 
     addTexture(key, someData) {
         this.assetsList.texture[key] = someData;
+        this.globalAtlas.addTexture(key, someData);
     };
 
     addSpine(key, someData) {
@@ -92,6 +95,10 @@ class LibCache {
     getTexture(key) {
         return this.assetsList.texture[key];
     };
+
+    getGlobalAtlas() {
+        return this.globalAtlas;
+    }
 
 };
 

@@ -71,7 +71,7 @@ class ModulesScenesPixiWrapper {
 
     _getDeltaTime() {
         let newTime = Date.now();
-        let deltaTime = newTime - this._loopLastCall;
+        let deltaTime = Urso.scenes.timeScale * (newTime - this._loopLastCall);
         this._loopLastCall = newTime;
 
         return Urso.math.intMakeBetween(deltaTime, 0, 1000);
@@ -113,6 +113,14 @@ class ModulesScenesPixiWrapper {
     resize(width, height) {
         this.renderer.resize(width, height);
     };
+
+    hideCanvas() {
+        this.renderer.view.style.display = 'none';
+    }
+
+    showCanvas() {
+        this.renderer.view.style.display = '';
+    }
 
     setWorldScale(x, y) {
         this.world.scale.x = x;

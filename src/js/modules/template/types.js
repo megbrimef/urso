@@ -9,9 +9,8 @@ class ModulesTemplateTypes {
                 SPINE: 5,
                 BITMAPFONT: 6,
                 SOUND: 7,
-                DRAGONBONES: 8,
-                FONT: 9,
-                AUDIOSPRITE: 10
+                FONT: 8,
+                AUDIOSPRITE: 9
             },
 
             objects: {
@@ -31,13 +30,12 @@ class ModulesTemplateTypes {
                 COMPONENT: 14,
                 GROUP: 15,
                 IMAGES_ANIMATION: 16,
-                DRAGONBONES: 17,
-                ATLASIMAGE: 18,
-                SLIDER: 19,
-                TOGGLE: 20,
-                CHECKBOX: 21,
-                SCROLLBOX: 22,
-                TEXTINPUT: 23
+                ATLASIMAGE: 17,
+                SLIDER: 18,
+                TOGGLE: 19,
+                CHECKBOX: 20,
+                SCROLLBOX: 21,
+                TEXTINPUT: 22
             }
         }
     }

@@ -29,6 +29,14 @@ class ModulesScenesController {
     getMouseCoords() {
         return this.getInstance('PixiWrapper').getCachedMouseCoords();
     }
+
+    get timeScale() {
+        return this._service.timeScale;
+    }
+
+    set timeScale(value) {
+        return this._service.setTimeScale(value);
+    }
 }
 
 module.exports = ModulesScenesController;

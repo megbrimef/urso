@@ -2,7 +2,7 @@ class LibLoader {
     constructor() {
         this._isRunning = false;
         this._assetsQuery = [];
-        this._onLoadUpdate = () => {};
+        this._onLoadUpdate = () => { };
     };
 
     isRunning() {
@@ -20,10 +20,10 @@ class LibLoader {
     /**
      * gets part of loading path
      */
-    _getLoadPath(asset){
+    _getLoadPath(asset) {
         const { path } = asset;
 
-        if(!Urso.config.useBinPath) {
+        if (!Urso.config.useBinPath) {
             return `assets/${path}`;
         }
 
@@ -33,7 +33,7 @@ class LibLoader {
         if (splitted[0] === 'images') {
             splitted.splice(1, 0, quality);
         }
-        
+
         return `bin/${splitted.join('/')}`;
     };
 
@@ -79,8 +79,8 @@ class LibLoader {
      * setup onload callback
      * @param {Function} onLoad
      */
-    setOnLoadUpdate(onLoadUpdate){
-        if(onLoadUpdate)
+    setOnLoadUpdate(onLoadUpdate) {
+        if (onLoadUpdate)
             this._onLoadUpdate = onLoadUpdate;
     }
 
@@ -98,21 +98,27 @@ class LibLoader {
         this._assetsQuery.forEach(asset => {
             // TODO: check to load
 
-            const params = asset.params || false; // TODO: Set params field in base mode
+            let params = asset.params || false; // TODO: Set params field in base mode
+
+            if (asset.type === Urso.types.assets.SPINE && asset.noAtlas) {
+                if (!params)
+                    params = {};
+
+                params.metadata = { spineAtlas: Urso.cache.getGlobalAtlas() };
+            }
+
             const loadPath = this._getLoadPath(asset);
             loader.add(asset.key, loadPath, params, (resource) => this._storeAsset(asset, resource))  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
         });
 
-        this._onLoadUpdate({progress: 0});
+        this._onLoadUpdate({ progress: 0 });
         loader.onProgress.add(this._onLoadUpdate);
 
         loader.load(function (loader, resources) {
-            this._onLoadUpdate({progress: 100});
-
-            callback();
-
+            this._onLoadUpdate({ progress: 100 });
             this._assetsQuery = [];
             this._isRunning = false;
+            callback();
         }.bind(this));
     };
 

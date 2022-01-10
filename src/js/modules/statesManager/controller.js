@@ -5,6 +5,8 @@ class ModulesStatesManagerController {
         this._configStates;
         this._currentState;
         this._started = false;
+        this._paused = false;
+        this._pauseNeedResume = false;
 
         this.statesGuards = this.getInstance('FunctionsStorage');
         this.actionsGuards = this.getInstance('FunctionsStorage');
@@ -12,7 +14,7 @@ class ModulesStatesManagerController {
         this.actionsTerminations = this.getInstance('FunctionsStorage');
 
 
-        this._iterator = this._iteratorConstructor();
+        this._iterator; //will be defined after start
         this._nextState = this._nextState.bind(this);
     }
 
@@ -20,13 +22,38 @@ class ModulesStatesManagerController {
         if (this._started)
             return;
 
+        this._currentState = null;
+        this._iterator = this._iteratorConstructor();
         this._started = true;
         this._configStates = this.getInstance('ConfigStates').get();
         this._nextState();
     }
 
+    pause() {
+        this._paused = true;
+    }
+
+    resume() {
+        this._paused = false;
+
+        if (this._pauseNeedResume) {
+            this._pauseNeedResume = false;
+            this._nextState();
+        }
+    }
+
     _iteratorConstructor() {
         let nextIndex = 0;
+
+
+        const getNextStateByOrder = () => {
+            let statesArray = Object.keys(this._configStates);
+
+            if (nextIndex === statesArray.length)
+                nextIndex = 0;
+
+            return statesArray[nextIndex++];
+        }
 
         return {
             next: (() => {
@@ -37,10 +64,9 @@ class ModulesStatesManagerController {
                     const currentState = this._configStates[this._currentState];
 
                     if (currentState.nextState) { //nextState: ["PICK_GAME2", "PICK_GAME1", "IDLE"]
-
                         for (const stateKey of currentState.nextState) {
                             if (this.checkStateGuard(stateKey)) {
-                                nextIndex = statesArray.indexOf(stateKey);
+                                nextIndex = statesArray.indexOf(stateKey) + 1;
 
                                 if (nextIndex === -1) {
                                     Urso.logger.error('ModulesStatesManagerController: nextState name error', stateKey);
@@ -53,16 +79,24 @@ class ModulesStatesManagerController {
                     }
                 }
 
-                //regular round logic
-                if (nextIndex === statesArray.length)
-                    nextIndex = 0;
+                //go next state by order
+                let stateName;
 
-                return statesArray[nextIndex++];
+                do {
+                    stateName = getNextStateByOrder();
+                } while (!this.checkStateGuard(stateName));
+
+                return stateName;
             }).bind(this)
         }
     }
 
     _nextState() {
+        if (this._paused) {
+            this._pauseNeedResume = true;
+            return;
+        }
+
         this._currentState = this._iterator.next();
 
         this.emit(Urso.events.MODULES_STATES_MANAGER_STATE_CHANGE, this._currentState);
@@ -72,10 +106,6 @@ class ModulesStatesManagerController {
         let config = this._configStates[this._currentState];
         let classInstance = this.getInstance('Helper').getActionByConfig(config);
 
-        //state guard
-        if (!this.checkStateGuard(this._currentState))
-            return this._nextState();
-
         //actions instances guard
         if (!classInstance.guard())
             return this._nextState();
@@ -84,46 +114,54 @@ class ModulesStatesManagerController {
     }
 
     //actions guards
-    addActionGuard(key, guard) {
+    addActionGuard = (key, guard) => {
         this.actionsGuards.add(key, guard, true);
     }
 
-    checkActionGuard(key) {
+    checkActionGuard = (key) => {
         return this.actionsGuards.checkGuard(key);
     }
 
-    removeActionGuard(key, guard) {
+    removeActionGuard = (key, guard) => {
         this.actionsGuards.remove(key, guard);
     }
 
     //actions runs
-    addActionRun(key, runFunction) {
+    addActionRun = (key, runFunction) => {
         this.actionsRuns.add(key, runFunction);
     }
 
-    runAction(key, onFinishCallback) {
+    runAction = (key, onFinishCallback) => {
         this.actionsRuns.runAndCallbackOnFinish(key, onFinishCallback);
     }
 
+    removeActionRun = (key, runFunction) => {
+        this.actionsRuns.remove(key, runFunction);
+    }
+
     //actions terminations
-    addActionTerminate(key, terminateFunction) {
+    addActionTerminate = (key, terminateFunction) => {
         this.actionsTerminations.add(key, terminateFunction);
     }
 
-    terminateAction(key) {
+    terminateAction = (key) => {
         this.actionsTerminations.run(key);
     }
 
+    removeActionTerminate = (key, terminateFunction) => {
+        this.actionsTerminations.remove(key, terminateFunction);
+    }
+
     //states guards
-    setStateGuard(key, guard) {
+    setStateGuard = (key, guard) => {
         this.statesGuards.add(key, guard, true);
     }
 
-    checkStateGuard(key) {
+    checkStateGuard = (key) => {
         return this.statesGuards.checkGuard(key);
     }
 
-    removeStateGuard(key, guard) {
+    removeStateGuard = (key, guard) => {
         this.statesGuards.remove(key, guard);
     }
 

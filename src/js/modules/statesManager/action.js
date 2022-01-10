@@ -18,6 +18,8 @@ class ModulesStatesManagerAction {
     run(onFinishCallback) {
         log(`%c action run ---> ${this.name}`, 'color: blue');
 
+        this.emit(Urso.events.MODULES_STATES_MANAGER_ACTION_START, this.name);
+
         this.finished = false;
         this._onFinishCallback = onFinishCallback;
 
@@ -47,6 +49,9 @@ class ModulesStatesManagerAction {
 
         this._terminating = false;
         this.finished = true;
+
+        this.emit(Urso.events.MODULES_STATES_MANAGER_ACTION_FINISH, this.name);
+        
         log(`%c action finish <--- ${this.name}`, 'color: blue');
         this._onFinishCallback();
     }

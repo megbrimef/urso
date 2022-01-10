@@ -29,7 +29,7 @@ class ModulesInstancesController {
             return false;
 
         this._modes.push(mode);
-
+        Urso.observer.emit(Urso.events.MODULES_INSTANCES_MODES_CHANGED);
         return true;
     }
 
@@ -40,6 +40,7 @@ class ModulesInstancesController {
             return false;
 
         this._modes.splice(index, 1);
+        Urso.observer.emit(Urso.events.MODULES_INSTANCES_MODES_CHANGED);
         return true;
     }
 

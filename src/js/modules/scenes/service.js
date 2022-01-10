@@ -1,10 +1,13 @@
 class ModulesScenesService {
     constructor() {
         this.singleton = true;
+
         this._displayInProgress = false;
         this._currentSceneName = false;
         this._currentSceneTemplate = false;
         this._sceneModel;
+
+        this.timeScale = 1;
 
         this._pixiWrapper;
 
@@ -16,6 +19,11 @@ class ModulesScenesService {
     init() {
         this._pixiWrapper = this.getInstance('PixiWrapper');
         this._pixiWrapper.init();
+    }
+
+    setTimeScale(value) {
+        this.timeScale = value;
+        gsap.globalTimeline.timeScale(this.timeScale);
     }
 
     display(name) {
@@ -62,9 +70,9 @@ class ModulesScenesService {
         Urso.assets.preload(this._currentSceneTemplate.assets, this._assetsLoadedHandler);
 
     }
-    
-    loadUpdate(loadProgress){
-        if(!this._sceneModel)
+
+    loadUpdate(loadProgress) {
+        if (!this._sceneModel)
             return;
         this._sceneModel.loadUpdate(loadProgress);
         this.emit(Urso.events.MODULES_ASSETS_LOAD_PROGRESS, loadProgress);

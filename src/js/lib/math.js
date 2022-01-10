@@ -16,6 +16,21 @@ class LibMath {
     getRandomIntBetween(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    /**
+     * round float number to digits count
+     * @param {Number} num
+     * @param {Number} digits - rounding digits count
+     * @returns {Number}
+     */
+    roundToDigits(num, digits) {
+        if (isNaN(num) || isNaN(digits))
+            return false;
+
+        const pow = Math.pow(10, digits);
+        return Math.round(num * pow) / pow;
+    }
+
 }
 
 module.exports = LibMath;

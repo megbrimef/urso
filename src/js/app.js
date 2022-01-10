@@ -44,8 +44,6 @@ class App {
 
         //Modules
         Urso.assets = Urso.getInstance('Modules.Assets.Controller');
-        Urso.buttons = Urso.getInstance('Modules.Buttons.Controller');
-        // TODO: CHECK FOR EVENT TO START COMMUNICATION WITH SERVER
         Urso.transport = Urso.getInstance('Modules.Transport.Controller');
         Urso.logic = Urso.getInstance('Modules.Logic.Controller');
         Urso.objects = Urso.getInstance('Modules.Objects.Controller');
@@ -56,6 +54,9 @@ class App {
 
         //set title
         document.title = Urso.config.title;
+
+        //device type mode
+        Urso.addInstancesMode(!Urso.helper.mobileAndTabletCheck() ? 'desktop' : 'mobile');
 
         //App.run
         Urso.device.whenReady(() => {

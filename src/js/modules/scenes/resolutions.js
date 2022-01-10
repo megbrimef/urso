@@ -4,9 +4,11 @@ class ModulesScenesResolutions {
         this.singleton = true;
         this._activeResolution = false; //object
         this._templateSize = { orientation: 0, width: 0, height: 0 };
+        this._orientations = { landscape: 'landscape', portrait: 'portrait' }
         this._currentOrientation = null;
 
         this.refreshSceneSize = this.refreshSceneSize.bind(this);
+        this.preResize = this.preResize.bind(this);
         this.refreshSceneSize();
 
         //TODO optimization (performance)
@@ -15,12 +17,18 @@ class ModulesScenesResolutions {
     }
 
     _subscribeOnce() {
+        this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE, this.preResize, true);
         this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE, this.refreshSceneSize, true);
         this.addListener(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, this.refreshSceneSize, true);
     }
 
     getTemplateSize() {
         return this._templateSize;
+    }
+
+    preResize() {
+        if (Urso.helper.mobileAndTabletCheck())
+            this.getInstance('PixiWrapper').hideCanvas();
     }
 
     refreshSceneSize() {
@@ -40,9 +48,15 @@ class ModulesScenesResolutions {
         this._templateSize = this._calculateTemplateSize(currentResolution);
         this._applyResolutionToPixi(currentResolution);
 
+        console.log('[SCENE] New Orientation', orientation);
         console.log('[SCENE] New Resolution', currentResolution, 'windowSize:', windowSize);
         console.log('[SCENE] New Template Size', this._templateSize);
 
+        //update InstancesModes
+        Object.values(this._orientations).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation'));
+        Urso.addInstancesMode(orientation + 'Orientation');
+
+        //send new resolution event
         this.emit(Urso.events.MODULES_SCENES_NEW_RESOLUTION, { resolution: currentResolution, template: this._templateSize });
 
         if (this._currentOrientation !== this._templateSize.orientation) {
@@ -71,7 +85,7 @@ class ModulesScenesResolutions {
     }
 
     _getOrientation(windowSize) {
-        return windowSize.width > windowSize.height ? 'landscape' : 'portrait';  //todo move to constants
+        return windowSize.width > windowSize.height ? this._orientations.landscape : this._orientations.portrait;  //todo move to constants
     }
 
     _getResolutionConfig(windowSize) {
@@ -148,6 +162,7 @@ class ModulesScenesResolutions {
             height: ~~(resolution.height * maxResolutionFactor)
         };
 
+        this.getInstance('PixiWrapper').showCanvas();
         this.getInstance('PixiWrapper').resize(canvasSize.width, canvasSize.height);
         this.getInstance('PixiWrapper').setWorldScale(canvasSize.width / this._templateSize.width, canvasSize.height / this._templateSize.height);
         this.getInstance('PixiWrapper').setCanvasWidth(resolution.width / dp);

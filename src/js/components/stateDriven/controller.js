@@ -23,6 +23,13 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
     //system callbacks storage
     _finishCallbacks = {};
 
+    _callbacksCache = {
+        stateGuards: {},
+        actionTerminates: {},
+        actionGuards: {},
+        actionRuns: {}
+    };
+
 
     /**
      * caller for delayed finish callback
@@ -40,7 +47,8 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
 
     _processStates() {
         for (const stateKey in this.configStates) {
-            Urso.statesManager.setStateGuard(stateKey, this.configStates[stateKey].guard.bind(this));
+            this._callbacksCache.stateGuards[stateKey] = this.configStates[stateKey].guard.bind(this);
+            Urso.statesManager.setStateGuard(stateKey, this._callbacksCache.stateGuards[stateKey]);
         }
     }
 
@@ -50,21 +58,27 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
             //const actionCfg = this.getInstance('ActionConfig', this.configActions[actionKey]);
             const actionCfg = this.configActions[actionKey];
 
-            if (actionCfg.run)
-                Urso.statesManager.addActionRun(actionKey, (finish) => {
+            if (actionCfg.run) {
+                this._callbacksCache.actionRuns[actionKey] = (finish) => {
                     this._saveFinish(actionKey, finish);
                     actionCfg.run(() => this.callFinish(actionKey));
-                });
-            else {
+                };
+
+                Urso.statesManager.addActionRun(actionKey, this._callbacksCache.actionRuns[actionKey]);
+            } else {
                 Urso.logger.error('ComponentsStateDrivenController: no run function in config', actionKey, this);
                 continue;
             }
 
-            if (actionCfg.terminate)
-                Urso.statesManager.addActionTerminate(actionKey, actionCfg.terminate.bind(this));
+            if (actionCfg.terminate) {
+                this._callbacksCache.actionTerminates[actionKey] = actionCfg.terminate.bind(this);
+                Urso.statesManager.addActionTerminate(actionKey, this._callbacksCache.actionTerminates[actionKey]);
+            }
 
-            if (actionCfg.guard)
-                Urso.statesManager.addActionGuard(actionKey, actionCfg.guard.bind(this));
+            if (actionCfg.guard) {
+                this._callbacksCache.actionGuards[actionKey] = actionCfg.guard.bind(this);
+                Urso.statesManager.addActionGuard(actionKey, this._callbacksCache.actionGuards[actionKey]);
+            }
         }
     }
 
@@ -86,9 +100,17 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
         this._processActions();
     }
 
-    //todo
     destroy() {
-        Urso.logger.error('ComponentsStateDrivenController will remove States and Actions by configs');
+        this._removeCallback(Urso.statesManager.removeStateGuard, this._callbacksCache.stateGuards);
+        this._removeCallback(Urso.statesManager.removeActionGuard, this._callbacksCache.actionGuards);
+        this._removeCallback(Urso.statesManager.removeActionTerminate, this._callbacksCache.actionTerminates);
+        this._removeCallback(Urso.statesManager.removeActionRun, this._callbacksCache.actionRuns);
+    }
+
+    _removeCallback(remover, cacheObject) {
+        for (let cacheKey in cacheObject) {
+            remover(cacheKey, cacheObject[cacheKey]);
+        }
     }
 
 }

@@ -6,14 +6,13 @@ import { DropShadowFilter } from '@pixi/filter-drop-shadow';
 PIXI.filters['DropShadowFilter'] = DropShadowFilter;
 
 
-require("pixi-spine");
+window.PIXI.spine = require("pixi-spine");
 require("pixi-projection");
 require("pixi-text-input");
 
-Urso.DragonBones = require("pixi5-dragonbones");
-
 import { gsap } from 'gsap';
 window.gsap = gsap;
+require('./setTimeout');
 
 import Howler from 'howler';
 window.Howler = Howler;

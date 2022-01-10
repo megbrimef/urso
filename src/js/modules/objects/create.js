@@ -4,6 +4,7 @@ class ModulesObjectsCreate {
 
         this._world = null;
         this._counter = 0;
+        this._objectsTypesFlipped;
     }
 
     _checkWorld() {
@@ -23,6 +24,7 @@ class ModulesObjectsCreate {
 
         this.updateWorldBounds({ template: Urso.scenes.getTemplateSize() })
         this.getInstance('Cache').reset();
+        this.applyClassesToWorld();
         this._addToCache(proxy);
     }
 
@@ -32,6 +34,23 @@ class ModulesObjectsCreate {
 
         Urso.objects._safeSetValueToTarget(this._world, 'width', params.template.width);
         Urso.objects._safeSetValueToTarget(this._world, 'height', params.template.height);
+    }
+
+    applyClassesToWorld() {
+        if (!this._world) {
+            return; //world do not created yet
+        }
+
+        //remove old classes
+        if (this._world.class) {
+            this._world.class.split(' ').forEach((className) => this._world.removeClass(className, true));
+        }
+
+        //apply new classes
+        Urso.getInstancesModes().forEach((className) => this._world.addClass(className, true));
+
+        //refresh styles
+        Urso.objects.refreshStyles();
     }
 
     _getUid() {
@@ -56,71 +75,36 @@ class ModulesObjectsCreate {
             object.contents = []; //clear contents. We will put here just correct models
         }
 
+        if (!this._objectsTypesFlipped)
+            this._objectsTypesFlipped = Urso.helper.objectFlip(Urso.types.objects);
+
         //set uid
         object._uid = this._getUid();
 
         switch (object.type) {
-            case Urso.types.objects.BITMAPTEXT:
-                model = this.getInstance('Models.BitmapText', object);
-                break;
-            case Urso.types.objects.BUTTON:
-                model = this.getInstance('Models.Button', object);
-                break;
-            case Urso.types.objects.COMPONENT:
-                model = this.getInstance('Models.Component', object);
-                break;
-            case Urso.types.objects.CONTAINER:
-                model = this.getInstance('Models.Container', object);
-                break;
-            case Urso.types.objects.DRAGONBONES:
-                model = this.getInstance('Models.DragonBones', object);
-                break;
-            case Urso.types.objects.GROUP:
-                model = this.getInstance('Models.Group', object);
-                break;
-            case Urso.types.objects.IMAGE:
-                model = this.getInstance('Models.Image', object);
-                break;
+            //exceptions with camelCase namings
             case Urso.types.objects.ATLASIMAGE:
                 model = this.getInstance('Models.AtlasImage', object);
                 break;
-            case Urso.types.objects.IMAGES_ANIMATION:
-                model = this.getInstance('Models.ImagesAnimation', object);
-                break;
-            case Urso.types.objects.MASK:
-                model = this.getInstance('Models.Mask', object);
-                break;
-            case Urso.types.objects.SPINE:
-                model = this.getInstance('Models.Spine', object);
-                break;
-            case Urso.types.objects.TEXT:
-                model = this.getInstance('Models.Text', object);
-                break;
-            case Urso.types.objects.GRAPHICS:
-                model = this.getInstance('Models.Graphics', object);
+            case Urso.types.objects.BITMAPTEXT:
+                model = this.getInstance('Models.BitmapText', object);
                 break;
             case Urso.types.objects.HITAREA:
                 model = this.getInstance('Models.HitArea', object);
                 break;
-            case Urso.types.objects.EMITTER:
-                model = this.getInstance('Models.Emitter', object);
-                break;
-            case Urso.types.objects.SLIDER:
-                model = this.getInstance('Models.Slider', object);
-                break;
-            case Urso.types.objects.TOGGLE:
-                model = this.getInstance('Models.Toggle', object);
-                break;
-            case Urso.types.objects.CHECKBOX:
-                model = this.getInstance('Models.Checkbox', object);
-                break;
-            case Urso.types.objects.SCROLLBOX:
-                model = this.getInstance('Models.Scrollbox', object);
+            case Urso.types.objects.IMAGES_ANIMATION:
+                model = this.getInstance('Models.ImagesAnimation', object);
                 break;
             case Urso.types.objects.TEXTINPUT:
                 model = this.getInstance('Models.TextInput', object);
                 break;
+
             default:
+                const objectName = Urso.helper.capitaliseFirstLetter(
+                    this._objectsTypesFlipped[object.type].toLowerCase()
+                );
+
+                model = this.getInstance(`Models.${objectName}`, object);
                 break;
         }
 

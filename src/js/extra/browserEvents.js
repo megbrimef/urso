@@ -7,6 +7,8 @@ class ExtraBrowserEvents {
         this.resizeHandler = this.resizeHandler.bind(this);
         this.visibilitychangeHandler = this.visibilitychangeHandler.bind(this);
 
+        this._resizeTimeoutId;
+
         this.init();
     }
 
@@ -25,7 +27,11 @@ class ExtraBrowserEvents {
     }
 
     resizeHandler() {
-        this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE, false, this.RESIZE_DELAY);
+        if (this._resizeTimeoutId)
+            Urso.clearTimeout(this._resizeTimeoutId)
+
+        this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE);
+        this._resizeTimeoutId = Urso.setTimeout(() => this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE), this.RESIZE_DELAY);
     }
 }
 

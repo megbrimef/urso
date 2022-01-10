@@ -5,7 +5,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
     constructor(params) {
         super(params);
 
-        this._toggleStatus = 'unpressed';
+        this.status = 'unpressed';
 
         this.type = Urso.types.objects.TOGGLE;
         this._addBaseObject();
@@ -18,7 +18,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         super.setupParams(params);
 
         this.action = Urso.helper.recursiveGet('action', params, () => { 
-            this.emit(Urso.events.MODULES_OBJECTS_TOGGLE_PRESS, { name: this.name, status: this._toggleStatus }) 
+            this.emit(Urso.events.MODULES_OBJECTS_TOGGLE_PRESS, { name: this.name, status: this.status, class: this.class }) 
         });
 
         this.buttonFrames = {
@@ -37,13 +37,13 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         this.buttonFrames[key] = assetKey;
 
         if (this._isOver)
-            this._changeTexture(`${this._toggleStatus}Over`);
+            this._changeTexture(`${this.status}Over`);
         else if(this._isDown)
-            this._changeTexture(`${this._toggleStatus}Down`);
+            this._changeTexture(`${this.status}Down`);
         else if(this._isDisabled)
-            this._changeTexture(`${this._toggleStatus}Disabled`);
+            this._changeTexture(`${this.status}Disabled`);
         else
-            this._changeTexture(`${this._toggleStatus}Out`);
+            this._changeTexture(`${this.status}Out`);
     }
 
     enable() {
@@ -51,9 +51,9 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
             return false;
 
         if (this._isOver)
-            this._changeTexture(`${this._toggleStatus}Over`);
+            this._changeTexture(`${this.status}Over`);
         else
-            this._changeTexture(`${this._toggleStatus}Out`);
+            this._changeTexture(`${this.status}Out`);
 
         this._isDisabled = false;
     }
@@ -62,7 +62,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         if (this._isDisabled)
             return false;
 
-        this._changeTexture(`${this._toggleStatus}Disabled`);
+        this._changeTexture(`${this.status}Disabled`);
         this._isDisabled = true;
     }
 
@@ -101,9 +101,9 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         if (this._isDisabled) //can be disabled after keyDownAction
             return false;
 
-        this._changeTexture(`${this._toggleStatus}Down`);
+        this._changeTexture(`${this.status}Down`);
 
-        this._toggleStatus = this._toggleStatus === 'pressed' ? 'unpressed' : 'pressed';
+        this.status = this.status === 'pressed' ? 'unpressed' : 'pressed';
     }
 
     _onButtonUp() {
@@ -119,9 +119,9 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
             return false;
 
         if (this._isOver)
-            this._changeTexture(`${this._toggleStatus}Over`);
+            this._changeTexture(`${this.status}Over`);
         else
-            this._changeTexture(`${this._toggleStatus}Out`);
+            this._changeTexture(`${this.status}Out`);
     }
 
     _onButtonOver() {
@@ -133,7 +133,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         if (this.mouseOverAction)
             this.mouseOverAction();
 
-        this._changeTexture(`${this._toggleStatus}Over`);
+        this._changeTexture(`${this.status}Over`);
     }
 
     _onButtonOut() {
@@ -145,19 +145,28 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         if (this.mouseOutAction)
             this.mouseOutAction();
 
-        this._changeTexture(`${this._toggleStatus}Out`);
+        this._changeTexture(`${this.status}Out`);
+    }
+
+    switchStatus() {
+        this.status = this.status === 'pressed' ? 'unpressed' : 'pressed';
+        
+        if (this._isOver)
+            this._changeTexture(`${this.status}Over`);
+        else
+            this._changeTexture(`${this.status}Out`);
     }
 
     _changeTexture(key) {
         let texture = Urso.cache.getTexture(this.buttonFrames[key]);
 
         if (!texture) {
-            if (key === `${this._toggleStatus}Out`) {
+            if (key === `${this.status}Out`) {
                 Urso.logger.error('ModulesObjectsModelsButton assets error: no out image ' + this.buttonFrames.out);
                 return false;
             }
 
-            this._changeTexture(`${this._toggleStatus}Out`); // load default texture for this key
+            this._changeTexture(`${this.status}Out`); // load default texture for this key
             return false;
         }
 

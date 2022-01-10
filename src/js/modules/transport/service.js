@@ -2,10 +2,6 @@ class ModulesTransportService {
     constructor() {
         this._callbacks = {};
         this._config = this.getInstance('Config').getConfig();
-
-        this.WEBSOCKET = 'websocket';
-        this.XHR = 'xhr';
-
         this._communicator = null;
     }
 
@@ -22,8 +18,18 @@ class ModulesTransportService {
         if (!this._checkCommunicator() || !this._checkCommunicatorReady())
             return false;
 
-        const decoratedMessage = this.getInstance('Decorator').toServer(message);
+        const decoratedMessage = this.getInstance('Decorator', { callbacks: this._callbacks }).toServer(message);
+
+        if(!decoratedMessage) {
+            return false;
+        }
+
         const validatedMessage = this._validateMessage(decoratedMessage);
+
+        if(!validatedMessage) {
+            return false;
+        }
+
         this._communicator.send(validatedMessage);
 
         return true;
@@ -33,7 +39,7 @@ class ModulesTransportService {
         if (!this._checkCommunicator())
             return false;
 
-        this._communicator.reconnect(this._config.autoReconnectionDelay || 0);
+        this._communicator.reconnect(this._getAutoReconnetionDelay());
 
         return true;
     };
@@ -83,7 +89,12 @@ class ModulesTransportService {
     _runMiddleWare(event, data) {
         switch (event) {
             case 'response':
-                const decoratedMessage = this.getInstance('Decorator').toFront(JSON.parse(data));
+                const decoratedMessage = this.getInstance('Decorator', { callbacks: this._callbacks }).toFront(data);
+
+                if(!decoratedMessage) {
+                    return;
+                }
+
                 return this._validateMessage(decoratedMessage);
 
             case 'close':
@@ -94,11 +105,19 @@ class ModulesTransportService {
         }
     };
 
+    _autoReconnectCheck() {
+        return this._config.reconnectTimeout;
+    }
+
+    _getAutoReconnetionDelay() {
+        return this._config.autoReconnect || 0;
+    }
+
     _tryReconnect() {
-        if (!this._config.autoReconnection)
+        if (!this._autoReconnectCheck())
             return false;
 
-        this._communicator.reconnect(this._config.autoReconnectionDelay);
+        this._communicator.reconnect(this._getAutoReconnetionDelay());
     };
 
     _setCallback(event, callback) {
@@ -110,24 +129,20 @@ class ModulesTransportService {
         return { ...message };
     };
 
-    _getHost(type) {
-        const hosts = this._config.hosts;
-
-        switch (type) {
-            case this.WEBSOCKET:
-                return hosts.wsHost;
-            case this.XHR:
-                return hosts.xhrHost;
-            default:
-                return false;
-        }
+    _getHost() {
+        return this._config.host;
     };
 
-    _createConnection(type = this.WEBSOCKET) {
-        const host = this._getHost(type);
+    _getType() {
+        return this._config.type;
+    }
+
+    _createConnection() {
+        const host = this._getHost();
+        const type = this._getType();
         const callbacks = this._callbacks;
         const capitalizedType = Urso.helper.capitaliseFirstLetter(type);
-
+        
         this._communicator = this.getInstance(`ConnectionTypes.${capitalizedType}`, { callbacks, host });
 
         if (!this._communicator)

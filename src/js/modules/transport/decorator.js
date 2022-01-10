@@ -1,5 +1,6 @@
 class ModulesTransportDecorator {
-    constructor() {
+    constructor({ callbacks }) {
+        this._callbacks = callbacks;
         this.singleton = true;
     }
 

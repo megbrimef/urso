@@ -8,6 +8,7 @@ class ModulesObjectsController {
 
         this._newResolutionHandler = this._newResolutionHandler.bind(this);
         this._resetWorld = this._resetWorld.bind(this);
+        this._applyClassesToWorld = this._applyClassesToWorld.bind(this);
     };
 
     create(objects, parent, doNotRefreshStylesFlag) { //TODO parse template for assets and objects (groups, components)
@@ -106,9 +107,14 @@ class ModulesObjectsController {
         this.getInstance('Create').resetWorld();
     }
 
+    _applyClassesToWorld() {
+        this.getInstance('Create').applyClassesToWorld();
+    }
+
     _subscribeOnce() {
         this.addListener(Urso.events.MODULES_SCENES_NEW_RESOLUTION, this._newResolutionHandler, true);
         this.addListener(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, this._resetWorld, true);
+        this.addListener(Urso.events.MODULES_INSTANCES_MODES_CHANGED, this._applyClassesToWorld, true);
     }
 }
 

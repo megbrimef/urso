@@ -17,6 +17,8 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             loop: Urso.helper.recursiveGet('animation.loop', params, false),
             onComplete: Urso.helper.recursiveGet('animation.onComplete', params, false)
         };
+
+        params.animation = this.animation; //we redefine original property here
     }
 
     play(animationName, loopFlag = false, track = 0) {
@@ -53,11 +55,10 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             ...config
         };
 
-        if (config.timeScale)
-            this._baseObject.state.timeScale = config.timeScale;
+        /*if (config.timeScale)
+            this._baseObject.state.timeScale = config.timeScale;*/ //deprecated - now we use getTimeScale getter
 
         if (config.onComplete) {
-            window.asd = this._baseObject.state
             this._baseObject.state.clearListeners();
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
         }
@@ -70,7 +71,8 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine object ' + this.assetKey);
 
         this._baseObject = new PIXI.spine.Spine(spineAsset.spineData);
-        this._baseObject.state.timeScale = this.animation.timeScale;
+        //this._baseObject.state.timeScale = this.animation.timeScale;
+        Object.defineProperty(this._baseObject.state, 'timeScale', { get: this.getTimeScale.bind(this) });
 
         if (this.animation.onComplete)
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
@@ -78,6 +80,10 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         if (this.animation.name)
             this.play(this.animation.name, this.animation.loop);
     };
+
+    getTimeScale() {
+        return Urso.scenes.timeScale * this.animation.timeScale;
+    }
 }
 
 module.exports = ModulesObjectsModelsSpine;

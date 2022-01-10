@@ -6,16 +6,18 @@ class ModulesAssetsController {
     /**
      * Update quality
      */
-    updateQuality(){
-        if(Urso.config.useBinPath){
+    updateQuality() {
+        if (Urso.config.useBinPath) {
             this.getInstance('Service').updateQuality();
         }
+
+        console.log('[ASSETS] Quality set to', this.getInstance('Service').getQuality());
     }
 
     /**
      * Current quality getter
      */
-    getQuality(){
+    getQuality() {
         this.getInstance('Service').getQuality();
     }
 
