@@ -116,7 +116,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     _onButtonUp() {
-        if (this._isDisabled)
+        if (this._isDisabled || !this._isDown)
             return false;
 
         this._isDown = false;
