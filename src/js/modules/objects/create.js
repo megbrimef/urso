@@ -149,13 +149,17 @@ class ModulesObjectsCreate {
             this.removeChild(child.parent, child, true);
         }
 
-        newParent.contents.push(child);
-        let childBase = child._baseObject;
-        newParent._baseObject.addChild(childBase);
-        child.parent = newParent;
+        if (child._baseObject) { //regular our object
+            newParent.contents.push(child);
+            let childBase = child._baseObject;
+            newParent._baseObject.addChild(childBase);
+            child.parent = newParent;
 
-        if (!doNotRefreshStylesFlag)
-            Urso.objects.refreshStyles(); //todo optimization
+            if (!doNotRefreshStylesFlag)
+                Urso.objects.refreshStyles(); //todo optimization
+        } else { //pixi system object
+            newParent._baseObject.addChild(child);
+        }
     }
 
     removeChild(parent, child, doNotRefreshStylesFlag) {
