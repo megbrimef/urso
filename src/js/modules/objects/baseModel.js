@@ -55,6 +55,15 @@ class ModulesObjectsBaseModel {
         Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
     }
 
+    get transform() {
+        return this._baseObject.transform;
+    }
+
+    addChildAt(childObject, zIndex, doNotRefreshStylesFlag) {
+        //TODO zIndex
+        Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
+    }
+
     removeChild(childObject, doNotRefreshStylesFlag) {
         Urso.objects.removeChild(this, childObject, doNotRefreshStylesFlag);
     }
