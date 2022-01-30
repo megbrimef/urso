@@ -2,14 +2,14 @@ class ModulesScenesResolutionsConfig {
     constructor() {
         this.singleton = true;
 
-        this._orientations = ['landscape', 'portrait'];
+        this._orientations = Urso.device.ScreenOrientation;
 
         this.contents = [
             {
                 "name": 'default',
                 "width": 1920,
                 "height": 1080,
-                "orientation": 'landscape',
+                "orientation": Urso.device.ScreenOrientation.LANDSCAPE,
                 "adaptive": true
             }
         ];

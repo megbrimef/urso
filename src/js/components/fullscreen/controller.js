@@ -37,15 +37,15 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   get _showOnLandscape() {
-    return this._resolutionsConfig.find(resolution => resolution.orientation === 'landscape');
+    return this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
-    return this._resolutionsConfig.find(resolution => resolution.orientation === 'portrait');
+    return this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
   get _isPortrait() {
-    return innerWidth > innerHeight ? 'portrait' : 'landscape';
+    return innerWidth > innerHeight ? Urso.device.ScreenOrientation.PORTRAIT : Urso.device.ScreenOrientation.LANDSCAPE;
   }
 
   get isFullscreen() {

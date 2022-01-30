@@ -476,6 +476,16 @@ LibDevice = function () {
     */
     this.fullscreenKeyboard = false;
 
+    /**
+    * Enum for possible screen orientations.
+    * @readonly
+    * @enum {string}
+    */
+    this.ScreenOrientation = {
+        LANDSCAPE: 'landscape',
+        PORTRAIT: 'portrait'
+    };
+
 };
 
 // Device is really a singleton/static entity; instantiate it
