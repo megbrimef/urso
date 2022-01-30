@@ -42,20 +42,20 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   get _showOnLandscape() {
-    return !this._resolutionsConfig.find(resolution => resolution.orientation === 'landscape');
+    return !this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
-    return !this._resolutionsConfig.find(resolution => resolution.orientation === 'portrait');
+    return !this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
   get _isPortrait() {
-    return this._orientation === 'portrait';
+    return this._orientation === Urso.device.ScreenOrientation.PORTRAIT;
   }
 
   get _needShow() {
-    return (this._orientation === 'portrait' && this._showOnPortrait) ||
-      (this._orientation !== 'portrait' && this._showOnLandscape)
+    return (this._orientation === Urso.device.ScreenOrientation.PORTRAIT && this._showOnPortrait) ||
+      (this._orientation !== Urso.device.ScreenOrientation.PORTRAIT && this._showOnLandscape)
   }
 
   set _isVisible(needShowDiv) {
@@ -63,7 +63,7 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   _updateOrientation() {
-    this._orientation = innerWidth > innerHeight ? 'landscape' : 'portrait';
+    this._orientation = innerWidth > innerHeight ? Urso.device.ScreenOrientation.LANDSCAPE : Urso.device.ScreenOrientation.PORTRAIT;
   }
 
   _updateVisibility() {

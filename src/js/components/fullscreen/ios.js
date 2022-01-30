@@ -55,7 +55,7 @@ class ComponentsFullscreenIos {
   }
 
   _updateOrientation() {
-    this._orientation = innerWidth > innerHeight ? 'landscape' : 'portrait';
+    this._orientation = innerWidth > innerHeight ? Urso.device.ScreenOrientation.LANDSCAPE : Urso.device.ScreenOrientation.PORTRAIT;
   }
 
   _updateResize() {
@@ -68,7 +68,7 @@ class ComponentsFullscreenIos {
   }
 
   get _isPortrait() {
-    return this._orientation === 'portrait';
+    return this._orientation === Urso.device.ScreenOrientation.PORTRAIT;
   }
 
   get _needShowOnCurrentOrientation() {
@@ -76,11 +76,11 @@ class ComponentsFullscreenIos {
   }
 
   get _showOnLandscape() {
-    return this._orientationsConfig.find(resolution => resolution.orientation === 'landscape');
+    return this._orientationsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
-    return this._orientationsConfig.find(resolution => resolution.orientation === 'portrait');
+    return this._orientationsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
   set isVisible(needShowDiv) {
