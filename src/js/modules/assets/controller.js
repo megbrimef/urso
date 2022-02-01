@@ -18,7 +18,14 @@ class ModulesAssetsController {
      * Current quality getter
      */
     getQuality() {
-        this.getInstance('Service').getQuality();
+        return this.getInstance('Service').getQuality();
+    }
+
+    /**
+     * Current asset resolution
+     */
+    getCurrentResolution() {
+        return this.getInstance('Service').getCurrentResolution();
     }
 
     /**
