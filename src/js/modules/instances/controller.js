@@ -1,3 +1,6 @@
+const MODES_NAMESPACE = 'modifications';
+const MIXINS_NAMESPACE = 'mixins';
+
 class ModulesInstancesController {
     constructor() {
         this._modes = [];
@@ -181,10 +184,18 @@ class ModulesInstancesController {
     _checkPathExist(entitiesArray, noModes) {
         let currentTestObject = window;
         let testMode;
+        let mixins = [];
 
         for (let entitiesIndex = 0; entitiesIndex < entitiesArray.length; entitiesIndex++) {
-            if (!noModes && this._modes && entitiesIndex === entitiesArray.length - 1)
-                testMode = this._checkPathWithModes(currentTestObject, entitiesArray, entitiesIndex);
+            const lastElementModesCondition = !noModes && this._modes && entitiesIndex === entitiesArray.length - 1;
+
+            //get path modification
+            if (lastElementModesCondition && currentTestObject[MODES_NAMESPACE])
+                testMode = this._checkPathWithModes(currentTestObject[MODES_NAMESPACE], entitiesArray, entitiesIndex);
+
+            //get path mixins
+            if (lastElementModesCondition && currentTestObject[MIXINS_NAMESPACE])
+                mixins = this._getMixins(currentTestObject[MIXINS_NAMESPACE], entitiesArray, entitiesIndex);
 
             if (testMode)
                 currentTestObject = testMode;
@@ -193,6 +204,13 @@ class ModulesInstancesController {
             else
                 return false;
         }
+
+        //mixins
+        mixins.forEach((mixin) => {
+            //use this mixin constructions:
+            //const ComponentsMixinEntitie = (superclass) => class extends superclass { ... }
+            currentTestObject = mixin(currentTestObject);
+        })
 
         return currentTestObject;
     }
@@ -213,6 +231,20 @@ class ModulesInstancesController {
             return currentTestObject[entitiesArray[entitiesIndex]];
 
         return false;
+    }
+
+    _getMixins(currentTestObject, entitiesArray, entitiesIndex) {
+        const mixins = [];
+
+        for (let mode of this._modes) {
+            const capMode = Urso.helper.capitaliseFirstLetter(mode);
+
+            if (currentTestObject[capMode] && currentTestObject[capMode][entitiesArray[entitiesIndex]]) {
+                mixins.push(currentTestObject[capMode][entitiesArray[entitiesIndex]]);
+            }
+        }
+
+        return mixins;
     }
 }
 
