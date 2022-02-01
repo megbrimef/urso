@@ -2,6 +2,8 @@ class ModulesAssetsConfig {
     constructor() {
         this.singleton = true;
 
+        this.defaultQualityFactor = 1;
+
         /**
          * quality settings for resource loading selection
          */
