@@ -67,11 +67,9 @@ class ModulesScenesResolutions {
     };
 
     _getWindowSize() {
-        const iOS = Urso.device.iOS;
-
         let windowSize = {
-            width: iOS ? window.innerWidth : window.innerWidth,
-            height: iOS ? window.innerHeight : window.innerHeight
+            width: window.innerWidth,
+            height: window.innerHeight
         };
 
         if (window.devicePixelRatio && window.devicePixelRatio !== 1) {
