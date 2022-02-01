@@ -26,8 +26,17 @@ class ModulesScenesService {
         gsap.globalTimeline.timeScale(this.timeScale);
     }
 
-    addObject(objects, parent) {
-        Urso.template.parse({ objects: [object] });
+    addObject(objects, parent, doNotRefreshStylesFlag) {
+        const newTemplatePart = Urso.template.parse({ objects: [objects] }, true);
+        Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag));
+    }
+
+    _newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag) {
+        Urso.objects.create(newTemplatePart.objects, parent, doNotRefreshStylesFlag);
+
+        //components create
+        newTemplatePart.components.forEach(component => component.create());
+        this._currentSceneTemplate.components = Urso.helper.mergeArrays(this._currentSceneTemplate.components, newTemplatePart.components);
     }
 
     display(name) {
@@ -72,12 +81,12 @@ class ModulesScenesService {
         this.emit(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, name);
 
         Urso.assets.preload(this._currentSceneTemplate.assets, this._assetsLoadedHandler);
-
     }
 
     loadUpdate(loadProgress) {
         if (!this._sceneModel)
             return;
+
         this._sceneModel.loadUpdate(loadProgress);
         this.emit(Urso.events.MODULES_ASSETS_LOAD_PROGRESS, loadProgress);
     }

@@ -18,10 +18,10 @@ class ModulesObjectsController {
             result = [];
 
             for (const object of objects) {
-                result.push(this._createSingleObject(object, parent));
+                result.push(this._createSingleObject(object, parent, doNotRefreshStylesFlag));
             }
         } else
-            result = this._createSingleObject(objects, parent);
+            result = this._createSingleObject(objects, parent, doNotRefreshStylesFlag);
 
         if (!doNotRefreshStylesFlag)
             this.refreshStyles(parent);
@@ -29,10 +29,10 @@ class ModulesObjectsController {
         return result;
     }
 
-    _createSingleObject(object, parent) {
+    _createSingleObject(object, parent, doNotRefreshStylesFlag) {
         //parse template for assets and objects (groups, components)
         if (!object._parsed) {
-            Urso.scenes.addObject(object, parent);
+            return Urso.scenes.addObject(object, parent, doNotRefreshStylesFlag);
         }
 
         return this.getInstance('Create').add(object, parent);
