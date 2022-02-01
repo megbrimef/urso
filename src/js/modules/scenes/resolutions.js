@@ -4,7 +4,6 @@ class ModulesScenesResolutions {
         this.singleton = true;
         this._activeResolution = false; //object
         this._templateSize = { orientation: 0, width: 0, height: 0 };
-        this._orientations = { landscape: 'landscape', portrait: 'portrait' }
         this._currentOrientation = null;
 
         this.refreshSceneSize = this.refreshSceneSize.bind(this);
@@ -53,7 +52,7 @@ class ModulesScenesResolutions {
         console.log('[SCENE] New Template Size', this._templateSize);
 
         //update InstancesModes
-        Object.values(this._orientations).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation'));
+        Object.values(Urso.device.ScreenOrientation).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation'));
         Urso.addInstancesMode(orientation + 'Orientation');
 
         //send new resolution event
@@ -68,12 +67,9 @@ class ModulesScenesResolutions {
     };
 
     _getWindowSize() {
-        const iOS = Urso.device.iOS;
-        const { width, height } = document.body.getBoundingClientRect();
-
         let windowSize = {
-            width: iOS ? window.innerWidth : width,
-            height: iOS ? window.innerHeight : height
+            width: window.innerWidth,
+            height: window.innerHeight
         };
 
         if (window.devicePixelRatio && window.devicePixelRatio !== 1) {
@@ -85,7 +81,7 @@ class ModulesScenesResolutions {
     }
 
     _getOrientation(windowSize) {
-        return windowSize.width > windowSize.height ? this._orientations.landscape : this._orientations.portrait;  //todo move to constants
+        return windowSize.width > windowSize.height ? Urso.device.ScreenOrientation.LANDSCAPE : Urso.device.ScreenOrientation.PORTRAIT;
     }
 
     _getResolutionConfig(windowSize) {

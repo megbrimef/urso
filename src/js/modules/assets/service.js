@@ -160,10 +160,13 @@ class ModulesAssetsService {
         }
     }
 
-    _processLoadedImage(assetModel) {
-        const { qualityFactors } = this.getInstance('Config');
+    getCurrentResolution() {
+        const { qualityFactors, defaultQualityFactor } = this.getInstance('Config');
+        return qualityFactors[this._currentQuality] || defaultQualityFactor || 1;
+    }
 
-        const resolution = qualityFactors[this._currentQuality] || 1;
+    _processLoadedImage(assetModel) {
+        const resolution = this.getCurrentResolution();
 
         const assetKey = assetModel.key;
         //textures cache
