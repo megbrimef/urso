@@ -2,7 +2,7 @@ class ModulesScenesResolutionsConfig {
     constructor() {
         this.singleton = true;
 
-        this._orientations = Urso.device.ScreenOrientation;
+        this._orientations = [Urso.device.ScreenOrientation.LANDSCAPE, Urso.device.ScreenOrientation.PORTRAIT]; //you can use only one orientation for config contents
 
         this.contents = [
             {
