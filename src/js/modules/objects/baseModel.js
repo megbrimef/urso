@@ -12,6 +12,7 @@ class ModulesObjectsBaseModel {
         this._baseObject = null; //link to pixi object
         this._uid = Urso.helper.recursiveGet('_uid', params, false); //will setup on create
         this._templatePath = false;
+        this._parsed = false;
     }
 
     setupParams(params) {

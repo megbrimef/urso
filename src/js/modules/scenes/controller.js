@@ -30,6 +30,10 @@ class ModulesScenesController {
         return this.getInstance('PixiWrapper').getCachedMouseCoords();
     }
 
+    addObject(objects, parent) {
+        this._service.addObject(objects, parent);
+    }
+
     get timeScale() {
         return this._service.timeScale;
     }

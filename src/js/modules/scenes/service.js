@@ -26,6 +26,10 @@ class ModulesScenesService {
         gsap.globalTimeline.timeScale(this.timeScale);
     }
 
+    addObject(objects, parent) {
+        Urso.template.parse({ objects: [object] });
+    }
+
     display(name) {
         if (this._displayInProgress) {
             console.warn("Scenes.display is busy ", this._currentSceneName);

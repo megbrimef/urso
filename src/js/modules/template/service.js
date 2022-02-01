@@ -49,6 +49,8 @@ class ModulesTemplateService {
 
             if (obj.type === Urso.types.objects.COMPONENT)
                 this._processComponent(obj);
+
+            obj._parsed = true;
         }
     }
 

@@ -11,21 +11,31 @@ class ModulesObjectsController {
         this._applyClassesToWorld = this._applyClassesToWorld.bind(this);
     };
 
-    create(objects, parent, doNotRefreshStylesFlag) { //TODO parse template for assets and objects (groups, components)
+    create(objects, parent, doNotRefreshStylesFlag) {
         let result;
 
         if (Array.isArray(objects)) {
             result = [];
+
             for (const object of objects) {
-                result.push(this.getInstance('Create').add(object, parent));
+                result.push(this._createSingleObject(object, parent));
             }
         } else
-            result = this.getInstance('Create').add(objects, parent);
+            result = this._createSingleObject(objects, parent);
 
         if (!doNotRefreshStylesFlag)
             this.refreshStyles(parent);
 
         return result;
+    }
+
+    _createSingleObject(object, parent) {
+        //parse template for assets and objects (groups, components)
+        if (!object._parsed) {
+            Urso.scenes.addObject(object, parent);
+        }
+
+        return this.getInstance('Create').add(object, parent);
     }
 
     find(selector) {
