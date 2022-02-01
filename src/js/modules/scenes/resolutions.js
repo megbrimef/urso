@@ -68,11 +68,10 @@ class ModulesScenesResolutions {
 
     _getWindowSize() {
         const iOS = Urso.device.iOS;
-        const { width, height } = document.body.getBoundingClientRect();
 
         let windowSize = {
-            width: iOS ? window.innerWidth : width,
-            height: iOS ? window.innerHeight : height
+            width: iOS ? window.innerWidth : window.innerWidth,
+            height: iOS ? window.innerHeight : window.innerHeight
         };
 
         if (window.devicePixelRatio && window.devicePixelRatio !== 1) {
