@@ -37,7 +37,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             currentSlot.removeChildren();
             currentSlot.addChild(object._baseObject);
         } else {
-            Urso.logger.warn('ModulesObjectsModelsSpine addToSlot error: no spine slot ' + slotName);
+            Urso.logger.warn('ModulesObjectsModelsSpine replaceSlotWith error: no spine slot ' + slotName);
         }
     }
 
