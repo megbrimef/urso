@@ -25,7 +25,11 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this._baseObject.state.setAnimation(track, animationName, loopFlag);
     }
 
-    addToSlot(object, slotName) {
+    stop() {
+        this._baseObject.state.clearTracks();
+    }
+
+    addToSlot(object, slotName, replaceSlotContent) {
         const spine = this._baseObject;
         const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
         const currentSlot = spine.slotContainers[slotIndex];
@@ -33,11 +37,20 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         if (currentSlot) {
             object._baseObject.scale.y = -1;
 
-            Urso.objects.removeChild(object.parent, object)
+            Urso.objects.removeChild(object.parent, object);
+
+            if (replaceSlotContent)
+                currentSlot.removeChildren(); //todo check if its proxy and reset parent
+
+            //object.parent = this; //todo && make removeChild
             currentSlot.addChild(object._baseObject);
         } else {
             Urso.logger.warn('ModulesObjectsModelsSpine addToSlot error: no spine slot ' + slotName);
         }
+    }
+
+    replaceSlotWith(object, slotName) {
+        this.addToSlot(object, slotName, true);
     }
 
     /**
