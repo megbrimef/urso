@@ -15,6 +15,10 @@ class ModulesObjectsBaseModel {
         this._parsed = false;
     }
 
+    /**
+     * setup params to object model
+     * @param {Object} params
+     */
     setupParams(params) {
         this.type = Urso.helper.recursiveGet('type', params, null);
 

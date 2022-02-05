@@ -6,6 +6,10 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this._addBaseObject();
     }
 
+    /**
+     * setup params to object model
+     * @param {Object} params
+     */
     setupParams(params) {
         super.setupParams(params);
 
@@ -21,14 +25,33 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         params.animation = this.animation; //we redefine original property here
     }
 
+    /**
+     * play spine animation
+     * @param {String} animationName
+     * @param {Boolean} [loopFlag]
+     * @param {Number} [track] - you can define track number for current animation
+     */
     play(animationName, loopFlag = false, track = 0) {
         this._baseObject.state.setAnimation(track, animationName, loopFlag);
     }
 
-    stop() {
-        this._baseObject.state.clearTracks();
+    /**
+     * stop track animation or all animations
+     * @param {Number} [track] - you can define track number to stop
+     */
+    stop(track) {
+        if (typeof track !== 'undefined')
+            this._baseObject.state.clearTrack(track);
+        else
+            this._baseObject.state.clearTracks();
     }
 
+    /**
+     * add object to spine slot
+     * @param {Object} object - created by engine object
+     * @param {String} slotName
+     * @param {Boolean} replaceSlotContent - will replace other slot content
+     */
     addToSlot(object, slotName, replaceSlotContent) {
         const spine = this._baseObject;
         const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
@@ -49,12 +72,17 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         }
     }
 
+    /**
+     * replace spine slot with new object
+     * @param {Object} object - created by engine object
+     * @param {String} slotName
+     */
     replaceSlotWith(object, slotName) {
         this.addToSlot(object, slotName, true);
     }
 
     /**
-     *
+     * set/update animation config
      * @param {*} config
      * @param {boolean} [noObjectCreate] dont use this flag out of core
      *
@@ -77,6 +105,10 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         }
     }
 
+    /**
+     * system function
+     * add object to pixi tree
+     */
     _addBaseObject() {
         let spineAsset = Urso.cache.getSpine(this.assetKey);
 
@@ -94,6 +126,10 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             this.play(this.animation.name, this.animation.loop);
     };
 
+    /**
+     * get animation timeScale
+     * @returns Number
+     */
     getTimeScale() {
         return Urso.scenes.timeScale * this.animation.timeScale;
     }
