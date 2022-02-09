@@ -6,6 +6,7 @@ class ModulesObserverConfig {
             MODULES_ASSETS_GROUP_LOADED: 'modules.assets.group.loaded',
             MODULES_ASSETS_LOAD_PROGRESS: 'modules.assets.load.progress',
             MODULES_ASSETS_LAZYLOAD_FINISHED: 'modules.assets.lazyLoad.finished',
+            MODULES_I18N_NEW_LOCALE_WAS_SET: 'modules.i18n.new.locale.was.set',
             MODULES_INSTANCES_MODES_CHANGED: 'modules.instances.modes.changed',
             MODULES_OBJECTS_BUTTON_PRESS: 'modules.objects.button.press',
             MODULES_OBJECTS_HIT_AREA_PRESS: 'modules.objects.hitArea.press',

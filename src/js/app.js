@@ -44,6 +44,7 @@ class App {
 
         //Modules
         Urso.assets = Urso.getInstance('Modules.Assets.Controller');
+        Urso.i18n = Urso.getInstance('Modules.I18n.Controller');
         Urso.transport = Urso.getInstance('Modules.Transport.Controller');
         Urso.logic = Urso.getInstance('Modules.Logic.Controller');
         Urso.objects = Urso.getInstance('Modules.Objects.Controller');
