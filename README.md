@@ -8,11 +8,12 @@ official website (https://ursojs.io/)
 examples (https://ursojs.io/examples.html)
 
 # how to
-
+```js
 require('urso');
 require('./app/config/load'); // your game application
 
 window.onload = Urso.runGame; //run game
+```
 
 ### Beginning ###
 Having cloned the repository to yourself locally, you must install all the game dependencies before starting.
