@@ -3,11 +3,11 @@
 # urso
 HTML5 game engine
 
-official website (https://ursojs.io/)
+[official website](https://ursojs.io/)
 
-examples (https://ursojs.io/examples.html)
+[examples](https://ursojs.io/examples.html)
 
-# how to
+### how to ###
 ```js
 require('urso');
 require('./app/config/load'); // your game application
