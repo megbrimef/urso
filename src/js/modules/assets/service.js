@@ -38,7 +38,7 @@ class ModulesAssetsService {
         Urso.scenes.loadUpdate(Math.floor(param.progress));
     }
 
-    loadGroup(group, callback) {
+    loadGroup(group, callback = () => { }) {
         if (!this.assets[group])
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
