@@ -5,9 +5,14 @@ class ModulesI18nController {
     /**
      * get text by localeId
      * @param {String} localeId 
+     * @param {Object} [localeVariables] - variables for locale string
      */
-    get(localeId) {
-        return this.#vocabulary && this.#vocabulary[localeId] || localeId;
+    get(localeId, localeVariables = {}) {
+        if (this.#vocabulary && this.#vocabulary[localeId]) {
+            return this._interpolate(this.#vocabulary[localeId], localeVariables);
+        }
+
+        return localeId;
     }
 
     /**
@@ -58,6 +63,12 @@ class ModulesI18nController {
     _loadLocaleByPath(localeKey, pathToLocaleJson) {
         const localeAsset = { type: Urso.types.assets.JSON, key: localeKey, path: pathToLocaleJson };
         Urso.assets.preload(localeAsset, () => this.setLocale(localeKey));
+    }
+
+    _interpolate(string, params) {
+        const names = Object.keys(params);
+        const vals = Object.values(params);
+        return new Function(...names, `return \`${string}\`;`)(...vals);
     }
 }
 
