@@ -10,7 +10,7 @@ class ModulesObjectsModelsBitmapText extends Urso.Core.Modules.Objects.BaseModel
         super.setupParams(params);
 
         this.text = Urso.helper.recursiveGet('text', params, false);
-        this.localeId = Urso.helper.recursiveGet('localeId', params, false); //you can use this insted text for localization
+        this.localeId = Urso.helper.recursiveGet('localeId', params, false); //you can use this instead text for localization
 
         this.fontName = Urso.helper.recursiveGet('fontName', params, false);
         this.fontSize = Urso.helper.recursiveGet('fontSize', params, false);

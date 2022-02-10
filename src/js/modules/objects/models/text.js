@@ -10,7 +10,7 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         super.setupParams(params);
 
         this.text = Urso.helper.recursiveGet('text', params, false);
-        this.localeId = Urso.helper.recursiveGet('localeId', params, false); //you can use this insted text for localization
+        this.localeId = Urso.helper.recursiveGet('localeId', params, false); //you can use this instead text for localization
 
         this.lineHeight = Urso.helper.recursiveGet('lineHeight', params, 0);
         this.fontFamily = Urso.helper.recursiveGet('fontFamily', params, 'Arial');
