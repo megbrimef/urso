@@ -3,13 +3,15 @@
 # urso
 HTML5 game engine
 
-[official website](https://ursojs.io/)
 
-[examples](https://ursojs.io/examples.html)
+### Learn more ###
+- You can find more information on the [official website](https://ursojs.io/)
+- Explore working [examples](https://ursojs.io/examples.html) demos and see the code structure
+- Clone [examples repository](https://github.com/megbrimef/urso-examples) to fast learning
 
-### how to ###
+### How to ###
 ```js
-require('urso');
+require('@urso/core');
 require('./app/config/load'); // your game application
 
 window.onload = Urso.runGame; //run game
