@@ -14,6 +14,14 @@ class ModulesScenesController {
         this._service.display(name);
     }
 
+    pause() {
+        this._service.pause();
+    }
+
+    resume() {
+        this._service.resume();
+    }
+
     loadUpdate(loadProgress) {
         this._service.loadUpdate(loadProgress);
     }
@@ -35,7 +43,7 @@ class ModulesScenesController {
     }
 
     get timeScale() {
-        return this._service.timeScale;
+        return this._service.getTimeScale();
     }
 
     set timeScale(value) {
