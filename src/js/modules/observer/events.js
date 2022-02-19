@@ -28,6 +28,8 @@ class ModulesObserverConfig {
             MODULES_SCENES_DISPLAY_START: 'modules.scenes.display.start',
             MODULES_SCENES_DISPLAY_FINISHED: 'modules.scenes.display.finished',
             MODULES_SCENES_MOUSE_NEW_POSITION: 'modules.scenes.mouse.newPosition',
+            MODULES_SCENES_PAUSE: 'modules.scenes.pause',
+            MODULES_SCENES_RESUME: 'modules.scenes.resume',
             MODULES_SCENES_UPDATE: 'modules.scenes.update',
             EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',
             EXTRA_BROWSEREVENTS_WINDOW_RESIZE: 'extra.browserEvents.window.resize',
