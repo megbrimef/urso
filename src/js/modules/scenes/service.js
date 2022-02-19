@@ -21,19 +21,31 @@ class ModulesScenesService {
         this._pixiWrapper.init();
     }
 
+    /**
+     * pause scene
+     */
     pause() {
         this.getInstance('PixiWrapper').pause();
     }
 
+    /**
+     * resume scene
+     */
     resume() {
         this.getInstance('PixiWrapper').resume();
     }
 
+    /**
+     * global timeScale getter
+     */
     getTimeScale() {
         const loopPaused = this.getInstance('PixiWrapper').isPaused();
         return loopPaused ? 0 : this.timeScale;
     }
 
+    /**
+     * global timeScale setter
+     */
     setTimeScale(value) {
         this.timeScale = value;
         gsap.globalTimeline.timeScale(this.timeScale);
