@@ -1,7 +1,4 @@
 class ModulesScenesModel {
-    constructor() {
-        this._isPaused = false;
-    }
 
     loadUpdate() {
         //just blank
@@ -21,10 +18,6 @@ class ModulesScenesModel {
 
     render() {
         //just blank
-    }
-
-    isPaused() {
-        return this._isPaused;
     }
 
     destroy() {

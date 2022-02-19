@@ -40,6 +40,32 @@ class ModulesScenesPixiWrapper {
         this.getInstance('Resolutions');
     }
 
+    /**
+     * returns is scene paused
+     * @returns {Boolean}
+     */
+    isPaused() {
+        return this._loopPaused;
+    }
+
+    /**
+     * pause scene
+     */
+    pause() {
+        this._loopPaused = true;
+        PIXI.spine.settings.GLOBAL_AUTO_UPDATE = false;
+    }
+
+    /**
+     * resume scene
+     */
+    resume() {
+        this._loopLastCall = Date.now();
+        this._loopPaused = false;
+        this.update();
+        PIXI.spine.settings.GLOBAL_AUTO_UPDATE = true;
+    }
+
     _setPixiSettings() {
         PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         PIXI.settings.TEXT_RESOLUTION = 1;
@@ -94,7 +120,7 @@ class ModulesScenesPixiWrapper {
     };
 
     update() {
-        if (!this.currentScene || this.currentScene.isPaused())
+        if (!this.currentScene)
             return;
 
         let deltaTime = this._getDeltaTime();
