@@ -30,7 +30,7 @@ class ModulesObjectsController {
     }
 
     _createSingleObject(object, parent, doNotRefreshStylesFlag) {
-        //parse template for assets and objects (groups, components)
+        //parse template for assets and objects (groups, components)  Urso.types.objects.COMPONENT  Urso.types.objects.GROUP
         if (!object._parsed) { //todo only for objects, contains components && groups in future
             return Urso.scenes.addObject(object, parent, doNotRefreshStylesFlag);
         }

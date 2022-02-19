@@ -73,7 +73,7 @@ class ModulesScenesController {
      * @param {Boolean} doNotRefreshStylesFlag 
      */
     addObject(objects, parent, doNotRefreshStylesFlag) {
-        this._service.addObject(objects, parent, doNotRefreshStylesFlag);
+        return this._service.addObject(objects, parent, doNotRefreshStylesFlag);
     }
 
     /**

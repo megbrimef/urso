@@ -53,15 +53,22 @@ class ModulesScenesService {
 
     addObject(objects, parent, doNotRefreshStylesFlag) {
         const newTemplatePart = Urso.template.parse({ objects: [objects] }, true);
-        Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag));
+
+        if (newTemplatePart.assets.length) {
+            Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag));
+            return null; //objects will be created soon. Maybe we can return a promice
+        } else
+            return this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag);
     }
 
     _newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag) {
-        Urso.objects.create(newTemplatePart.objects, parent, doNotRefreshStylesFlag);
+        const objectToCreate = newTemplatePart.objects[0];
+        const result = Urso.objects.create(objectToCreate, parent, doNotRefreshStylesFlag);
 
         //components create
         newTemplatePart.components.forEach(component => component.create());
         this._currentSceneTemplate.components = Urso.helper.mergeArrays(this._currentSceneTemplate.components, newTemplatePart.components);
+        return result;
     }
 
     display(name) {
