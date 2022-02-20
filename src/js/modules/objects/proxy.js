@@ -161,6 +161,7 @@ class ModulesObjectsProxy {
             'fontStyle': 'style.fontStyle',
             'fontWeight': 'style.fontWeight',
             'fill': 'style.fill',
+            'fillCustomColors': 'fillCustomColors',
             'stroke': 'style.stroke',
             'strokeThickness': 'style.strokeThickness',
             'dropShadow': 'style.dropShadow',
