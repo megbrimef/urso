@@ -17,6 +17,8 @@ require('./setTimeout');
 import Howler from 'howler';
 window.Howler = Howler;
 
+require("./pixiPatch.js");
+
 Urso.Core.Extra = {
     BrowserEvents: require('./browserEvents.js')
 };
