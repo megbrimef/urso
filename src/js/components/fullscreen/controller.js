@@ -7,8 +7,10 @@ class ComponentsFullscreenController extends ComponentsBaseController {
 
     this._fullscreenActivator = null;
     this._resolutionsConfig = null;
+    this.lastResizeFullscreenResult;
 
     this.createActivator();
+    this._resizeHandler();
   }
 
   createActivator() {
@@ -53,7 +55,14 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   _resizeHandler() {
-    Urso.localData.set('fullscreen.isFullscreen', this.isFullscreen);
+    const isFullscreen = this.isFullscreen;
+
+    if (this.lastResizeFullscreenResult === isFullscreen)
+      return;
+
+    this.lastResizeFullscreenResult = isFullscreen;
+    Urso.localData.set('fullscreen.isFullscreen', isFullscreen);
+    this.emit(Urso.events.COMPONENTS_FULLSCREEN_CHANGE, isFullscreen);
   }
 
   _subscribeOnce() {
