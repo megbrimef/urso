@@ -39,12 +39,14 @@ PIXI.Text.prototype.drawLetterSpacing = function (text, x, y, isStroke) {
     }
     var currentPosition = x;
 
-    var customColors = [];//colors patch block
-    var textIndexOffset = this.text.indexOf(text);
+    var textIndexOffset = this.text.indexOf(text); //colors patch block
+    var allTextLength = this.text.length;
+    var customColors = new Array(allTextLength);
     if (this.fillCustomColors) {
-        for (var k in this.fillCustomColors){
+        for (var k in this.fillCustomColors) {
             var colorsParams = this.fillCustomColors[k];
-            customColors[colorsParams.position] = colorsParams.color;
+            //customColors[colorsParams.position] = colorsParams.color;
+            customColors.fill(colorsParams.color, colorsParams.position, allTextLength);
         }
     }
 
