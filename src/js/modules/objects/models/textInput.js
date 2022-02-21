@@ -15,7 +15,7 @@ class ModulesObjectsModelsTextInput extends Urso.Core.Modules.Objects.BaseModel 
         this.box = Urso.helper.recursiveGet('box', params, false);
         this.numbersOnly = Urso.helper.recursiveGet('numbersOnly', params, false);
         this.allowedSymbols = Urso.helper.recursiveGet('allowedSymbols', params, false);
-        this.substituteText = Urso.helper.recursiveGet('substituteText', params, false);
+        //this.substituteText = Urso.helper.recursiveGet('substituteText', params, false);
         this.maxLength = Urso.helper.recursiveGet('maxLength', params, false);
     }
 
@@ -53,7 +53,7 @@ class ModulesObjectsModelsTextInput extends Urso.Core.Modules.Objects.BaseModel 
 
     _addBaseObject() {
         this._baseObject = new PIXI.TextInput({ input: this.input, box: this.box });
-        this._baseObject.substituteText = this.substituteText;
+        //this._baseObject.substituteText = this.substituteText;
 
         if(this.maxLength)
             this._baseObject.maxLength = this.maxLength
