@@ -125,7 +125,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         this._isDown = false;
 
         if (this.action) {
-            if (!this.noActionOnMouseOut || this._isOver) //if unlockPressOnMouseOut && mouse is out of button -> do nothing
+            if (!this.noActionOnMouseOut || this._isOver) //if noActionOnMouseOut && mouse is out of button -> do nothing
                 this.action();
         }
 
