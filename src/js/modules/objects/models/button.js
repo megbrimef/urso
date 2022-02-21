@@ -31,7 +31,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
-        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, true);
+        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, Urso.device.desktop ? true : false);
 
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
