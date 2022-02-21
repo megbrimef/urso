@@ -3,6 +3,7 @@ class ModulesObserverConfig {
         this.singleton = true;
 
         this.list = {
+            COMPONENTS_FULLSCREEN_CHANGE: 'components.fullscreen.change',
             MODULES_ASSETS_GROUP_LOADED: 'modules.assets.group.loaded',
             MODULES_ASSETS_LOAD_PROGRESS: 'modules.assets.load.progress',
             MODULES_ASSETS_LAZYLOAD_FINISHED: 'modules.assets.lazyLoad.finished',
