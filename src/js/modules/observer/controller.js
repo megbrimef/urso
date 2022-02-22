@@ -60,7 +60,7 @@ class ModulesObserverController {
 
     _removeLocal(name, callback) {
         if (!this._observers[name] || !callback._ouid)
-            Urso.logger.error('ModulesObserverController remove error');
+            return Urso.logger.error('ModulesObserverController remove error, no observer with', name, callback);
 
         const uid = callback._ouid;
         delete this._observers[name][uid];
