@@ -20,6 +20,7 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         this.fontStyle = Urso.helper.recursiveGet('fontStyle', params, false); //'italic'
         this.fontWeight = Urso.helper.recursiveGet('fontWeight', params, false); // 'bold'
         this.fill = Urso.helper.recursiveGet('fill', params, '#000000'); // gradient  ['#ffffff', '#00ff99']
+        this.fillCustomColors = Urso.helper.recursiveGet('fillCustomColors', params, false); //or array [{position:12,color:'#000000'},...]
         this.stroke = Urso.helper.recursiveGet('stroke', params, 'black');
         this.strokeThickness = Urso.helper.recursiveGet('strokeThickness', params, 0);
         this.dropShadow = Urso.helper.recursiveGet('dropShadow', params, false);
@@ -38,6 +39,10 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
             this._originalModel.text = this.text = Urso.i18n.get(this.localeId, this.localeVariables);
 
         this._baseObject = new PIXI.Text(this.text);
+
+        if (this.fillCustomColors) {
+            this._baseObject.fillCustomColors = this.fillCustomColors;
+        }
     };
 
     _newLocaleHandler() {

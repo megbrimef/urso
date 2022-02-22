@@ -56,6 +56,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
             this._changeTexture(`${this.status}Out`);
 
         this._isDisabled = false;
+        this._baseObject.buttonMode = true;
     }
 
     disable() {
@@ -64,6 +65,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
 
         this._changeTexture(`${this.status}Disabled`);
         this._isDisabled = true;
+        this._baseObject.buttonMode = false;
     }
 
     _addBaseObject() {

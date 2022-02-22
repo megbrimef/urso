@@ -26,6 +26,7 @@ class ModulesScenesService {
      */
     pause() {
         this.getInstance('PixiWrapper').pause();
+        this.emit(Urso.events.MODULES_SCENES_PAUSE);
     }
 
     /**
@@ -33,6 +34,7 @@ class ModulesScenesService {
      */
     resume() {
         this.getInstance('PixiWrapper').resume();
+        this.emit(Urso.events.MODULES_SCENES_RESUME);
     }
 
     /**

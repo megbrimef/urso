@@ -40,6 +40,10 @@ class ComponentsFullscreenIos {
     });
   }
 
+  get isFullscreen() {
+    return this._isFullscreen;
+  }
+
   get _isFullscreen() {
     const minFactor = 0.51;
     const deviceFactor = screen.width / screen.height;
@@ -49,7 +53,7 @@ class ComponentsFullscreenIos {
 
     return !(
       this._isPortrait ?
-        factor - deviceFactor < 0.1:
+        factor - deviceFactor < 0.1 :
         factor > minFactor
     );
   }
@@ -87,8 +91,8 @@ class ComponentsFullscreenIos {
     this._div.style.zIndex = needShowDiv ? 1 : -1;
     clearTimeout(this._scrollTimeout)
     this._scrollTimeout = setTimeout(() => {
-      if(needShowDiv)
-        window.scrollTo(0,0);
+      if (needShowDiv)
+        window.scrollTo(0, 0);
     }, 200);
   }
 

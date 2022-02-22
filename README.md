@@ -1,12 +1,12 @@
+URSO — The HTML5 Game Framework
+=============
+
 ![pixi.js logo](https://ursojs.io/img/logo.png)
-
-# urso
-HTML5 game engine
-
 
 ### Learn more ###
 - You can find more information on the [official website](https://ursojs.io/)
 - Explore working [examples](https://ursojs.io/examples.html) demos and see the code structure
+- Also you can use [slot base game](https://github.com/megbrimef/urso-slot-base) as a slot game engine (slot framework)
 - Clone [examples repository](https://github.com/megbrimef/urso-examples) to fast learning
 
 ### How to ###

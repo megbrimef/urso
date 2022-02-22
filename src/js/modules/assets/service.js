@@ -6,6 +6,7 @@ class ModulesAssetsService {
 
         this._currentQuality = 'auto';
         this._addedAssetsCache = [];
+        this.lazyLoadProcessStarted = false;
     };
 
     getQuality() {
@@ -30,7 +31,7 @@ class ModulesAssetsService {
     startLoad(callback) {
         this.loadGroup(
             this.getInstance('Config').loadingGroups.initial,
-            (() => { callback(); this._continueLazyLoad(); }).bind(this)
+            (() => { callback(); this._startLazyLoad(); }).bind(this)
         )
     }
 
@@ -261,6 +262,14 @@ class ModulesAssetsService {
             this.assets[model.loadingGroup] = [];
 
         this.assets[model.loadingGroup].push(model);
+    }
+
+    _startLazyLoad() {
+        if (this.lazyLoadProcessStarted)
+            return;
+
+        this.lazyLoadProcessStarted = true;
+        this._continueLazyLoad();
     }
 
     _continueLazyLoad(step) {
