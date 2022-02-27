@@ -21,9 +21,56 @@ class ModulesScenesService {
         this._pixiWrapper.init();
     }
 
+    /**
+     * pause scene
+     */
+    pause() {
+        this.getInstance('PixiWrapper').pause();
+        this.emit(Urso.events.MODULES_SCENES_PAUSE);
+    }
+
+    /**
+     * resume scene
+     */
+    resume() {
+        this.getInstance('PixiWrapper').resume();
+        this.emit(Urso.events.MODULES_SCENES_RESUME);
+    }
+
+    /**
+     * global timeScale getter
+     */
+    getTimeScale() {
+        const loopPaused = this.getInstance('PixiWrapper').isPaused();
+        return loopPaused ? 0 : this.timeScale;
+    }
+
+    /**
+     * global timeScale setter
+     */
     setTimeScale(value) {
         this.timeScale = value;
         gsap.globalTimeline.timeScale(this.timeScale);
+    }
+
+    addObject(objects, parent, doNotRefreshStylesFlag) {
+        const newTemplatePart = Urso.template.parse({ objects: [objects] }, true);
+
+        if (newTemplatePart.assets.length) {
+            Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag));
+            return null; //objects will be created soon. Maybe we can return a promice
+        } else
+            return this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag);
+    }
+
+    _newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag) {
+        const objectToCreate = newTemplatePart.objects[0];
+        const result = Urso.objects.create(objectToCreate, parent, doNotRefreshStylesFlag);
+
+        //components create
+        newTemplatePart.components.forEach(component => component.create());
+        this._currentSceneTemplate.components = Urso.helper.mergeArrays(this._currentSceneTemplate.components, newTemplatePart.components);
+        return result;
     }
 
     display(name) {
@@ -68,12 +115,12 @@ class ModulesScenesService {
         this.emit(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, name);
 
         Urso.assets.preload(this._currentSceneTemplate.assets, this._assetsLoadedHandler);
-
     }
 
     loadUpdate(loadProgress) {
         if (!this._sceneModel)
             return;
+
         this._sceneModel.loadUpdate(loadProgress);
         this.emit(Urso.events.MODULES_ASSETS_LOAD_PROGRESS, loadProgress);
     }

@@ -1,5 +1,6 @@
 Urso.Core.Modules = {};
 require('./assets/_info.js');
+require('./i18n/_info.js');
 require('./instances/_info.js');
 require('./logic/_info.js');
 require('./objects/_info.js');

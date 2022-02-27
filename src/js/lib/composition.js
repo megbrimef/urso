@@ -1,48 +1,44 @@
 // Class for creating multi inheritance.
-class LibComposition
-{
+class LibComposition {
 	// Inherit method to create base classes.
-	static inherit(..._bases)
-	{
+	static inherit(..._bases) {
 		class classes {
 
 			// The base classes
-  			get base() { return _bases; }
+			get base() { return _bases; }
 
-			constructor(..._args)
-			{
+			constructor(..._args) {
 				let index = 0;
 
-				for (let b of this.base) 
-				{
+				for (let b of this.base) {
 					let obj = new b(_args[index++]);
-                    LibComposition.copy(this, obj);
+					LibComposition.copy(this, obj);
 				}
 			}
-		
+
 		}
 
 		// Copy over properties and methods
-		for (let base of _bases) 
-		{
-            LibComposition.copy(classes, base);
-            LibComposition.copy(classes.prototype, base.prototype);
+		for (let base of _bases) {
+			LibComposition.copy(classes, base);
+			LibComposition.copy(classes.prototype, base.prototype, true);
 		}
 
 		return classes;
 	}
 
 	// Copies the properties from one class to another
-	static copy(_target, _source) 
-	{
-    		for (let key of Reflect.ownKeys(_source)) 
-			{
-        		if (key !== "constructor" && key !== "prototype" && key !== "name") 
-				{
-	        	    let desc = Object.getOwnPropertyDescriptor(_source, key);
-	        	    Object.defineProperty(_target, key, desc);
-        		}
-    		}
+	static copy(_target, _source, protoFlag) {
+		for (let key of Reflect.ownKeys(_source)) {
+			if (key !== "constructor" && key !== "prototype" && key !== "name") {
+				let desc = Object.getOwnPropertyDescriptor(_source, key);
+				Object.defineProperty(_target, key, desc);
+			}
+		}
+
+		if (protoFlag && Object.getPrototypeOf(_source) !== Object.prototype) {
+			LibComposition.copy(_target, Object.getPrototypeOf(_source));
+		}
 	}
 }
 
@@ -50,7 +46,7 @@ module.exports = LibComposition;
 
 
 /**
- * 
+ *
  example:
 
 

@@ -12,8 +12,13 @@ class ModulesObjectsBaseModel {
         this._baseObject = null; //link to pixi object
         this._uid = Urso.helper.recursiveGet('_uid', params, false); //will setup on create
         this._templatePath = false;
+        this._parsed = false;
     }
 
+    /**
+     * setup params to object model
+     * @param {Object} params
+     */
     setupParams(params) {
         this.type = Urso.helper.recursiveGet('type', params, null);
 
@@ -52,6 +57,15 @@ class ModulesObjectsBaseModel {
     _customDestroy() { }
 
     addChild(childObject, doNotRefreshStylesFlag) {
+        Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
+    }
+
+    get transform() {
+        return this._baseObject.transform;
+    }
+
+    addChildAt(childObject, zIndex, doNotRefreshStylesFlag) {
+        //TODO zIndex
         Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
     }
 

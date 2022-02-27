@@ -40,6 +40,10 @@ class ComponentsFullscreenIos {
     });
   }
 
+  get isFullscreen() {
+    return this._isFullscreen;
+  }
+
   get _isFullscreen() {
     const minFactor = 0.51;
     const deviceFactor = screen.width / screen.height;
@@ -49,13 +53,13 @@ class ComponentsFullscreenIos {
 
     return !(
       this._isPortrait ?
-        factor - deviceFactor < 0.1:
+        factor - deviceFactor < 0.1 :
         factor > minFactor
     );
   }
 
   _updateOrientation() {
-    this._orientation = innerWidth > innerHeight ? 'landscape' : 'portrait';
+    this._orientation = innerWidth > innerHeight ? Urso.device.ScreenOrientation.LANDSCAPE : Urso.device.ScreenOrientation.PORTRAIT;
   }
 
   _updateResize() {
@@ -68,7 +72,7 @@ class ComponentsFullscreenIos {
   }
 
   get _isPortrait() {
-    return this._orientation === 'portrait';
+    return this._orientation === Urso.device.ScreenOrientation.PORTRAIT;
   }
 
   get _needShowOnCurrentOrientation() {
@@ -76,19 +80,19 @@ class ComponentsFullscreenIos {
   }
 
   get _showOnLandscape() {
-    return this._orientationsConfig.find(resolution => resolution.orientation === 'landscape');
+    return this._orientationsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
-    return this._orientationsConfig.find(resolution => resolution.orientation === 'portrait');
+    return this._orientationsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
   set isVisible(needShowDiv) {
     this._div.style.zIndex = needShowDiv ? 1 : -1;
     clearTimeout(this._scrollTimeout)
     this._scrollTimeout = setTimeout(() => {
-      if(needShowDiv)
-        window.scrollTo(0,0);
+      if (needShowDiv)
+        window.scrollTo(0, 0);
     }, 200);
   }
 

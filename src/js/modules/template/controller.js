@@ -19,8 +19,8 @@ class ModulesTemplateController {
     };
 
     //make template
-    parse(template) {
-        return this.getInstance('Service').parse(template);
+    parse(template, additionalTemplateFlag) {
+        return this.getInstance('Service').parse(template, additionalTemplateFlag);
     }
 
 }

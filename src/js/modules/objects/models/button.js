@@ -31,6 +31,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
+        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, Urso.device.desktop ? true : false);
 
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
@@ -48,9 +49,9 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         if (this._isOver)
             this._changeTexture('over');
-        else if(this._isDown)
+        else if (this._isDown)
             this._changeTexture('pressed');
-        else if(this._isDisabled)
+        else if (this._isDisabled)
             this._changeTexture('disabled');
         else
             this._changeTexture('out');
@@ -66,6 +67,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
             this._changeTexture('out');
 
         this._isDisabled = false;
+        this._baseObject.buttonMode = true;
     }
 
     disable() {
@@ -74,6 +76,7 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this._changeTexture('disabled');
         this._isDisabled = true;
+        this._baseObject.buttonMode = false;
     }
 
     _addBaseObject() {
@@ -121,8 +124,10 @@ class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
 
         this._isDown = false;
 
-        if (this.action)
-            this.action();
+        if (this.action) {
+            if (!this.noActionOnMouseOut || this._isOver) //if noActionOnMouseOut && mouse is out of button -> do nothing
+                this.action();
+        }
 
         if (this._isDisabled) //can be disabled after action
             return false;

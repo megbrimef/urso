@@ -7,8 +7,10 @@ class ComponentsFullscreenController extends ComponentsBaseController {
 
     this._fullscreenActivator = null;
     this._resolutionsConfig = null;
+    this.lastResizeFullscreenResult;
 
     this.createActivator();
+    this._resizeHandler();
   }
 
   createActivator() {
@@ -37,15 +39,15 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   get _showOnLandscape() {
-    return this._resolutionsConfig.find(resolution => resolution.orientation === 'landscape');
+    return this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
-    return this._resolutionsConfig.find(resolution => resolution.orientation === 'portrait');
+    return this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
   get _isPortrait() {
-    return innerWidth > innerHeight ? 'portrait' : 'landscape';
+    return innerWidth > innerHeight ? Urso.device.ScreenOrientation.PORTRAIT : Urso.device.ScreenOrientation.LANDSCAPE;
   }
 
   get isFullscreen() {
@@ -53,7 +55,14 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   _resizeHandler() {
-    Urso.localData.set('fullscreen.isFullscreen', this.isFullscreen);
+    const isFullscreen = this.isFullscreen;
+
+    if (this.lastResizeFullscreenResult === isFullscreen)
+      return;
+
+    this.lastResizeFullscreenResult = isFullscreen;
+    Urso.localData.set('fullscreen.isFullscreen', isFullscreen);
+    this.emit(Urso.events.COMPONENTS_FULLSCREEN_CHANGE, isFullscreen);
   }
 
   _subscribeOnce() {

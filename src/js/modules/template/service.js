@@ -3,10 +3,11 @@ class ModulesTemplateService {
         this.singleton = true;
 
         this._currentTemplate = this.getInstance('Model');
+        this._actualTemplate;
     };
 
     getTemplate() {
-        return this._currentTemplate;
+        return this._actualTemplate;
     }
 
     getSceneOrGroup(name, namespace) {
@@ -17,11 +18,20 @@ class ModulesTemplateService {
         return entity;
     }
 
-    parse(template) {
+    parse(template, additionalTemplateFlag) {
         this._currentTemplate = Urso.helper.mergeObjectsRecursive(this.getInstance('Model'), template);
 
         this._parseAssets(this._currentTemplate.assets, template._templatePath);
         this._parseObjects(this._currentTemplate.objects, template._templatePath);
+
+        if (additionalTemplateFlag) {
+            this._actualTemplate.assets = Urso.helper.mergeArrays(this._actualTemplate.assets, this._currentTemplate.assets);
+            this._actualTemplate.components = Urso.helper.mergeArrays(this._actualTemplate.components, this._currentTemplate.components);
+            this._actualTemplate.objects = Urso.helper.mergeArrays(this._actualTemplate.objects, this._currentTemplate.objects);
+            Urso.helper.mergeObjectsRecursive(this._actualTemplate.styles, this._currentTemplate.styles);
+        } else {
+            this._actualTemplate = this._currentTemplate;
+        }
 
         return this._currentTemplate;
     }
@@ -49,6 +59,8 @@ class ModulesTemplateService {
 
             if (obj.type === Urso.types.objects.COMPONENT)
                 this._processComponent(obj);
+
+            obj._parsed = true;
         }
     }
 

@@ -6,6 +6,7 @@ class ModulesAssetsService {
 
         this._currentQuality = 'auto';
         this._addedAssetsCache = [];
+        this.lazyLoadProcessStarted = false;
     };
 
     getQuality() {
@@ -30,7 +31,7 @@ class ModulesAssetsService {
     startLoad(callback) {
         this.loadGroup(
             this.getInstance('Config').loadingGroups.initial,
-            (() => { callback(); this._continueLazyLoad(); }).bind(this)
+            (() => { callback(); this._startLazyLoad(); }).bind(this)
         )
     }
 
@@ -38,7 +39,7 @@ class ModulesAssetsService {
         Urso.scenes.loadUpdate(Math.floor(param.progress));
     }
 
-    loadGroup(group, callback) {
+    loadGroup(group, callback = () => { }) {
         if (!this.assets[group])
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
@@ -160,10 +161,13 @@ class ModulesAssetsService {
         }
     }
 
-    _processLoadedImage(assetModel) {
-        const { qualityFactors } = this.getInstance('Config');
+    getCurrentResolution() {
+        const { qualityFactors, defaultQualityFactor } = this.getInstance('Config');
+        return qualityFactors[this._currentQuality] || defaultQualityFactor || 1;
+    }
 
-        const resolution = qualityFactors[this._currentQuality] || 1;
+    _processLoadedImage(assetModel) {
+        const resolution = this.getCurrentResolution();
 
         const assetKey = assetModel.key;
         //textures cache
@@ -258,6 +262,14 @@ class ModulesAssetsService {
             this.assets[model.loadingGroup] = [];
 
         this.assets[model.loadingGroup].push(model);
+    }
+
+    _startLazyLoad() {
+        if (this.lazyLoadProcessStarted)
+            return;
+
+        this.lazyLoadProcessStarted = true;
+        this._continueLazyLoad();
     }
 
     _continueLazyLoad(step) {
