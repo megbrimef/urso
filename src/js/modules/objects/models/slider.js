@@ -8,7 +8,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._baseObject = null;
         this._handleIsPulling = false;
         this._points = [];
-        this._init();
+        this._addBaseObject();
     }
 
     setupParams(params) {
@@ -23,15 +23,6 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this.maxValueTextModel = Urso.helper.recursiveGet('maxValueTextModel', params, false);
         this.currentValueTextModel = Urso.helper.recursiveGet('currentValueTextModel', params, false);
         this.isVertical = Urso.helper.recursiveGet('isVertical', params, false);
-    }
-
-    _init() {
-        this._setPoints();
-        this._setVariables();
-        this._addBaseObject();
-        this._createSliderTextures();
-        this._createValueText();
-        this._setDefaultValue();
     }
 
     _setVariables() {
@@ -123,6 +114,12 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
 
     _addBaseObject() {
         this._baseObject = new PIXI.Container();
+        
+        this._setPoints();
+        this._setVariables();
+        this._createSliderTextures();
+        this._createValueText();
+        this._setDefaultValue();
     };
 
     _onPointerDown(obj) {
