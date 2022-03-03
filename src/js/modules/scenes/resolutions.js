@@ -51,17 +51,18 @@ class ModulesScenesResolutions {
         console.log('[SCENE] New Resolution', currentResolution, 'windowSize:', windowSize);
         console.log('[SCENE] New Template Size', this._templateSize);
 
-        //update InstancesModes
-        Object.values(Urso.device.ScreenOrientation).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation'));
-        Urso.addInstancesMode(orientation + 'Orientation');
+        if (this._currentOrientation !== this._templateSize.orientation) {
+            this._currentOrientation = this._templateSize.orientation;
+
+            //update InstancesModes
+            Object.values(Urso.device.ScreenOrientation).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation'));
+            Urso.addInstancesMode(this._templateSize.orientation + 'Orientation');
+
+            this.emit(Urso.events.MODULES_SCENES_ORIENTATION_CHANGE, this._templateSize.orientation);
+        }
 
         //send new resolution event
         this.emit(Urso.events.MODULES_SCENES_NEW_RESOLUTION, { resolution: currentResolution, template: this._templateSize });
-
-        if (this._currentOrientation !== this._templateSize.orientation) {
-            this._currentOrientation = this._templateSize.orientation;
-            this.emit(Urso.events.MODULES_SCENES_ORIENTATION_CHANGE, this._templateSize.orientation);
-        }
 
         return true;
     };
