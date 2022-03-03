@@ -51,6 +51,9 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   get isFullscreen() {
+    if (!this._fullscreenActivator)
+      return false;
+
     return this._fullscreenActivator.isFullscreen;
   }
 

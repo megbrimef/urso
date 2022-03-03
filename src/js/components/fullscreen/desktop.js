@@ -1,5 +1,5 @@
 class ComponentsFullscreenDesktop {
-  init() {}
+  init() { }
 
   get isFullscreen() {
     return (
@@ -42,7 +42,7 @@ class ComponentsFullscreenDesktop {
   }
 
   _subscribeOnce() {
-    this.addListener('components.fullscreen.switch', this._fullscreenSwitchHandler.bind(this));
+    this.addListener(Urso.events.COMPONENTS_FULLSCREEN_SWITCH, this._fullscreenSwitchHandler.bind(this));
   }
 }
 
