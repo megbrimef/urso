@@ -30,8 +30,6 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         this.dropShadowDistance = Urso.helper.recursiveGet('dropShadowBlur', params, 0); // 6
         this.wordWrap = Urso.helper.recursiveGet('wordWrap', params, false);
         this.wordWrapWidth = Urso.helper.recursiveGet('wordWrapWidth', params, 100)
-
-        this.maxWidth = Urso.helper.recursiveGet('maxWidth', params, false); //todo
     }
 
     _addBaseObject() {
