@@ -111,6 +111,9 @@ class ModulesObjectsProxy {
                 scaleNeed = scaleYNeed;
         }
 
+        if (scaleNeed > 1)
+            scaleNeed = 1;
+
         target._baseObject.scale.x = scaleNeed * Math.sign(target._baseObject.scale.x);
         target._baseObject.scale.y = scaleNeed * Math.sign(target._baseObject.scale.y);
     }
