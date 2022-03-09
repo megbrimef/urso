@@ -4,6 +4,7 @@ class ModulesObjectsStyles {
 
         this._cache = {};
         this._tempObject = this.getInstance('BaseModel', {})
+        this._tempTextObject = this.getInstance('Models.Text', {})
     }
 
     refresh(parent) {
@@ -103,8 +104,10 @@ class ModulesObjectsStyles {
         if (object._originalModel[key])
             return;
 
+        const tempObject = (object.type === Urso.types.objects.TEXT) ? this._tempTextObject : this._tempObject;
+
         //restore defaults
-        Urso.objects._safeSetValueToTarget(object, key, this._tempObject[key]);
+        Urso.objects._safeSetValueToTarget(object, key, tempObject[key]);
 
         //check other styles
         for (let [selector, style] of Object.entries(object._styles))

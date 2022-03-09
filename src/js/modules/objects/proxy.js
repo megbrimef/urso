@@ -85,12 +85,38 @@ class ModulesObjectsProxy {
 
         this._setProperty(target, propertyName, value);
 
+        this._checkMaxSize(target);
+
         //setup dirty to recalc params
         if (typeof target._baseObject.dirty !== 'undefined')
             target._baseObject.dirty = true;
 
         return true;
     };
+
+    _checkMaxSize(target) {
+        if (!target.maxWidth && !target.maxHeight)
+            return;
+
+        let scaleNeed = 1;
+
+        if (target.maxWidth) {
+            scaleNeed = Math.abs((target._baseObject.scale.x * target.maxWidth) / target._baseObject.width);
+        }
+
+        if (target.maxHeight) {
+            const scaleYNeed = Math.abs((target._baseObject.scale.y * target.maxHeight) / target._baseObject.height);
+
+            if (scaleNeed > scaleYNeed)
+                scaleNeed = scaleYNeed;
+        }
+
+        if (scaleNeed > 1)
+            scaleNeed = 1;
+
+        target._baseObject.scale.x = scaleNeed * Math.sign(target._baseObject.scale.x);
+        target._baseObject.scale.y = scaleNeed * Math.sign(target._baseObject.scale.y);
+    }
 
     _runCustomFunction(property, target) {
         const funcName = property.replace('function.', '');

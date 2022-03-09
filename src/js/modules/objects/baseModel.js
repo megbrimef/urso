@@ -37,6 +37,8 @@ class ModulesObjectsBaseModel {
         this.alignY = Urso.helper.recursiveGet('alignY', params, 'top'); //or bottom or center
         this.width = Urso.helper.recursiveGet('width', params, false); //or 40% or 1456  // highest priority then scale
         this.height = Urso.helper.recursiveGet('height', params, false); //or 40% or 568  // highest priority then scale
+        this.maxWidth = Urso.helper.recursiveGet('maxWidth', params, false); //maximum width value. If objects width will be higher, it will be downscale. Do not use with scale.
+        this.maxHeight = Urso.helper.recursiveGet('maxHeight', params, false); //maximum height value. If objects height will be higher, it will be downscale. Do not use with scale.
         this.stretchingType = Urso.helper.recursiveGet('stretchingType', params, false);  //or inscribed or circumscribed //works only if width=height=100%
         this.angle = Urso.helper.recursiveGet('angle', params, 0);
         this.visible = Urso.helper.recursiveGet('visible', params, true);

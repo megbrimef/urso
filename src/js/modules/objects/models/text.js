@@ -30,15 +30,13 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         this.dropShadowDistance = Urso.helper.recursiveGet('dropShadowBlur', params, 0); // 6
         this.wordWrap = Urso.helper.recursiveGet('wordWrap', params, false);
         this.wordWrapWidth = Urso.helper.recursiveGet('wordWrapWidth', params, 100)
-
-        this.maxWidth = Urso.helper.recursiveGet('maxWidth', params, false); //todo
     }
 
     _addBaseObject() {
         if (this.localeId)
             this._originalModel.text = this.text = Urso.i18n.get(this.localeId, this.localeVariables);
 
-        this._baseObject = new PIXI.Text(this.text);
+        this._baseObject = new PIXI.Text(this.text, { fontFamily: this.fontFamily });
 
         if (this.fillCustomColors) {
             this._baseObject.fillCustomColors = this.fillCustomColors;
