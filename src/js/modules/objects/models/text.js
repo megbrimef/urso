@@ -36,7 +36,7 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         if (this.localeId)
             this._originalModel.text = this.text = Urso.i18n.get(this.localeId, this.localeVariables);
 
-        this._baseObject = new PIXI.Text(this.text);
+        this._baseObject = new PIXI.Text(this.text, { fontFamily: this.fontFamily });
 
         if (this.fillCustomColors) {
             this._baseObject.fillCustomColors = this.fillCustomColors;
