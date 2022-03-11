@@ -3,6 +3,7 @@ Urso.Core.Modules.Objects.Models = {
     BitmapText: require('./bitmapText.js'),
     Button: require('./button.js'),
     ButtonComposite: require('./buttonComposite.js'),
+    Checkbox: require('./checkbox.js'),
     Collection: require('./collection.js'),
     Component: require('./component.js'),
     Container: require('./container.js'),
@@ -13,12 +14,12 @@ Urso.Core.Modules.Objects.Models = {
     Image: require('./image.js'),
     ImagesAnimation: require('./imagesAnimation.js'),
     Mask: require('./mask.js'),
+    NineSlicePlane: require('./nineSlicePlane.js'),
+    Scrollbox: require('./scrollbox.js'),
+    Slider: require('./slider.js'),
     Spine: require('./spine.js'),
     Text: require('./text.js'),
-    Slider: require('./slider.js'),
-    Toggle: require('./toggle.js'),
-    Checkbox: require('./checkbox.js'),
-    Scrollbox: require('./scrollbox.js'),
     TextInput: require('./textInput.js'),
-    World:  require('./world.js')
+    Toggle: require('./toggle.js'),
+    World: require('./world.js')
 };
