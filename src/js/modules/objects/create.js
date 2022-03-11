@@ -98,6 +98,9 @@ class ModulesObjectsCreate {
             case Urso.types.objects.TEXTINPUT:
                 model = this.getInstance('Models.TextInput', object);
                 break;
+            case Urso.types.objects.NINESLICEPLANE:
+                model = this.getInstance('Models.NineSlicePlane', object);
+                break;
 
             default:
                 const objectName = Urso.helper.capitaliseFirstLetter(
