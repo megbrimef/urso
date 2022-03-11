@@ -198,7 +198,7 @@ class ModulesObjectsProxy {
             'wordWrap': 'style.wordWrap',
             'wordWrapWidth': 'style.wordWrapWidth',
             'leading ': 'style.leading',
-            'textAlign ': 'style.textAlign',
+            'textAlign ': 'style.align',
             'enabled': 'input.enabled',
             'cacheAsBitmap': 'cacheAsBitmap',
 
