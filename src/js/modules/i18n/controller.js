@@ -68,7 +68,10 @@ class ModulesI18nController {
     _interpolate(string, params) {
         const names = Object.keys(params);
         const vals = Object.values(params);
-        return new Function(...names, `return \`${string}\`;`)(...vals);
+        const encodedString = encodeURIComponent(string);
+        const resultEncodedString = new Function(...names, `return \`${encodedString}\`;`)(...vals);
+
+        return decodeURIComponent(resultEncodedString);
     }
 }
 
