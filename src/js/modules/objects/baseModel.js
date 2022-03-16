@@ -172,6 +172,20 @@ class ModulesObjectsBaseModel {
 
         return { x, y };
     }
+
+    /**
+     * generate texture from current object
+     * @param {String} [key]
+     * @returns {Object} - pixi.Texture
+     */
+    generateTexture(key = '') {
+        const newTexture = Urso.scenes.generateTexture(this._baseObject);
+
+        if (key)
+            Urso.cache.addTexture(key, newTexture);
+
+        return newTexture;
+    }
 }
 
 module.exports = ModulesObjectsBaseModel;

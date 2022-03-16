@@ -77,6 +77,15 @@ class ModulesScenesController {
     }
 
     /**
+     * generateTexture from object
+     * @param {Object} obj
+     * @returns {Object} - pixi.Texture
+     */
+    generateTexture(obj) {
+        return this.getInstance('PixiWrapper').generateTexture(obj);
+    }
+
+    /**
      * global timeScale getter
      */
     get timeScale() {
