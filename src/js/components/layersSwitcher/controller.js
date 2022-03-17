@@ -6,11 +6,11 @@ class ComponentsLayersSwitcherController extends Urso.Core.Components.Base.Contr
     }
 
     /**
-     * disable all layers from the list of managed layers (config.allLayers) and enables layers corresponding to the desired group (config.layers[groupName])
+     * disable all layers from the list of managed layers (config.allLayers) and enables layers corresponding to the desired group (config.groupsLayers[groupName])
      * @param {String} groupName 
      */
     _showGroup(groupName) {
-        const configLayersGroup = this._config.layers[groupName];
+        const configLayersGroup = this._config.groupsLayers[groupName];
 
         if (configLayersGroup) {
             this._config.allLayers.forEach(selectorLayers => {

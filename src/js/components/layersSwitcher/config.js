@@ -13,8 +13,8 @@ class ComponentsLayersSwitcher {
             '.bonusGame'
         ];
 
-        //layers config example
-        this.layers = {
+        //groups layers config example
+        this.groupsLayers = {
             'mainElements': ['^logo', '^mainButton', '.baseGame'],
             'background': ['.backround'],
             'granny': ['^granny'],
