@@ -5,6 +5,7 @@ class ModulesObserverConfig {
         this.list = {
             COMPONENTS_FULLSCREEN_CHANGE: 'components.fullscreen.change',
             COMPONENTS_FULLSCREEN_SWITCH: 'components.fullscreen.switch',
+            COMPONENTS_LAYERS_SWITCHER_SWITCH: 'components.layersSwitcher.switch',
             MODULES_ASSETS_GROUP_LOADED: 'modules.assets.group.loaded',
             MODULES_ASSETS_LOAD_PROGRESS: 'modules.assets.load.progress',
             MODULES_ASSETS_LAZYLOAD_FINISHED: 'modules.assets.lazyLoad.finished',
