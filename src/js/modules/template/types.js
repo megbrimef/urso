@@ -35,7 +35,8 @@ class ModulesTemplateTypes {
                 TOGGLE: 19,
                 CHECKBOX: 20,
                 SCROLLBOX: 21,
-                TEXTINPUT: 22
+                TEXTINPUT: 22,
+                NINESLICEPLANE: 23
             }
         }
     }

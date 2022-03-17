@@ -197,6 +197,8 @@ class ModulesObjectsProxy {
             'dropShadowDistance': 'style.dropShadowDistance',
             'wordWrap': 'style.wordWrap',
             'wordWrapWidth': 'style.wordWrapWidth',
+            'leading ': 'style.leading',
+            'textAlign ': 'style.align',
             'enabled': 'input.enabled',
             'cacheAsBitmap': 'cacheAsBitmap',
 

@@ -31,21 +31,22 @@ class PropertyAdapter {
             Urso.types.objects.COMPONENT,
             Urso.types.objects.CONTAINER,
             Urso.types.objects.GROUP,
-            Urso.types.objects.WORLD,
-            Urso.types.objects.SLIDER,
             Urso.types.objects.SCROLLBOX,
+            Urso.types.objects.SLIDER,
+            Urso.types.objects.WORLD
         ];
 
         this._typesWithoutAnchor = [
+            Urso.types.objects.CHECKBOX,
             Urso.types.objects.EMITTER,
             Urso.types.objects.GRAPHICS,
             Urso.types.objects.HITAREA,
             Urso.types.objects.MASK,
-            Urso.types.objects.SPINE,
+            Urso.types.objects.NINESLICEPLANE,
             Urso.types.objects.SLIDER,
+            Urso.types.objects.SPINE,
             Urso.types.objects.TEXTINPUT,
-            Urso.types.objects.CHECKBOX,
-            Urso.types.objects.WORLD,
+            Urso.types.objects.WORLD
         ];
     }
 

@@ -220,6 +220,15 @@ class ModulesScenesPixiWrapper {
         }, 16);
     }
 
+    /**
+     * generateTexture from object
+     * @param {Object} obj
+     * @returns {Object} - pixi.Texture
+     */
+     generateTexture(obj) {
+        return this.renderer.generateTexture(obj);
+    }
+
     _subscribeOnce() {
         this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE, this.visibilityChangeHandler.bind(this), true);
     }
