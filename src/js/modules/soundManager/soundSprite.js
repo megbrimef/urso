@@ -55,6 +55,9 @@ class SoundSprite {
         this._player.on('end', id => {
             const soundState = this._getSoundStateById(id);
 
+            if (!soundState)
+                return Urso.logger.error(`SoundSprite error: soundState for id '${id}' not found!`);
+
             if (!soundState.loop)
                 soundState.id = null;
         });
@@ -175,7 +178,7 @@ class SoundSprite {
         const params = { loop, relaunch, volume, soundKey };
 
         if (!self[action])
-            Urso.logger.error(`Sound action '${action}' not found!`);
+            return Urso.logger.error(`SoundSprite error: Sound action '${action}' not found!`);
 
         if (!this._isAudioUnlocked)
             this._addEventToQueue({ ...params, action });
