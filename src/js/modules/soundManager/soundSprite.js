@@ -10,6 +10,7 @@ class SoundSprite {
         this._soundsState = this._initSoundsState();
 
         this._eventsCfg = {};
+        this._fadeTweens = {};
         this._eventsQueue = [];
         this._isAudioUnlocked = false;
 
@@ -97,10 +98,12 @@ class SoundSprite {
         this._player.loop(loop, this._soundsState[soundKey].id);
     };
 
-    setVolume(soundKey, volume = 1) {
-        this._soundsState[soundKey].volume = volume;
-
+    setVolume(soundKey, volume = 1, saveVolumeState = true) {
         this._player.volume(volume, this._soundsState[soundKey].id);
+
+        if(saveVolumeState) {
+            this._soundsState[soundKey].volume = volume;
+        }
     };
 
     setAllVolume(volume) {
@@ -113,9 +116,12 @@ class SoundSprite {
     }
 
     _updateVolume() {
-        const keys = Object.keys(this._soundsState);
+        const soundKeys = Object.keys(this._soundsState);
         this._player._volume = this._totalVolume;
-        keys.forEach(key => this.setVolume(key, this._totalVolume));
+        soundKeys.forEach(soundKey => {
+            const soundVolume = this._soundsState[soundKey].volume * this._totalVolume;
+            this.setVolume(soundKey, soundVolume, false);
+        });
     }
 
     setRelaunch(soundKey, needRelaunch = false) {
@@ -146,6 +152,38 @@ class SoundSprite {
         this._customSubscribe();
     };
 
+    _stopPrevFade(soundKey) {
+        if(this._fadeTweens[soundKey]) {
+            this._fadeTweens[soundKey].kill();
+        }
+
+        delete this._fadeTweens[soundKey];
+    }
+
+    _startFade({ fadeTo, fadeDuration, soundKey }) {
+        const fadeFrom = this._soundsState[soundKey].volume;
+        const delta = fadeTo - fadeFrom;
+
+        const onUpdate = () => {
+            const volume  = fadeFrom + (delta * this._fadeTweens[soundKey].ratio);
+            this.setVolume(soundKey, volume);
+        };
+
+        this._fadeTweens[soundKey] = gsap.to({}, fadeDuration / 1000, { onUpdate });
+    }
+
+    fade({ fadeTo = 1, fadeDuration = 200, startSound = false, soundKey, ...others }) {
+        if(startSound) {
+            this.play({ ...others, soundKey });
+        }
+        if(this._soundsState[soundKey].id === null) {
+            return;
+        }
+
+        this._stopPrevFade(soundKey);
+        this._startFade({ fadeTo, fadeDuration, soundKey });
+    }
+
     _saveEvents(eventsCfg) {
         this._eventsCfg = eventsCfg;
     }
@@ -172,10 +210,10 @@ class SoundSprite {
         this._eventsQueue.push(data);
     };
 
-    _reactToEvent(soundKey, { action, loop, relaunch, volume = 0 }) {
+    _reactToEvent(soundKey, { action, volume, ...otherParams }) {
         volume *= this._totalVolume;
         const self = this;
-        const params = { loop, relaunch, volume, soundKey };
+        const params = { ...otherParams, action, soundKey, volume };
 
         if (!self[action])
             return Urso.logger.error(`SoundSprite error: Sound action '${action}' not found!`);

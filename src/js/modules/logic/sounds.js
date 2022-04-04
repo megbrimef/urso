@@ -19,19 +19,26 @@ class ModulesLogicSounds {
             const cfg = this._cfg[configName];
 
             cfg.forEach(obj => {
-                const params = {
-                    action: obj.action || 'play',
-                    relaunch: obj.relaunch || false,
-                    loop: obj.loop || false,
-                    volume: obj.volume || 1
-                };
+                const {
+                    action = 'play',
+                    relaunch = false,
+                    loop = false,
+                    volume = 1,
+                    ...otherParams
+                } = obj;
 
                 if (!mappedCfg[obj.soundKey])
                     mappedCfg[obj.soundKey] = {
                         events: {}
                     };
 
-                mappedCfg[obj.soundKey].events[obj.event] = params;
+                mappedCfg[obj.soundKey].events[obj.event] = {
+                    ...otherParams,
+                    action,
+                    relaunch,
+                    loop,
+                    volume,
+                };;
             });
         });
 

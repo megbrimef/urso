@@ -82,6 +82,7 @@ class SoundManagerController {
         this._systemVolume = ~~(state === 'visible');
         this._updateSoundVolume();
     }
+
     _updateSoundVolume() {
         const totalVolume = this._globalVolume * this._systemVolume;
         for (const key in this._sounds)
