@@ -13,6 +13,7 @@ class ModulesObjectsBaseModel {
         this._uid = Urso.helper.recursiveGet('_uid', params, false); //will setup on create
         this._templatePath = false;
         this._parsed = false;
+        this._transitions = { tweens: {} };
     }
 
     /**
@@ -44,6 +45,11 @@ class ModulesObjectsBaseModel {
         this.visible = Urso.helper.recursiveGet('visible', params, true);
         this.alpha = Urso.helper.recursiveGet('alpha', params, 1);
         this.blendMode = Urso.helper.recursiveGet('blendMode', params, 1);
+
+        this.transitionDelay = Urso.helper.recursiveGet('transitionDelay', params, false); //time in ms
+        this.transitionDuration = Urso.helper.recursiveGet('transitionDuration', params, false); //time in ms
+        this.transitionProperty = Urso.helper.recursiveGet('transitionProperty', params, false); //props list ex: 'x', 'x y', 'x y alpha'
+
         this.append = Urso.helper.recursiveGet('append', params, true); //if false - object will not created  //TODO
         this.custom = Urso.helper.recursiveGet('custom', params, {}); //custom params
     }
