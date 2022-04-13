@@ -19,7 +19,7 @@ class ModulesObjectsProxy {
             },
 
             set(target, key, value, receiver) {
-                const oldValue = target[key];
+                const oldValue = target._baseObject[key];
                 const rv = Reflect.set(target, key, value, receiver);
                 _this._customSetLogic(target, key, value, proxy, oldValue);
                 return rv;
@@ -150,6 +150,8 @@ class ModulesObjectsProxy {
         )
             return;
 
+        const baseNewValue = target._baseObject[propertyName];
+
         //remove old active tween
         const currentTween = target._transitions.tweens[propertyName];
 
@@ -161,7 +163,7 @@ class ModulesObjectsProxy {
 
         //create new tween
         const tweenParams = { duration: target.transitionDuration / 1000, ease: "none" };
-        tweenParams[propertyName] = value;
+        tweenParams[propertyName] = baseNewValue;
 
         if (target.transitionDelay)
             tweenParams.delay = target.transitionDelay / 1000;
