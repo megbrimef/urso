@@ -79,7 +79,7 @@ class ModulesTemplateService {
         this._mergeStylesAndAssets({ styles: groupTemplate.styles, assets: groupTemplate.assets })
 
         //objects
-        obj.contents = groupTemplate.objects;
+        obj.contents = groupTemplate.objects || [];
     }
 
     _processComponent(obj) {

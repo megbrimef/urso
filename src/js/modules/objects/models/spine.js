@@ -36,6 +36,21 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
+     * set skin by name
+     * @param {String} skinName 
+     */
+    setSkinByName(skinName) {
+        this._baseObject.skeleton.setSkinByName(skinName);
+    }
+
+    /**
+     * reset animation to first frame
+     */
+    setToSetupPose() {
+        this._baseObject.skeleton.setToSetupPose();
+    }
+
+    /**
      * play spine animation and execute function after animation completes
      * @param {String} animation - name of the animation to be played
      * @param {Function} func - function to be executed
@@ -50,8 +65,24 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     playInSequence(animations) {
         this.stop();
-        const defaultTrack = 0;
-        animations.forEach(e => this._baseObject.state.addAnimation(defaultTrack, e));
+        let removeSelf = () => { };
+        let animationCount = 0;
+
+        const completer = {
+            complete: () => {
+                animationCount++;
+
+                if (animations[animationCount])
+                    this.play(animations[animationCount])
+                else {
+                    removeSelf();
+                }
+            }
+        }
+
+        removeSelf = () => this._baseObject.state.removeListener(completer);
+        this._baseObject.state.addListener(completer);
+        this.play(animations[0]);
     }
 
     /**
@@ -62,14 +93,16 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     playInSequenceAndThen(animations, func) {
         let animationsLeft = animations.length;
         let removeSelf = () => { };
+
         let completer = {
             complete: () => {
                 if (--animationsLeft === 0) {
-                    func();
+                    func && func();
                     removeSelf();
                 }
             }
         };
+
         removeSelf = () => this._baseObject.state.removeListener(completer);
         this._baseObject.state.addListener(completer);
         this.playInSequence(animations);
