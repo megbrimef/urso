@@ -119,7 +119,7 @@ class SoundSprite {
         const soundKeys = Object.keys(this._soundsState);
         this._player._volume = this._totalVolume;
         soundKeys.forEach(soundKey => {
-            const soundVolume = this._soundsState[soundKey].volume * this._totalVolume;
+            const soundVolume = 1 * this._totalVolume;
             this.setVolume(soundKey, soundVolume, false);
         });
     }
@@ -211,7 +211,8 @@ class SoundSprite {
     };
 
     _reactToEvent(soundKey, { action, volume, ...otherParams }) {
-        volume *= this._totalVolume;
+        volume = 1 * this._totalVolume;
+
         const self = this;
         const params = { ...otherParams, action, soundKey, volume };
 
