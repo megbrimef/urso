@@ -1,5 +1,3 @@
-const { DisplayObject } = require("pixi.js");
-
 class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     constructor(params) {
         super(params);
@@ -178,7 +176,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
-     * 
+     * returns skeleton's child by it's name
      * @param {string} name 
      * @returns {DisplayObject}
      */
@@ -187,7 +185,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
-     * 
+     * returns skeleton's slot by it's name
      * @param {string} name 
      * @returns {Slot}
      */
@@ -196,7 +194,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
     
     /**
-     * 
+     * returns skeleton's bone by it's name
      * @param {string} name 
      * @returns {Bone}
      */
@@ -205,7 +203,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
-     * 
+     * returns animation from spineData by it's name
      * @param {string} name 
      * @returns {Animation}
      */
@@ -215,7 +213,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
 
     
     /**
-     * 
+     * returns event from spineData by it's name
      * @param {string} name 
      * @returns {EventData}
      */
