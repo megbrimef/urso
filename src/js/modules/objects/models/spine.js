@@ -1,3 +1,5 @@
+const { DisplayObject } = require("pixi.js");
+
 class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     constructor(params) {
         super(params);
@@ -173,6 +175,52 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             this._baseObject.state.clearListeners();
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
         }
+    }
+
+    /**
+     * 
+     * @param {string} name 
+     * @returns {DisplayObject}
+     */
+    getChildByName(name) {
+        return this.children[this._baseObject.skeleton.findSlotIndex(name)];
+    }
+
+    /**
+     * 
+     * @param {string} name 
+     * @returns {Slot}
+     */
+    findSlot(name) {
+        return this._baseObject.skeleton.findSlot(name)
+    }
+    
+    /**
+     * 
+     * @param {string} name 
+     * @returns {Bone}
+     */
+    findSlot(name) {
+        return this._baseObject.skeleton.findBone(name)
+    }
+
+    /**
+     * 
+     * @param {string} name 
+     * @returns {Animation}
+     */
+    findAnimation(name) {
+        return this._baseObject.spineData.findAnimation(name)
+    }
+
+    
+    /**
+     * 
+     * @param {string} name 
+     * @returns {EventData}
+     */
+    findEvent(name) {
+        return this._baseObject.spineData.findEvent(name)
     }
 
     /**
