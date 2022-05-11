@@ -176,6 +176,52 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
+     * returns skeleton's child by it's name
+     * @param {string} name 
+     * @returns {DisplayObject}
+     */
+    getChildByName(name) {
+        return this.children[this._baseObject.skeleton.findSlotIndex(name)];
+    }
+
+    /**
+     * returns skeleton's slot by it's name
+     * @param {string} name 
+     * @returns {Slot}
+     */
+    findSlot(name) {
+        return this._baseObject.skeleton.findSlot(name)
+    }
+    
+    /**
+     * returns skeleton's bone by it's name
+     * @param {string} name 
+     * @returns {Bone}
+     */
+    findSlot(name) {
+        return this._baseObject.skeleton.findBone(name)
+    }
+
+    /**
+     * returns animation from spineData by it's name
+     * @param {string} name 
+     * @returns {Animation}
+     */
+    findAnimation(name) {
+        return this._baseObject.spineData.findAnimation(name)
+    }
+
+    
+    /**
+     * returns event from spineData by it's name
+     * @param {string} name 
+     * @returns {EventData}
+     */
+    findEvent(name) {
+        return this._baseObject.spineData.findEvent(name)
+    }
+
+    /**
      * system function
      * add object to pixi tree
      */
