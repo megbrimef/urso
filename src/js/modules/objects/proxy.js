@@ -19,8 +19,9 @@ class ModulesObjectsProxy {
             },
 
             set(target, key, value, receiver) {
+                const oldValue = target._baseObject[key];
                 const rv = Reflect.set(target, key, value, receiver);
-                _this._customSetLogic(target, key, value, proxy);
+                _this._customSetLogic(target, key, value, proxy, oldValue);
                 return rv;
             }
         });
@@ -32,13 +33,15 @@ class ModulesObjectsProxy {
      * propertyName - property to adapt for PIXI object 
      * value - value to set
      */
-    _setProperty(target, propertyName, value) {
+    _setProperty(target, propertyName, value, oldValue) {
         const isAdaptiveProperty = this._propertyAdapter.isAdaptiveProperty(propertyName);
 
         if (isAdaptiveProperty)
             this._propertyAdapter.propertyChangeHandler(target, propertyName);
         else
             Urso.helper.recursiveSet(propertyName, value, target._baseObject);
+
+        this._checkNeedTransitions(target, propertyName, value, oldValue);
     }
 
     safeSetValueToTarget(target, key, value) {
@@ -66,7 +69,7 @@ class ModulesObjectsProxy {
         return Urso.helper.recursiveGet(wrapKey, target._baseObject, reflectValue);
     }
 
-    _customSetLogic(target, key, value, proxy) {
+    _customSetLogic(target, key, value, proxy, oldValue) {
         if (!this._getOriginalModelExceptions().includes(key))
             target._originalModel[key] = value;
 
@@ -83,7 +86,7 @@ class ModulesObjectsProxy {
 
         this._checkSelectorProperties(key);
 
-        this._setProperty(target, propertyName, value);
+        this._setProperty(target, propertyName, value, oldValue);
 
         this._checkMaxSize(target);
 
@@ -129,6 +132,48 @@ class ModulesObjectsProxy {
             Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector propertie: ' + key);
             Urso.logger.error('Notice: use functions addClass, removeClass, setId, setName');
         }
+    }
+
+    /**
+     * transitions tweens creation
+     * @param {Object} target - ObjectsModel
+     * @param {String} propertyName
+     * @param {Number} value
+     * @param {Number} oldValue
+     */
+    _checkNeedTransitions(target, propertyName, value, oldValue) {
+        if (
+            typeof oldValue === 'undefined' ||
+            !target.transitionProperty ||
+            !target.transitionDuration ||
+            !target.transitionProperty.split(' ').includes(propertyName)
+        )
+            return;
+
+        const baseNewValue = target._baseObject[propertyName];
+
+        //remove old active tween
+        const currentTween = target._transitions.tweens[propertyName];
+
+        if (currentTween)
+            currentTween.kill();
+
+        //set base value
+        target._baseObject[propertyName] = oldValue;
+
+        //create new tween
+        const tweenParams = { duration: target.transitionDuration / 1000, ease: "none" };
+        tweenParams[propertyName] = baseNewValue;
+
+        if (target.transitionDelay)
+            tweenParams.delay = target.transitionDelay / 1000;
+
+        const newTween = gsap.to(target._baseObject, tweenParams);
+        target._transitions.tweens[propertyName] = newTween;
+
+        newTween.eventCallback("onComplete", () => {
+            target._transitions.tweens[propertyName] = null;
+        });
     }
 
     _getSelectorProperties() {

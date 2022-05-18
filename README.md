@@ -1,7 +1,7 @@
 URSO — The HTML5 Game Framework
 =============
 
-![pixi.js logo](https://ursojs.io/img/logo.png)
+![ursojs.io logo](https://ursojs.io/img/logo.png)
 
 ### Learn more ###
 - You can find more information on the [official website](https://ursojs.io/)
