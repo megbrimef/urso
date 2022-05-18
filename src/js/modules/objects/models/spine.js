@@ -198,7 +198,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      * @param {string} name 
      * @returns {Bone}
      */
-    findSlot(name) {
+    findBone(name) {
         return this._baseObject.skeleton.findBone(name)
     }
 
