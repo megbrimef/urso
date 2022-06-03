@@ -6,6 +6,8 @@ class ModulesI18nController {
      * get text by localeId
      * @param {String} localeId 
      * @param {Object} [localeVariables] - variables for locale string
+     *
+     * @example get('Some333 ${bet} " `test ${multi} text localized', {bet:12,multi:13})
      */
     get(localeId, localeVariables = {}) {
         if (this.#vocabulary && this.#vocabulary[localeId]) {
@@ -66,12 +68,11 @@ class ModulesI18nController {
     }
 
     _interpolate(string, params) {
-        const names = Object.keys(params);
-        const vals = Object.values(params);
-        const encodedString = encodeURIComponent(string);
-        const resultEncodedString = new Function(...names, `return \`${encodedString}\`;`)(...vals);
+        for (const [key, value] of Object.entries(params)) {
+            string = Urso.helper.stringReplace('${' + key + '}', value, string);
+        }
 
-        return decodeURIComponent(resultEncodedString);
+        return string
     }
 }
 
