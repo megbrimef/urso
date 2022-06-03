@@ -55,7 +55,7 @@ class ModulesScenesResolutions {
             this._currentOrientation = this._templateSize.orientation;
 
             //update InstancesModes
-            Object.values(Urso.device.ScreenOrientation).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation'));
+            Object.values(Urso.device.ScreenOrientation).forEach((orientationValue) => Urso.removeInstancesMode(orientationValue + 'Orientation', true));
             Urso.addInstancesMode(this._templateSize.orientation + 'Orientation');
 
             this.emit(Urso.events.MODULES_SCENES_ORIENTATION_CHANGE, this._templateSize.orientation);
