@@ -23,6 +23,10 @@ class LibLoader {
     _getLoadPath(asset) {
         const { path } = asset;
 
+        if (path.indexOf('http') === 0) { //if absolute path - just return
+            return path;
+        }
+
         if (!Urso.config.useBinPath) {
             return `assets/${path}`;
         }
