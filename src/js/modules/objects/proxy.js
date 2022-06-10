@@ -101,6 +101,22 @@ class ModulesObjectsProxy {
         if (!target.maxWidth && !target.maxHeight)
             return;
 
+        let calculationNeed = false;
+
+        const baseObject = target._baseObject;
+        const baseObjectWidth = baseObject._texture ? Math.abs(baseObject.scale.x) * baseObject._texture.orig.width : target._baseObject.width;
+        const baseObjectHeight = baseObject._texture ? Math.abs(baseObject.scale.x) * baseObject._texture.orig.height : target._baseObject.height;
+
+        if (target.maxWidth && target.maxWidth < baseObjectWidth) //check maxWidth
+            calculationNeed = true;
+
+        if (target.maxHeight && target.maxHeight < baseObjectHeight) //check maxHeight
+            calculationNeed = true;
+
+        if (!calculationNeed)
+            return;
+
+
         let scaleNeed = 1;
 
         if (target.maxWidth) {
