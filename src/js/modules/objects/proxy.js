@@ -117,7 +117,6 @@ class ModulesObjectsProxy {
         if (!calculationNeed)
             return;
 
-
         let scaleNeed = 1;
 
         if (target.maxWidth) {
