@@ -88,6 +88,11 @@ class ModulesObjectsProxy {
 
         this._setProperty(target, propertyName, value, oldValue);
 
+        //if property is text - we will update it
+        if (propertyName === 'text') {
+            target._baseObject.updateText(true);
+        }
+
         this._checkMaxSize(target);
 
         //setup dirty to recalc params
