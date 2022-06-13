@@ -104,7 +104,12 @@ class ModulesObjectsProxy {
         let calculationNeed = false;
 
         const baseObject = target._baseObject;
+
         //Pixi texts have _texture.orig.width. When we call baseObject.width, Pixi runs update text. Its too slow operation.
+        if (baseObject._texture && (!baseObject._texture.orig.width || baseObject._texture.orig.height)) {
+            baseObject.updateText(true);
+        }
+
         const baseObjectWidth = baseObject._texture ? Math.abs(baseObject.scale.x) * baseObject._texture.orig.width : baseObject.width;
         const baseObjectHeight = baseObject._texture ? Math.abs(baseObject.scale.y) * baseObject._texture.orig.height : baseObject.height;
 
