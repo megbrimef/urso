@@ -64,6 +64,24 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      * @param {String[]} animations - names of the animations to be played
      */
     playInSequence(animations) {
+        this._playInSequenceAndThen(animations);
+    }
+
+    /**
+     * play spine animations in sequence and execute function after last animation completes
+     * @param {String[]} animations - names of the animations to be played
+     * @param {Function} func - function to be executed
+     */
+    playInSequenceAndThen(animations, func) {
+        this._playInSequenceAndThen(animations, func);
+    }
+
+    /**
+     * play spine animations in sequence and execute function after last animation completes
+     * @param {String[]} animations - names of the animations to be played
+     * @param {Function} func - function to be executed
+     */
+    _playInSequenceAndThen(animations, func) {
         this.stop();
         let removeSelf = () => { };
         let animationCount = 0;
@@ -75,6 +93,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
                 if (animations[animationCount])
                     this.play(animations[animationCount])
                 else {
+                    func && func();
                     removeSelf();
                 }
             }
@@ -83,29 +102,6 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         removeSelf = () => this._baseObject.state.removeListener(completer);
         this._baseObject.state.addListener(completer);
         this.play(animations[0]);
-    }
-
-    /**
-     * play spine animations in sequence and execute function after last animation completes
-     * @param {String[]} animations - names of the animations to be played
-     * @param {Function} func - function to be executed
-     */
-    playInSequenceAndThen(animations, func) {
-        let animationsLeft = animations.length;
-        let removeSelf = () => { };
-
-        let completer = {
-            complete: () => {
-                if (--animationsLeft === 0) {
-                    func && func();
-                    removeSelf();
-                }
-            }
-        };
-
-        removeSelf = () => this._baseObject.state.removeListener(completer);
-        this._baseObject.state.addListener(completer);
-        this.playInSequence(animations);
     }
 
     /**
@@ -192,7 +188,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     findSlot(name) {
         return this._baseObject.skeleton.findSlot(name)
     }
-    
+
     /**
      * returns skeleton's bone by it's name
      * @param {string} name 
@@ -211,7 +207,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         return this._baseObject.spineData.findAnimation(name)
     }
 
-    
+
     /**
      * returns event from spineData by it's name
      * @param {string} name 
