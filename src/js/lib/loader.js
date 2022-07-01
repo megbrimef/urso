@@ -92,7 +92,7 @@ class LibLoader {
      * start loading assets from assets query
      * @param {Function} callback 
      */
-     start(callback) {
+    start(callback) {
         if (this._isRunning)
             return false;
 
