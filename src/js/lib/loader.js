@@ -23,6 +23,10 @@ class LibLoader {
     _getLoadPath(asset) {
         const { path } = asset;
 
+        if (path.indexOf('http') === 0) { //if absolute path - just return
+            return path;
+        }
+
         if (!Urso.config.useBinPath) {
             return `assets/${path}`;
         }
@@ -93,8 +97,13 @@ class LibLoader {
             return false;
 
         this._isRunning = true;
-
         const loader = new PIXI.Loader();
+        const appVersion = Urso.config.appVersion;
+
+        if (appVersion) {
+            loader.defaultQueryString = `appVersion=${appVersion}`;
+        }
+
         this._assetsQuery.forEach(asset => {
             // TODO: check to load
 

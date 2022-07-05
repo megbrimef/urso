@@ -88,6 +88,11 @@ class ModulesObjectsProxy {
 
         this._setProperty(target, propertyName, value, oldValue);
 
+        //if property is text - we will update it
+        if (propertyName === 'text') {
+            target._baseObject.updateText(true);
+        }
+
         this._checkMaxSize(target);
 
         //setup dirty to recalc params
@@ -99,6 +104,27 @@ class ModulesObjectsProxy {
 
     _checkMaxSize(target) {
         if (!target.maxWidth && !target.maxHeight)
+            return;
+
+        let calculationNeed = false;
+
+        const baseObject = target._baseObject;
+
+        //Pixi texts have _texture.orig.width. When we call baseObject.width, Pixi runs update text. Its too slow operation.
+        if (baseObject._texture && (!baseObject._texture.orig.width || !baseObject._texture.orig.height)) {
+            baseObject.updateText(true);
+        }
+
+        const baseObjectWidth = baseObject._texture ? Math.abs(baseObject.scale.x) * baseObject._texture.orig.width : baseObject.width;
+        const baseObjectHeight = baseObject._texture ? Math.abs(baseObject.scale.y) * baseObject._texture.orig.height : baseObject.height;
+
+        if (target.maxWidth && target.maxWidth < baseObjectWidth) //check maxWidth
+            calculationNeed = true;
+
+        if (target.maxHeight && target.maxHeight < baseObjectHeight) //check maxHeight
+            calculationNeed = true;
+
+        if (!calculationNeed)
             return;
 
         let scaleNeed = 1;

@@ -42,7 +42,6 @@ class ModulesObjectsStyles {
                     delete this._cache[selector];
             }
         }
-
     }
 
     _apply(selector, style) {
@@ -68,7 +67,7 @@ class ModulesObjectsStyles {
     _globalResetStyles() {
         for (let [selector, selectorCache] of Object.entries(this._cache)) {
             for (let [uid, object] of Object.entries(selectorCache))
-                this._removeSelectorStyles(object, selector);
+                this._removeSelectorStyles(object, selector, true);
 
             delete this._cache[selector];
         }
@@ -84,7 +83,7 @@ class ModulesObjectsStyles {
             }
     }
 
-    _removeSelectorStyles(object, selector) {
+    _removeSelectorStyles(object, selector, globalResetFlag) {
         delete object._styles[selector];
         let template = Urso.template.get();
         let styles = template.styles[selector];
@@ -94,12 +93,12 @@ class ModulesObjectsStyles {
         }
 
         for (let [key, value] of Object.entries(styles)) {
-            this._restoreValueByKey(key, object);
+            this._restoreValueByKey(key, object, globalResetFlag);
         }
 
     }
 
-    _restoreValueByKey(key, object) {
+    _restoreValueByKey(key, object, globalResetFlag) {
         //check own
         if (object._originalModel[key])
             return;
@@ -110,9 +109,11 @@ class ModulesObjectsStyles {
         Urso.objects._safeSetValueToTarget(object, key, tempObject[key]);
 
         //check other styles
-        for (let [selector, style] of Object.entries(object._styles))
-            if (typeof style[key] !== 'undefined')
-                Urso.objects._safeSetValueToTarget(object, key, style[key]);
+        if (!globalResetFlag) {
+            for (let [selector, style] of Object.entries(object._styles))
+                if (typeof style[key] !== 'undefined')
+                    Urso.objects._safeSetValueToTarget(object, key, style[key]);
+        }
     }
 }
 

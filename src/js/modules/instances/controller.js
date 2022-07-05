@@ -36,14 +36,24 @@ class ModulesInstancesController {
         return true;
     }
 
-    removeMode(mode) {
+    /**
+     * remove mode from system
+     * @param {String} mode
+     * @param {Boolean} passiveMode - do not refresh styles
+     * @returns
+     */
+    removeMode(mode, passiveMode) {
         let index = this._modes.indexOf(mode);
 
         if (index === -1)
             return false;
 
         this._modes.splice(index, 1);
-        Urso.observer.emit(Urso.events.MODULES_INSTANCES_MODES_CHANGED);
+
+        if (!passiveMode) {
+            Urso.observer.emit(Urso.events.MODULES_INSTANCES_MODES_CHANGED);
+        }
+
         return true;
     }
 
