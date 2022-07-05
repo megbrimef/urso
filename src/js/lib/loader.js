@@ -97,8 +97,13 @@ class LibLoader {
             return false;
 
         this._isRunning = true;
-
         const loader = new PIXI.Loader();
+        const appVersion = Urso.config.appVersion;
+
+        if (appVersion) {
+            loader.defaultQueryString = `appVersion=${appVersion}`;
+        }
+
         this._assetsQuery.forEach(asset => {
             // TODO: check to load
 
