@@ -41,7 +41,20 @@ class ModulesObjectsModelsEmitter extends Urso.Core.Modules.Objects.BaseModel {
             if (texture)
                 textures.push(texture);
         }
-        this.emitter = new PIXI.particles.Emitter(this._baseObject, textures, cfg.data);
+
+        if (textures.length > 1) {
+            const texturesOptions = {
+                framerate: 20,
+                loop: true,
+                textures
+            };
+
+            this.emitter = new PIXI.particles.Emitter(this._baseObject, texturesOptions, cfg.data);
+            this.emitter.particleConstructor = PIXI.particles.AnimatedParticle; //import { AnimatedParticle } from "pixi-particles";
+        } else {
+            this.emitter = new PIXI.particles.Emitter(this._baseObject, textures, cfg.data);
+        }
+
         this.emitter.emit = this.autostart;
         this.emitter.autoUpdate = true;
     }
