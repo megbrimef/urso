@@ -32,7 +32,7 @@ class ModulesScenesPixiWrapper {
         this._createWorld();
 
         // setup interaction
-        this.interaction = new PIXI.InteractionManager({ root: this._root, view: this.renderer.view });
+        this.interaction = new PIXI.InteractionManager(this.renderer);
 
         this._loaderScene = this.getInstance('Model');
         this._requestAnimFrame(this.loop);
