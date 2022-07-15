@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.4.50",
+  "version": "0.4.51",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",
@@ -23,6 +23,7 @@
   "homepage": "https://github.com/megbrimef/urso#readme",
   "dependencies": {
     "@pixi/filter-drop-shadow": "^3.2.0",
+    "@urso/revolt-fx": "^0.1.0",
     "gsap": "^3.1.1",
     "howler": "^2.2.1",
     "pixi-particles": "^4.3.0",

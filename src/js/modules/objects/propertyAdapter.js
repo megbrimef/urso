@@ -39,6 +39,7 @@ class PropertyAdapter {
         this._typesWithoutAnchor = [
             Urso.types.objects.CHECKBOX,
             Urso.types.objects.EMITTER,
+            Urso.types.objects.EMITTERFX,
             Urso.types.objects.GRAPHICS,
             Urso.types.objects.HITAREA,
             Urso.types.objects.MASK,

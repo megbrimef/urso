@@ -8,6 +8,7 @@ Urso.Core.Modules.Objects.Models = {
     Component: require('./component.js'),
     Container: require('./container.js'),
     Emitter: require('./emitter.js'),
+    EmitterFx: require('./emitterFx.js'),
     Graphics: require('./graphics.js'),
     Group: require('./group.js'),
     HitArea: require('./hitArea.js'),
