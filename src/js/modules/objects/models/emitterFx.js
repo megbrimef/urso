@@ -5,10 +5,12 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
         this.type = Urso.types.objects.EMITTERFX;
 
         this.emitter = null;
+        this.update = this.update.bind(this);
 
         this._addBaseObject();
-        this._createBundle();
+        this._createBundle();   
     }
+
     /**
      * 
      * @param {Object} params
@@ -47,6 +49,7 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
         this._emitter = this._bundle.getParticleEmitter(emitterName);
         this._emitter.init(this._baseObject, true, 1);
     }
+
     /**
      * 
      * Stops emitter. If new emitter wasn't inited before particles disappears - clears this._emitter to stop bundle update.
@@ -70,7 +73,6 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
 
     _createBundle() {
         this._bundle = new PIXI.particlesFx.FX();
-
         let fx_settings_data = Urso.cache.getJson(this.cfg).data;
 
         if(this.spritesheetFilter)
@@ -83,7 +85,14 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
     }
 
     _subscribeOnce() {
-        this.addListener(Urso.events.MODULES_SCENES_UPDATE, this.update.bind(this))
+        this.addListener(Urso.events.MODULES_SCENES_UPDATE, this.update);
+    }
+
+    _customDestroy() {
+        this.removeListener(Urso.events.MODULES_SCENES_UPDATE, this.update);
+        this._emitter.stop(false);
+        this._bundle = null;
+        this._emitter = null;
     }
 }
 
