@@ -101,6 +101,9 @@ class ModulesObjectsCreate {
             case Urso.types.objects.NINESLICEPLANE:
                 model = this.getInstance('Models.NineSlicePlane', object);
                 break;
+            case Urso.types.objects.EMITTERFX:
+                model = this.getInstance('Models.EmitterFx', object);
+                break;
 
             default:
                 const objectName = Urso.helper.capitaliseFirstLetter(

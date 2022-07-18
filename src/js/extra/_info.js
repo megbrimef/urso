@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js';
 window.PIXI = PIXI;
 window.PIXI.particles = require('pixi-particles');
 
+window.PIXI.particlesFx = require('@urso/revolt-fx');
+
 import { DropShadowFilter } from '@pixi/filter-drop-shadow';
 PIXI.filters['DropShadowFilter'] = DropShadowFilter;
 
