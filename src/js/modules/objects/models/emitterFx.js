@@ -8,7 +8,6 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
 
         this._addBaseObject();
         this._createBundle();
-        this._createTicker();
     }
     /**
      * 
@@ -32,7 +31,7 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
 
     update(deltaTime) {
         if (this._emitter) {
-            this._bundle.update(deltaTime);
+            this._bundle.update(deltaTime * PIXI.settings.TARGET_FPMS);
         }
     }
 
@@ -83,10 +82,8 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
         this.autostart && this.play();
     }
 
-    _createTicker() {
-        this._ticker = new PIXI.Ticker();
-        this._ticker.add(this.update.bind(this));
-        this._ticker.start();
+    _subscribeOnce() {
+        this.addListener(Urso.events.MODULES_SCENES_UPDATE, this.update.bind(this))
     }
 }
 
