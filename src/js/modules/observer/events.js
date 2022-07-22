@@ -12,6 +12,7 @@ class ModulesObserverConfig {
             MODULES_I18N_NEW_LOCALE_WAS_SET: 'modules.i18n.new.locale.was.set',
             MODULES_INSTANCES_MODES_CHANGED: 'modules.instances.modes.changed',
             MODULES_OBJECTS_BUTTON_PRESS: 'modules.objects.button.press',
+            MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK: 'modules.objects.dragContainer.switchBlock',
             MODULES_OBJECTS_HIT_AREA_PRESS: 'modules.objects.hitArea.press',
             MODULES_OBJECTS_SLIDER_HANDLE_MOVE: 'modules.objects.slider.handleMove',
             MODULES_OBJECTS_SLIDER_HANDLE_DROP: 'modules.objects.slider.handleDrop',
