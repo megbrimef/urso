@@ -1,7 +1,5 @@
 //setup custom log level with:  ?logLevel=1,2,3,4  OR  ?logLevel=ERROR,WARNING,INFO,LOG
 
-const DEFAULT_LOG_LEVEL = 'ERROR,WARNING,INFO,LOG'; //also can be 0,1,2,3
-
 const LEVELS = [
     'ERROR',
     'WARNING',
@@ -52,7 +50,7 @@ class LibLogger {
      * setup logging levels
      */
     _setupLevels() {
-        const logLevelsString = Urso.helper.parseGetParams('logLevel') || DEFAULT_LOG_LEVEL;
+        const logLevelsString = Urso.helper.parseGetParams('logLevel') || Urso.config.defaultLogLevel;
         const logLevelsArray = logLevelsString.split(',');
 
         for (const [index, level] of Object.entries(LEVELS)) {
