@@ -48,8 +48,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     }
 
     _setResizeReactively() {
-        Urso.helper.reactive(this._baseObject, 'width', () => this.resize());
-        Urso.helper.reactive(this._baseObject, 'height', () => this.resize());
+        Urso.helper.reactive(this, 'width', () => this.resize());
+        Urso.helper.reactive(this, 'height', () => this.resize());
     }
 
     _setupDragContainer() {

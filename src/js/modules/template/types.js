@@ -37,7 +37,8 @@ class ModulesTemplateTypes {
                 SCROLLBOX: 21,
                 TEXTINPUT: 22,
                 NINESLICEPLANE: 23,
-                EMITTERFX: 24
+                EMITTERFX: 24,
+                DRAGCONTAINER: 25
             }
         }
     }
