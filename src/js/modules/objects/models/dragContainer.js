@@ -1,48 +1,55 @@
-
+const ModulesObjectsModelsContainer = require('./container.js');
 const containers = [];
 
-class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models.Container {
+class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     _mask = null;
     _interactiveLayer = null;
     _filler = null;
     _startPosition = null;
     _startY = 0;
-    _ofsetStartY = 0;
+    _offsetStartY = 0;
     _needBlock = false;
-    _scrollSpeed = 2;
     _needMoveSlider = true;
     _moveStartedY = 0;
     _dragStarted = false;
-    _anException = 'mainDrag';
-    _needBlockAllDrags = false;
-    _easingTime = 1.5;
 
     constructor(params) {
         super(params);
         this.type = Urso.types.objects.DRAGCONTAINER;
-        this.addListener('modules.objects.styles.resize', () => Urso.setTimeout(() => {
-            this.resize(true)
-        }, 0));
-        this.addListener('components.loader.gameCreated', () => this.resize());
-
-
         this._setupDragContainer();
 
         this._resizeInteractiveLayer();
         this._resizeMask();
+        this._setResizeReactively();
         this._setEvents();
 
         containers.push(this);
     }
 
-    resize(moveMask) {
+    get _moveInProgress() {
+        return this._interactiveLayer.visible
+    }
 
+    set _moveInProgress(inProgress) {
+        this._interactiveLayer.visible = inProgress;
+    }
+    setVisibility() {}
+    /**
+     * 
+     * @param { Boolean } needResetMaskY
+     */
+    resize(needResetMaskY) {
         this._resizeInteractiveLayer();
         this._resizeMask();
 
-        if (moveMask) {
+        if (needResetMaskY) {
             this._mask.y = 0;
         }
+    }
+
+    _setResizeReactively() {
+        Urso.helper.reactive(this._baseObject, 'width', () => this.resize());
+        Urso.helper.reactive(this._baseObject, 'height', () => this.resize());
     }
 
     _setupDragContainer() {
@@ -62,14 +69,8 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
         this.speed = Urso.helper.recursiveGet('speed', params, 1);
         this.dragIndex = Urso.helper.recursiveGet('dragIndex', params, 0);
         this.sliderClass = Urso.helper.recursiveGet('sliderClass', params, false);
-    }
-
-    get _moveInProgress() {
-        return this._interactiveLayer.visible
-    }
-
-    set _moveInProgress(inProgress) {
-        this._interactiveLayer.visible = inProgress;
+        this.onMoveCallback = Urso.helper.recursiveGet('onMoveCallback', params, false);
+        this.easingTime = Urso.helper.recursiveGet('easingTime', params, 1.5); 
     }
 
     _isActive({ x, y }) {
@@ -96,39 +97,19 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
         this._slider.visible = this.height < this._baseObject.height;
     }
 
-    _setNeedBlock(nameDrag) {
-        if (this._needBlockAllDrags) {
-            this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, { names: ['*'], needBlock: true });
-            return;
-        }
-
-        if (Urso.localData.get('openMenu')) {
-            this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, { names: ['*'], needBlock: true });
-            if (nameDrag !== this._anException) {
-            
-                Urso.observer.fire('modules.objects.dragContainer.switchBlock', { names: [nameDrag], needBlock: false });
-            } else {
-                return
-            }
-        } else {
-            Urso.observer.fire('modules.objects.dragContainer.switchBlock', { names: ['*'], needBlock: false });
-        }
-    }
-
-    _product(pX, pY, aX, aY, bX, bY) {
+    _calculatePoint(pX, pY, aX, aY, bX, bY) {
         return (bX - aX) * (pY - aY) - (bY - aY) * (pX - aX);
     }
 
     _checkPointerOver(p, p1, p2, p3, p4) {
-        const v1 = this._product(p.x, p.y, p1.x, p1.y, p2.x, p2.y);
-        const v2 = this._product(p.x, p.y, p2.x, p2.y, p3.x, p3.y);
-        const v3 = this._product(p.x, p.y, p3.x, p3.y, p4.x, p4.y);
-        const v4 = this._product(p.x, p.y, p4.x, p4.y, p1.x, p1.y);
-        return (v1 < 0 && v2 < 0 && v3 < 0 && v4 < 0) || (v1 > 0 && v2 > 0 && v3 > 0 && v4 > 0)
+        const point1 = this._calculatePoint(p.x, p.y, p1.x, p1.y, p2.x, p2.y);
+        const point2 = this._calculatePoint(p.x, p.y, p2.x, p2.y, p3.x, p3.y);
+        const point3 = this._calculatePoint(p.x, p.y, p3.x, p3.y, p4.x, p4.y);
+        const point4 = this._calculatePoint(p.x, p.y, p4.x, p4.y, p1.x, p1.y);
+        return (point1 < 0 && point2 < 0 && point3 < 0 && point4 < 0) || (point1 > 0 && point2 > 0 && point3 > 0 && point4 > 0)
     }
 
     _getObjectPoints(container) {
-
         if (Urso.device.desktop) {
             const { x, y } = this._getPatentScaleRecursive(this);
             const { width, height } = container._mask;
@@ -142,11 +123,9 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
             ];
 
         } else {
-
             const { x, y } = container._mask.toGlobal(new PIXI.Point(0, 0));
             const { width, height } = container._mask;
             const { scaleX, scaleY } = this._getPatentScaleRecursive(this);
-
             return [
                 { x, y },
                 { x: x + width * scaleX, y },
@@ -178,7 +157,7 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
 
         if (Math.abs(this._moveStartedY - offset) > 15 && !this._dragStarted) {
             this._dragStarted = true;
-            this.emit('modules.objects.dragContainer.dragStarted')
+            this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_DRAG_STARTED, { name: this.name, className: this.class, id: this.id });
         }
     }
 
@@ -187,10 +166,10 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
         return { x: clientX, y: clientY };
     }
 
-    _documentPointerEnd(e) {
+    _documentPointerEnd() {
         const timeDelta = Date.now() - this._lastMoveTime;
+        this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, { names: ['*'], needBlock: false });
 
-        Urso.observer.fire('modules.objects.dragContainer.switchBlock', { names: ['*'], needBlock: false });
         if (this._wasMoved && timeDelta < 100)
             this._startMoveEasing();
         else
@@ -210,7 +189,7 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
 
 
         let obj = { y: this._baseObject.y };
-        this._easingTween = gsap.to(obj, this._easingTime, {
+        this._easingTween = gsap.to(obj, this.easingTime, {
             y: targetY, ease: 'power2',
             onUpdate: () => {
                 this._move(obj.y, true);
@@ -242,10 +221,9 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
 
     _onMoveComplete() {
         this._moveInProgress = false;
-
         this._dragStarted = false;
         this._isWheelMove = false;
-        this.emit('modules.objects.dragContainer.dragFinished');
+        this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_DRAG_FINISHED, { name: this.name, className: this.class, id: this.id });
         this._isBorder = false;
     }
 
@@ -296,20 +274,24 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
 
     _move(dY, isWheel) {
         this._lastMoveTime = Date.now();
-        this._setNeedBlock(this.name);
+        this._onMoveCallback();
         const y = this._validateY(dY, isWheel);
         this._setNewPosition(y, dY);
         this._mask.y = -y;
         this._interactiveLayer.y = -y;
-        this._needMoveSlider && this._setSliderPosition(y)
+        this._needMoveSlider && this._setSliderPosition(y);
+    }
+
+    _onMoveCallback() {
+        this.onMoveCallback && this.onMoveCallback();
     }
 
     _setSlider() {
         if (!this.sliderClass)
             return;
 
-        const sliderCont = this.parent.contents.find(obj => obj.class && obj.class.indexOf(this.sliderClass) !== -1)
-        this._slider = sliderCont.contents[0];
+        this._slider = Urso.findOne(`.${this.sliderClass}`);
+        
     }
 
     _setSliderPosition(y) {
@@ -344,19 +326,19 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
 
         document.addEventListener('mousedown', (e) => {
             this._moveStartedY = e.offsetY;
-            this._documentPointerStart(e)
+            this._documentPointerStart(e);
             document.addEventListener('mousemove', eventCallback);
         });
         document.addEventListener('mouseup', (e) => {
-            this._documentPointerEnd(e)
+            this._documentPointerEnd(e);
             document.removeEventListener('mousemove', eventCallback);
         });
 
         document.addEventListener('touchstart', (e) => {
-            this._ofsetStartY = e.changedTouches[0].offsetY;
+            this._offsetStartY = e.changedTouches[0].offsetY;
             this._moveStartedY = e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
 
-            this._documentPointerStart(e)
+            this._documentPointerStart(e);
         });
         document.addEventListener('touchmove', (e) => this._documentPointerMove(e));
         document.addEventListener('touchend', (e) => this._documentPointerEnd(e));
@@ -366,7 +348,6 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
     }
 
     _documentWheelScroll({ x, y, deltaY }) {
-
         if (Urso.device.desktop) {
             x = Urso.scenes.getMouseCoords().x;
             y = Urso.scenes.getMouseCoords().y;
@@ -381,9 +362,9 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
         const { x: startX, y: startY } = this._baseObject;
         this._startPosition = { x: startX, y: startY };
         this._moveStartY = this._getStartY();
-        const nextY = startY - deltaY
+        const nextY = startY - deltaY;
 
-        this.emit('modules.objects.dragContainer.scroll');
+        this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SCROLL, { name: this.name, className: this.class, id: this.id });
 
         this._move(nextY, true);
         this._startMoveEasing()
@@ -452,7 +433,6 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
     }
 
     _onScrollSliderMove({ position, class: className }) {
-
         if (className !== this.sliderClass)
             return
 
@@ -470,26 +450,27 @@ class ModulesObjectsModelsDragContainer extends Urso.Core.Modules.Objects.Models
     }
 
     _sliderHandleDrop({ class: className }) {
-
         if (className === this.sliderClass)
             this._needMoveSlider = true;
     }
 
-    _checkOpenPopup(isOpen) {
-        this._needBlockAllDrags = isOpen;
+    /**
+     * function recieves an array of dragcontainer's names or ['*'] if we need block all dragContainers
+     * @param { Array } names 
+     * @param { Boolean } needBlock 
+     */
+    _switchBlock({ names = [], needBlock }) {
+        if (names.includes(this.name) || names.includes('*')) {
+            this._needBlock = needBlock;
+        }
     }
 
     _subscribeOnce() {
         this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, this._onScrollSliderMove.bind(this));
         this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_DROP, this._sliderHandleDrop.bind(this));
-        this.addListener('components.loader.gameCreated', this._setSlider.bind(this), true);
-        this.addListener('modules.objects.dragContainer.switchBlock', ({ names = [], needBlock }) => {
-            if (names.includes(this.name) || names.includes('*')) {
-                this._needBlock = needBlock;
-            }
-        }, true);
-
-        this.addListener('components.popup.open', this._checkOpenPopup.bind(this));
+        this.addListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSlider.bind(this), true);
+        this.addListener(Urso.events.COMPONENTS_LOADER_GAME_CREATED, this._setSlider.bind(this), true);
+        this.addListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, this._switchBlock.bind(this), true);
     }
 }
 

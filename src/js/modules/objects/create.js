@@ -104,7 +104,9 @@ class ModulesObjectsCreate {
             case Urso.types.objects.EMITTERFX:
                 model = this.getInstance('Models.EmitterFx', object);
                 break;
-
+            case Urso.types.objects.DRAGCONTAINER:
+                model = this.getInstance('Models.DragContainer', object);
+                break;  
             default:
                 const objectName = Urso.helper.capitaliseFirstLetter(
                     this._objectsTypesFlipped[object.type].toLowerCase()
