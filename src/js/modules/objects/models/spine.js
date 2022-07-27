@@ -236,7 +236,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         if (this.animation.name)
             this.play(this.animation.name, this.animation.loop);
 
-        animation.state.addListener({ event: this._eventHandler.bind(this) });
+        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     };
 
     _eventHandler(entry, event) {
