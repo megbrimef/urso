@@ -15,6 +15,7 @@ class ModulesObserverConfig {
             MODULES_OBJECTS_HIT_AREA_PRESS: 'modules.objects.hitArea.press',
             MODULES_OBJECTS_SLIDER_HANDLE_MOVE: 'modules.objects.slider.handleMove',
             MODULES_OBJECTS_SLIDER_HANDLE_DROP: 'modules.objects.slider.handleDrop',
+            MODULES_OBJECTS_SPINE_EVENT: 'modules.objects.spine.event',
             MODULES_OBJECTS_TOGGLE_PRESS: 'modules.objects.toggle.press',
             MODULES_OBJECTS_TEXTINPUT_BLUR: 'modules.objects.textinput.blur',
             MODULES_OBJECTS_TEXTINPUT_INPUT: 'modules.objects.textinput.input',

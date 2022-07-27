@@ -207,7 +207,6 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         return this._baseObject.spineData.findAnimation(name)
     }
 
-
     /**
      * returns event from spineData by it's name
      * @param {string} name 
@@ -236,7 +235,13 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
 
         if (this.animation.name)
             this.play(this.animation.name, this.animation.loop);
+
+        animation.state.addListener({ event: this._eventHandler.bind(this) });
     };
+
+    _eventHandler(entry, event) {
+        this.emit(Urso.events.MODULES_OBJECTS_SPINE_EVENT, { eventName: event.data.name, name: this.name, class: this.class });
+    }
 
     _addToSlot(slotName, object, replaceSlotContents) {
         const spine = this._baseObject;
