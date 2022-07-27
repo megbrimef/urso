@@ -1,4 +1,4 @@
-class ModulesObjectsCreate {
+class ModulesObjectsService {
     constructor() {
         this.singleton = true;
 
@@ -237,4 +237,4 @@ class ModulesObjectsCreate {
     }
 }
 
-module.exports = ModulesObjectsCreate;
+module.exports = ModulesObjectsService;
