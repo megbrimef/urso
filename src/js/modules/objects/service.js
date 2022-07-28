@@ -92,7 +92,7 @@ class ModulesObjectsService {
             case Urso.types.objects.HITAREA:
                 model = this.getInstance('Models.HitArea', object);
                 break;
-            case Urso.types.objects.IMAGES_ANIMATION:
+            case Urso.types.objects.IMAGESANIMATION:
                 model = this.getInstance('Models.ImagesAnimation', object);
                 break;
             case Urso.types.objects.TEXTINPUT:
