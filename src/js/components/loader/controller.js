@@ -25,7 +25,7 @@ class ComponentsLoaderController extends Urso.Core.Components.Base.Controller {
 
     create(){
         this.setMask();
-
+        this._createGame();
         //todo remove all objects
     }
     
@@ -44,6 +44,10 @@ class ComponentsLoaderController extends Urso.Core.Components.Base.Controller {
 
         this.loaderBgMask._baseObject.scale.x = val;
         this.loadAmountText.text = this.formatAmountText(val);
+    }
+    // override on tha game layer.
+    _createGame() {
+        this.emit(Urso.events.COMPONENTS_LOADER_GAME_CREATED);
     }
 
     get componentCreated(){

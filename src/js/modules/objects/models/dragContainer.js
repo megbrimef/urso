@@ -4,7 +4,6 @@ const containers = [];
 class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     _mask = null;
     _interactiveLayer = null;
-    _filler = null;
     _startPosition = null;
     _startY = 0;
     _offsetStartY = 0;
@@ -12,12 +11,19 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     _needMoveSlider = true;
     _moveStartedY = 0;
     _dragStarted = false;
+    _minMoveDurationForEasing = 100;
+    _minMoveDistanceForEasing = 50;
 
     constructor(params) {
         super(params);
         this.type = Urso.types.objects.DRAGCONTAINER;
-        this._setupDragContainer();
 
+        this._onScrollSliderMove = this._onScrollSliderMove.bind(this);
+        this._sliderHandleDrop = this._sliderHandleDrop.bind(this);
+        this._setSlider = this._setSlider.bind(this);
+        this._switchBlock = this._switchBlock.bind(this);
+
+        this._setupDragContainer();
         this._resizeInteractiveLayer();
         this._resizeMask();
         this._setResizeReactively();
@@ -33,9 +39,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     set _moveInProgress(inProgress) {
         this._interactiveLayer.visible = inProgress;
     }
-    setVisibility() {}
     /**
-     * 
+     * Resizes mask and interactiveLayer according dragContainer size
      * @param { Boolean } needResetMaskY
      */
     resize(needResetMaskY) {
@@ -46,33 +51,43 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             this._mask.y = 0;
         }
     }
-
+    /**
+     * Subscribes resize() method on dragContauber width/height params change
+     */
     _setResizeReactively() {
         Urso.helper.reactive(this, 'width', () => this.resize());
         Urso.helper.reactive(this, 'height', () => this.resize());
     }
-
+    /**
+     * Setups mask and interactive layer of dragContainer
+     */
     _setupDragContainer() {
         this._mask = this._makeMask();
         this._interactiveLayer = this._makeInteractiveLayer();
-        this._filler = this._makeFiller();
 
         this._baseObject.addChild(this._mask);
         this._baseObject.addChild(this._interactiveLayer);
-        this._baseObject.addChild(this._filler);
 
         this._baseObject.mask = this._mask;
     }
-
+    /**
+     * Setups initial params on create.
+     * @param { Object } params 
+     */
     setupParams(params) {
         super.setupParams(params);
         this.speed = Urso.helper.recursiveGet('speed', params, 1);
         this.dragIndex = Urso.helper.recursiveGet('dragIndex', params, 0);
         this.sliderClass = Urso.helper.recursiveGet('sliderClass', params, false);
         this.onMoveCallback = Urso.helper.recursiveGet('onMoveCallback', params, false);
-        this.easingTime = Urso.helper.recursiveGet('easingTime', params, 1.5); 
+        this.easingTime = Urso.helper.recursiveGet('easingTime', params, 1.5);
+        this.easingDistance = Urso.helper.recursiveGet('easingDistance', params, 200);
     }
-
+    /**
+     * Function takes pointer coords and checks if pointer over current dragContainer.
+     * @param { Object } coords
+     * @returns { Boolean }
+     */
     _isActive({ x, y }) {
         const pointerOverContainers = containers
             .filter((container) => {
@@ -89,31 +104,58 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
 
         return pointerOverContainers[0] === this;
     }
-
+    /**
+     * Hides attached slider if dragContainer cannot be scrolled
+     */
     _changeSliderVisibility() {
         if (!this._slider)
             return;
 
         this._slider.visible = this.height < this._baseObject.height;
     }
-
-    _calculatePoint(pX, pY, aX, aY, bX, bY) {
-        return (bX - aX) * (pY - aY) - (bY - aY) * (pX - aX);
+    /**
+     * Function takes pointer coords and coords of the two container's vertexes
+     * returns relative position of pointer between two points
+     * @param { Object } pointerCoords
+     * @param { Object } point1 
+     * @param { Object } point2 
+     * @returns { Number }
+     */
+    _calculatePoint(pointerCoords, point1, point2) {
+        const xDelta = point2.x - point1.x;
+        const yDelta = point2.y - point1.y;
+        const poiterDeltaY = pointerCoords.y - point1.y;
+        const poiterDeltaX = pointerCoords.x - point1.x;
+        return xDelta * poiterDeltaY - yDelta * poiterDeltaX;
     }
-
-    _checkPointerOver(p, p1, p2, p3, p4) {
-        const point1 = this._calculatePoint(p.x, p.y, p1.x, p1.y, p2.x, p2.y);
-        const point2 = this._calculatePoint(p.x, p.y, p2.x, p2.y, p3.x, p3.y);
-        const point3 = this._calculatePoint(p.x, p.y, p3.x, p3.y, p4.x, p4.y);
-        const point4 = this._calculatePoint(p.x, p.y, p4.x, p4.y, p1.x, p1.y);
+    /**
+     * Takes pointer coords and dragContainer vertexes coords.
+     * Checks if pointer is inside dragContainer rectangle.
+     * @param { Object } pointerCoords 
+     * @param { Object } pointA 
+     * @param { Object } pointB 
+     * @param { Object } pointC 
+     * @param { Object } pointD 
+     * @returns { Boolean }
+     */
+    _checkPointerOver(pointerCoords, pointA, pointB, pointC, pointD) {
+        const point1 = this._calculatePoint(pointerCoords, pointA, pointB);
+        const point2 = this._calculatePoint(pointerCoords, pointB, pointC);
+        const point3 = this._calculatePoint(pointerCoords, pointC, pointD);
+        const point4 = this._calculatePoint(pointerCoords, pointD, pointA);
         return (point1 < 0 && point2 < 0 && point3 < 0 && point4 < 0) || (point1 > 0 && point2 > 0 && point3 > 0 && point4 > 0)
     }
-
+    /**
+     * Function takes container object and calculate it's vertexes coords.
+     * Returns array of coords.
+     * @param { Object } container 
+     * @returns { Array }
+     */
     _getObjectPoints(container) {
         if (Urso.device.desktop) {
-            const { x, y } = this._getPatentScaleRecursive(this);
+            const { x, y } = this._getScaleAndPositionRecursive(this);
             const { width, height } = container._mask;
-            const { scaleX, scaleY } = this._getPatentScaleRecursive(this);
+            const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
 
             return [
                 { x, y },
@@ -125,7 +167,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         } else {
             const { x, y } = container._mask.toGlobal(new PIXI.Point(0, 0));
             const { width, height } = container._mask;
-            const { scaleX, scaleY } = this._getPatentScaleRecursive(this);
+            const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
             return [
                 { x, y },
                 { x: x + width * scaleX, y },
@@ -135,13 +177,17 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         }
 
     }
-
-    _getPatentScaleRecursive({ scaleX, scaleY, parent, x, y }) {
+    /**
+     * Function takes dragContainer object and recurcievly calculates it's global scale and position
+     * @param { Object } 
+     * @returns 
+     */
+    _getScaleAndPositionRecursive({ scaleX, scaleY, parent, x, y }) {
         if (!parent) {
             return { scaleX, scaleY, x, y };
         }
 
-        const { scaleX: parentScaleX, scaleY: parentScaleY, x: parentX, y: parentY } = this._getPatentScaleRecursive(parent);
+        const { scaleX: parentScaleX, scaleY: parentScaleY, x: parentX, y: parentY } = this._getScaleAndPositionRecursive(parent);
 
         return {
             scaleX: scaleX * parentScaleX,
@@ -150,7 +196,10 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             y: y + parentY,
         }
     }
-
+    /**
+     * Callback on pointer move. Takes pointer event data.
+     * @param { Object } e 
+     */
     _documentPointerMove(e) {
         this._moveInProgress = true;
         let offset = e.offsetY || e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
@@ -160,17 +209,14 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_DRAG_STARTED, { name: this.name, className: this.class, id: this.id });
         }
     }
-
-    _getPointerPosition(e) {
-        const { clientX, clientY } = e.targetTouches ? e.targetTouches[0] : e;
-        return { x: clientX, y: clientY };
-    }
-
+    /**
+     * Callback on move end. Unblock all dragContainers and if move was longer than requred minimum starts easing
+     */
     _documentPointerEnd() {
         const timeDelta = Date.now() - this._lastMoveTime;
         this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, { names: ['*'], needBlock: false });
 
-        if (this._wasMoved && timeDelta < 100)
+        if (this._wasMoved && timeDelta < this._minMoveDurationForEasing)
             this._startMoveEasing();
         else
             this._startPosition = null;
@@ -178,7 +224,9 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._onMoveComplete();
         this._wasMoved = false;
     }
-
+    /**
+     * Starts easing animation in the end of move
+     */
     _startMoveEasing() {
         const targetY = this._getEasingTargetY();
 
@@ -187,8 +235,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return
         };
 
-
         let obj = { y: this._baseObject.y };
+
         this._easingTween = gsap.to(obj, this.easingTime, {
             y: targetY, ease: 'power2',
             onUpdate: () => {
@@ -200,7 +248,9 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             }
         })
     }
-
+    /**
+     * Kills al animation tweens
+     */
     _killTweens() {
         if (this._easingTween) {
             this._easingTween.pause();
@@ -209,16 +259,21 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             this._startPosition = null;
         };
     }
-
+    /**
+     * Calculates target move coordinate of easing
+     * @returns { Number }
+     */
     _getEasingTargetY() {
         const multipler = this._moveStartY > this._baseObject.y ? -1 : 1;
 
-        if (Math.abs(this._moveStartY - this._baseObject.y) < 50)
+        if (Math.abs(this._moveStartY - this._baseObject.y) < this._minMoveDistanceForEasing)
             return false;
 
-        return this._baseObject.y + 200 * multipler;
+        return this._baseObject.y + this.easingDistance * multipler;
     }
-
+    /**
+     * Resets params on move callback
+     */
     _onMoveComplete() {
         this._moveInProgress = false;
         this._dragStarted = false;
@@ -226,8 +281,15 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_DRAG_FINISHED, { name: this.name, className: this.class, id: this.id });
         this._isBorder = false;
     }
-
-    _checkMaxMin(y, lastPosY, deltaY) {
+    /**
+     * Checks if next dragContainer Y coordinate is in possible range.
+     * If it's out of possible range returns nearest possible point.
+     * @param { Number } y 
+     * @param { Number } lastPosY 
+     * @param { Number } deltaY 
+     * @returns { Number }
+     */
+    _getValidatedY(y, lastPosY, deltaY) {
         if (y > 0) {
             this._startY = -deltaY;
             y = 0;
@@ -248,7 +310,11 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
 
         return y;
     }
-
+    /**
+     * Calculates max possible dragContainer Y
+     * @param { Object } pixiObject 
+     * @returns { Number }
+     */
     _calcMaxY(pixiObject) {
         let maxY = 0;
 
@@ -264,63 +330,87 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
 
         return maxY;
     }
-
+    /**
+     * Validates next dragContainer position.
+     * @param { Number } lastY 
+     * @param { Boolean } isWheel 
+     * @returns 
+     */
     _validateY(lastY, isWheel) {
         const deltaY = isWheel ? lastY * this.speed : ((lastY - this._startPosition.y) * this.speed);
         const lastPosY = this._mask.height - this._baseObject.height;
         const targetY = isWheel ? lastY : this._startY + deltaY
-        return this._checkMaxMin(targetY, lastPosY, deltaY);;
+        return this._getValidatedY(targetY, lastPosY, deltaY);;
     }
-
-    _move(dY, isWheel) {
+    /**
+     * Moves dragContainer
+     * @param { Number } nextY 
+     * @param { Boolean } isWheel 
+     */
+    _move(nextY, isWheel) {
         this._lastMoveTime = Date.now();
         this._onMoveCallback();
-        const y = this._validateY(dY, isWheel);
-        this._setNewPosition(y, dY);
+        const y = this._validateY(nextY, isWheel);
+        this._setNewPosition(y);
         this._mask.y = -y;
         this._interactiveLayer.y = -y;
         this._needMoveSlider && this._setSliderPosition(y);
     }
-
+    /**
+     * Calls given onMoveCallback if it's exists
+     */
     _onMoveCallback() {
         this.onMoveCallback && this.onMoveCallback();
     }
-
+    /**
+     * Sets slider.
+     */
     _setSlider() {
         if (!this.sliderClass)
-            return;
+            return
 
         this._slider = Urso.findOne(`.${this.sliderClass}`);
-        
     }
-
+    /**
+     * Updates slider position alongside with dragged container.
+     * @param { Number } y 
+     */
     _setSliderPosition(y) {
         if (!this._slider)
             return;
 
-        const { height } = this.getAbsoluteSize()
+        const { height } = this.getAbsoluteSize();
+
         const positionChange = y / (height - this.height);
-
         const { _sliderHandle, _sliderSize } = this._slider;
-
         _sliderHandle.y = -(_sliderSize * positionChange);
     }
-
+    /**
+     * Callback on move start.
+     */
     _documentPointerStart() {
-        this._startY = this._getStartY();
-        this._moveStartY = this._getStartY();
+        this._startY = this._getCurrentY();
+        this._moveStartY = this._getCurrentY();
         this._startTime = Date.now();
         this._killTweens();
     }
-
+    /**
+     * Sets dragContainer validated position.
+     * @param { Number } y 
+     */
     _setNewPosition(y) {
         this._baseObject.y = y;
     }
-
-    _getStartY() {
+    /**
+     * Returns current container position.
+     * @returns { Number }
+     */
+    _getCurrentY() {
         return this._baseObject.y;
     }
-
+    /**
+     * Sets callbacks on pointer events
+     */
     _setEvents() {
         const eventCallback = (e) => this._documentPointerMove(e);
 
@@ -329,6 +419,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             this._documentPointerStart(e);
             document.addEventListener('mousemove', eventCallback);
         });
+
         document.addEventListener('mouseup', (e) => {
             this._documentPointerEnd(e);
             document.removeEventListener('mousemove', eventCallback);
@@ -340,13 +431,16 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
 
             this._documentPointerStart(e);
         });
+
         document.addEventListener('touchmove', (e) => this._documentPointerMove(e));
         document.addEventListener('touchend', (e) => this._documentPointerEnd(e));
         document.addEventListener('wheel', (e) => this._documentWheelScroll(e));
         this._interactiveLayer.on('pointermove', (e) => this._onPointerMove(e));
-
     }
-
+    /**
+     * Moves container on wheel scroll.
+     * @param { Object } 
+     */
     _documentWheelScroll({ x, y, deltaY }) {
         if (Urso.device.desktop) {
             x = Urso.scenes.getMouseCoords().x;
@@ -361,15 +455,18 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._killTweens();
         const { x: startX, y: startY } = this._baseObject;
         this._startPosition = { x: startX, y: startY };
-        this._moveStartY = this._getStartY();
+        this._moveStartY = this._getCurrentY();
         const nextY = startY - deltaY;
 
         this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SCROLL, { name: this.name, className: this.class, id: this.id });
 
         this._move(nextY, true);
-        this._startMoveEasing()
+        this._startMoveEasing();
     }
-
+    /**
+     * Drags container on pointer move.
+     * @param { Object } event 
+     */
     _onPointerMove(event) {
         let { data: { global: { x, y } } } = event;
 
@@ -391,17 +488,24 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._wasMoved = true;
         this._move(y);
     }
-
+    /**
+     * Resizes mask according dragContainer size.
+     */
     _resizeMask() {
         this._mask.width = this.width;
         this._mask.height = this.height;
     }
-
+    /**
+     * Resizes interactive layer according dragContainer size.
+     */
     _resizeInteractiveLayer() {
         this._interactiveLayer.width = this.width;
         this._interactiveLayer.height = this.height;
     }
-
+    /**
+     * Creates a PIXI.Graohics rectangle which represents area in which we can interact with dragContainer.
+     * @returns { Object }
+     */
     _makeInteractiveLayer() {
         let layer = new PIXI.Graphics();
         layer.beginFill(0xffffff);
@@ -413,16 +517,10 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         layer.interactive = true;
         return layer;
     }
-
-    _makeFiller() {
-        let layer = new PIXI.Graphics();
-        layer.beginFill(0xffffff);
-        layer.drawRect(0, 0, 1, 1);
-        layer.endFill();
-        layer.alpha = 0;
-        return layer;
-    }
-
+    /**
+     * Create PIXI.Graohics object that used as mask of dragContainer.
+     * @returns { Object }
+     */
     _makeMask() {
         let mask = new PIXI.Graphics();
         mask.lineStyle(0);
@@ -431,7 +529,10 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         mask.endFill();
         return mask;
     }
-
+    /**
+     * Moves dragContainer via attached slider.
+     * @param { Object } 
+     */
     _onScrollSliderMove({ position, class: className }) {
         if (className !== this.sliderClass)
             return
@@ -448,29 +549,48 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._needMoveSlider = false;
         this._move(diffY, true)
     }
-
+    /**
+     * Callback on slider move end.
+     * @param { Object }
+     */
     _sliderHandleDrop({ class: className }) {
         if (className === this.sliderClass)
             this._needMoveSlider = true;
     }
 
     /**
-     * function recieves an array of dragcontainer's names or ['*'] if we need block all dragContainers
-     * @param { Array } names 
-     * @param { Boolean } needBlock 
+     * function recieves object that contains an array of dragcontainer's names or ['*'] if we need block all dragContainers
+     * @param { Object } blockParams 
      */
-    _switchBlock({ names = [], needBlock }) {
+    _switchBlock(blockParams) {
+        if (!blockParams)
+            return;
+
+        const { names, needBlock } = blockParams;
+
         if (names.includes(this.name) || names.includes('*')) {
             this._needBlock = needBlock;
         }
     }
-
+    /**
+     * Unsubscribes methods on object destroy.
+     */
+    _customDestroy() {
+        this.removeListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, this._onScrollSliderMove);
+        this.removeListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_DROP, this._sliderHandleDrop);
+        this.removeListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSlider);
+        this.removeListener(Urso.events.COMPONENTS_LOADER_GAME_CREATED, this._setSlider);
+        this.removeListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, this._switchBlock);
+    }
+    /**
+     * Subscribes methods.
+     */
     _subscribeOnce() {
-        this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, this._onScrollSliderMove.bind(this));
-        this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_DROP, this._sliderHandleDrop.bind(this));
-        this.addListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSlider.bind(this), true);
-        this.addListener(Urso.events.COMPONENTS_LOADER_GAME_CREATED, this._setSlider.bind(this), true);
-        this.addListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, this._switchBlock.bind(this), true);
+        this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, this._onScrollSliderMove);
+        this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_DROP, this._sliderHandleDrop);
+        this.addListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSlider);
+        this.addListener(Urso.events.COMPONENTS_LOADER_GAME_CREATED, this._setSlider);
+        this.addListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, this._switchBlock);
     }
 }
 
