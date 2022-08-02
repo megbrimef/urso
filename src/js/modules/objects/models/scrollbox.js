@@ -24,8 +24,7 @@ class ModulesObjectsModelsScrollbox extends Urso.Core.Modules.Objects.BaseModel 
             boxHeight: this.height,
             dragScroll: this.dragScroll,
             fade: false,
-            fadeScrollbarTime: 300,
-            stopPropagation: true,
+            fadeScrollbarTime: 300
         }
     }
 
