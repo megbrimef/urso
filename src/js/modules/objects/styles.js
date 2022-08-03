@@ -38,7 +38,7 @@ class ModulesObjectsStyles {
     }
 
     /**
-     * remove all styles and re-add
+     * remove inactual styles and add new if need
      * @param {Object} parent
      * @param {Object} styles
      */
