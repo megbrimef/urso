@@ -71,12 +71,16 @@ class ModulesObjectsStyles {
     removeFromCache(object) {
         for (let selector in this._cache) {
             if (this._cache[selector][object._uid]) {
-                delete this._cache[selector][object._uid];
-
-                if (!Object.keys(this._cache[selector]).length)
-                    delete this._cache[selector];
+                this._deleteFromCacheBySelector(selector, object);
             }
         }
+    }
+
+    _deleteFromCacheBySelector(selector, object) {
+        delete this._cache[selector][object._uid];
+
+        if (!Object.keys(this._cache[selector]).length)
+            delete this._cache[selector];
     }
 
     /**
@@ -131,10 +135,10 @@ class ModulesObjectsStyles {
     _resetInactualStyles() {
         for (let [selector, selectorCache] of Object.entries(this._cache)) {
             for (let [uid, object] of Object.entries(selectorCache))
-                if (!this._selector.testObject(object, selector))
+                if (!this._selector.testObject(object, selector)) {
                     this._removeSelectorStyles(object, selector);
-
-            delete this._cache[selector];
+                    this._deleteFromCacheBySelector(selector, object);
+                }
         }
     }
 
