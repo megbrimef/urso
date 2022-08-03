@@ -6,7 +6,7 @@ class ModulesObjectsFind {
     };
 
     /**
-     * find object(s) by selector
+     * find object(s) by selector  (find, findOne, findAll)
      * @param {String} selector
      * @param {Boolean} findOneFlag
      * @returns {mixed}
@@ -16,18 +16,20 @@ class ModulesObjectsFind {
         let selectorsPartsParsed = this._selector.parse(selector);
         let lastRule = selectorsPartsParsed[selectorsPartsParsed.length - 1][0];
 
-        //get elements
+        //get elements by last rule
         let testObjects = this.getInstance('Cache')[
             'get' + Urso.helper.capitaliseFirstLetter(lastRule.type)
         ](lastRule.value);
 
-        if (lastRule.type !== 'class')
+        //if its name or id we will transform one element to array of elements to test
+        if (lastRule.type !== 'class' && testObjects)
             testObjects = [testObjects];
 
+        //no objects found to test --> return false
         if (!testObjects || testObjects.length === 0)
             return false;
 
-        //return findOneFlag with simple selector
+        //return findOneFlag with simple selector (selector with one rule)
         if (
             findOneFlag &&
             selectorsPartsParsed.length === 1 &&
