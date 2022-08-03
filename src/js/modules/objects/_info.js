@@ -4,6 +4,7 @@ Urso.Core.Modules.Objects = {
     Controller: require('./controller.js'),
     Find: require('./find.js'),
     Proxy: require('./proxy.js'),
+    Selector: require('./selector.js'),
     Service: require('./service.js'),
     Styles: require('./styles.js'),
     PropertyAdapter: require('./propertyAdapter.js')

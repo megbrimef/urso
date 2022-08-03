@@ -5,8 +5,13 @@ class ModulesObjectsStyles {
         this._cache = {};
         this._tempObject = this.getInstance('BaseModel', {})
         this._tempTextObject = this.getInstance('Models.Text', {})
+        this._selector = this.getInstance('Selector');
     }
 
+    /**
+     * refresh styles
+     * @param {mixed} parent
+     */
     refresh(parent) {
         if (!parent)
             parent = this.getInstance('Controller').getWorld();
@@ -14,6 +19,16 @@ class ModulesObjectsStyles {
         let template = Urso.template.get();
         let styles = template.styles;
 
+        this._removeInactualStylesAndAddNew(parent, styles);
+    }
+
+    /**
+     * @deprecated
+     * remove all styles and re-add
+     * @param {Object} parent
+     * @param {Object} styles
+     */
+    _removeAllStylesAndReAdd(parent, styles) {
         this._globalResetStyles();
 
         //todo consider parent
@@ -22,6 +37,22 @@ class ModulesObjectsStyles {
             this._apply(selector, style);
     }
 
+    /**
+     * remove all styles and re-add
+     * @param {Object} parent
+     * @param {Object} styles
+     */
+    _removeInactualStylesAndAddNew(parent, styles) {
+        this._resetInactualStyles();
+
+        for (let [selector, style] of Object.entries(styles))
+            this._apply(selector, style);
+    }
+
+    /**
+     * refresh styles by changed className (when addClass or removeClass)
+     * @param {String} className
+     */
     refreshByChangedClassName(className) {
         let template = Urso.template.get();
         let styles = template.styles;
@@ -33,6 +64,10 @@ class ModulesObjectsStyles {
                 this._apply(selector, style);
     }
 
+    /**
+     * remove object from styles cache
+     * @param {Object} object
+     */
     removeFromCache(object) {
         for (let selector in this._cache) {
             if (this._cache[selector][object._uid]) {
@@ -44,10 +79,18 @@ class ModulesObjectsStyles {
         }
     }
 
+    /**
+     * apply style to selector
+     * @param {String} selector
+     * @param {Object} style
+     */
     _apply(selector, style) {
         let objectsArray = this.getInstance('Controller').findAll(selector);
 
         for (let object of objectsArray) {
+            if (object._styles[selector])
+                continue;
+
             this._addObjectToCache(selector, object);
             object._styles[selector] = style;
 
@@ -57,6 +100,11 @@ class ModulesObjectsStyles {
         }
     }
 
+    /**
+     * add object to inner cache by selector
+     * @param {String} selector
+     * @param {Object} object
+     */
     _addObjectToCache(selector, object) {
         if (!this._cache[selector])
             this._cache[selector] = {};
@@ -64,6 +112,10 @@ class ModulesObjectsStyles {
         this._cache[selector][object._uid] = object;
     }
 
+    /**
+     * global reset(remove) all styles
+     * @deprecated
+     */
     _globalResetStyles() {
         for (let [selector, selectorCache] of Object.entries(this._cache)) {
             for (let [uid, object] of Object.entries(selectorCache))
@@ -73,6 +125,23 @@ class ModulesObjectsStyles {
         }
     }
 
+    /**
+     * reset(remove) inactual styles
+     */
+    _resetInactualStyles() {
+        for (let [selector, selectorCache] of Object.entries(this._cache)) {
+            for (let [uid, object] of Object.entries(selectorCache))
+                if (!this._selector.testObject(object, selector))
+                    this._removeSelectorStyles(object, selector);
+
+            delete this._cache[selector];
+        }
+    }
+
+    /**
+     * restore default values after reset styles (when addClass or removeClass)
+     * @param {String} className
+     */
     _restoreDefaultsByCache(className) {
         for (let [selector, selectorCache] of Object.entries(this._cache))
             if (selector.indexOf('.' + className) !== -1) {
@@ -83,12 +152,18 @@ class ModulesObjectsStyles {
             }
     }
 
+    /**
+     * remove all selector styles
+     * @param {Object} object
+     * @param {String} selector
+     * @param {Boolean} globalResetFlag
+     */
     _removeSelectorStyles(object, selector, globalResetFlag) {
         delete object._styles[selector];
         let template = Urso.template.get();
         let styles = template.styles[selector];
 
-        if(!styles){
+        if (!styles) {
             return;
         }
 
@@ -98,6 +173,12 @@ class ModulesObjectsStyles {
 
     }
 
+    /**
+     * restore value by key from original model
+     * @param {String} key
+     * @param {Object} object
+     * @param {Boolean} globalResetFlag
+     */
     _restoreValueByKey(key, object, globalResetFlag) {
         //check own
         if (object._originalModel[key])
