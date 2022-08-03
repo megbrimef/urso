@@ -76,6 +76,11 @@ class ModulesObjectsStyles {
         }
     }
 
+    /**
+     * delete object from inner cache by selector
+     * @param {String} selector 
+     * @param {Object} object 
+     */
     _deleteFromCacheBySelector(selector, object) {
         delete this._cache[selector][object._uid];
 
