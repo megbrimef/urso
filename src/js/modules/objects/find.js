@@ -37,7 +37,7 @@ class ModulesObjectsFind {
         )
             return testObjects;
 
-        //check test objects all selectors parts
+        //check test objects for all selectors parts conformity
         for (let testObject of testObjects) {
             let testResult = this._selector.testObjectWithParsedSelector(
                 testObject,
