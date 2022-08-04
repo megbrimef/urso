@@ -49,7 +49,7 @@ class ModulesObjectsSelector {
                 parent = parent.parent;
             }
 
-            if (expectedParentFoundFlag === 1 && i === 0) //last propertie from selector and all is good
+            if (expectedParentFoundFlag === 1 && i === 0) //last property from selector and all is good
                 return true;
 
             if (expectedParentFoundFlag === 0)
@@ -64,15 +64,15 @@ class ModulesObjectsSelector {
      * @returns {Boolean}
      */
     _testObjectsProperties(object, properties) {
-        for (let propertie of properties) {
-            if (propertie.type === 'class') {
+        for (let property of properties) {
+            if (property.type === 'class') {
                 if (
-                    !object[propertie.type] ||
-                    !object[propertie.type].split(' ').includes(propertie.value)
+                    !object[property.type] ||
+                    !object[property.type].split(' ').includes(property.value)
                 )
                     return false;
 
-            } else if (object[propertie.type] !== propertie.value)
+            } else if (object[property.type] !== property.value)
                 return false;
         }
 

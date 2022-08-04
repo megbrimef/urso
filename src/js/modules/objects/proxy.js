@@ -155,7 +155,7 @@ class ModulesObjectsProxy {
 
     _checkSelectorProperties(key) {
         if (!this._safeFlag && this._getSelectorProperties().includes(key)) {
-            Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector propertie: ' + key);
+            Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector property: ' + key);
             Urso.logger.error('Notice: use functions addClass, removeClass, setId, setName');
         }
     }
