@@ -60,7 +60,7 @@ class ModulesObjectsStyles {
         this._restoreDefaultsByCache(className);
 
         for (let [selector, style] of Object.entries(styles))
-            if (selector.indexOf('.' + className) !== -1)
+            if (selector.includes('.' + className))
                 this._apply(selector, style);
     }
 
@@ -153,7 +153,7 @@ class ModulesObjectsStyles {
      */
     _restoreDefaultsByCache(className) {
         for (let [selector, selectorCache] of Object.entries(this._cache))
-            if (selector.indexOf('.' + className) !== -1) {
+            if (selector.includes('.' + className)) {
                 for (let [uid, object] of Object.entries(selectorCache))
                     this._removeSelectorStyles(object, selector);
 

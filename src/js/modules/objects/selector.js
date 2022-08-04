@@ -68,7 +68,7 @@ class ModulesObjectsSelector {
             if (propertie.type === 'class') {
                 if (
                     !object[propertie.type] ||
-                    object[propertie.type].split(' ').indexOf(propertie.value) === -1
+                    !object[propertie.type].split(' ').includes(propertie.value)
                 )
                     return false;
 
