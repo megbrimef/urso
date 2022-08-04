@@ -112,7 +112,7 @@ class ModulesAssetsService {
                 let texture = imageData.textures[i];
                 let newFilename = frame.filename;
 
-                if (frame.filename.indexOf('/') === -1)
+                if (!frame.filename.includes('/'))
                     newFilename = folderPath + '/' + frame.filename;
 
                 Urso.cache.addFile(newFilename, texture);

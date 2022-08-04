@@ -31,7 +31,7 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   get _isCriOS() {
-    return navigator.userAgent.indexOf('CriOS') !== -1;
+    return navigator.userAgent.includes('CriOS');
   }
 
   get _orientationsConfig() {
