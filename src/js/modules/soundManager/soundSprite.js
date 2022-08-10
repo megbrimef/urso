@@ -27,7 +27,8 @@ class SoundSprite {
                 id: null,
                 loop: false,
                 volume: 1,
-                relaunch: false
+                relaunch: false,
+                _muted: false
             }
         });
 
@@ -100,6 +101,15 @@ class SoundSprite {
 
     setVolume(soundKey, volume = 1, saveVolumeState = true) {
         this._player.volume(volume, this._soundsState[soundKey].id);
+        
+        if(volume === 0) {
+            this._player.mute(true, soundKey);
+            this._soundsState[soundKey]._muted = true;
+            return;
+        }else if(this._soundsState[soundKey]._muted) {
+            this._player.mute(false, soundKey);
+            this._soundsState[soundKey]._muted = false;
+        }
 
         if(saveVolumeState) {
             this._soundsState[soundKey].volume = volume;
@@ -165,7 +175,7 @@ class SoundSprite {
         const delta = fadeTo - fadeFrom;
 
         const onUpdate = () => {
-            const volume  = fadeFrom + (delta * this._fadeTweens[soundKey].ratio);
+            const volume  = (fadeFrom + (delta * this._fadeTweens[soundKey].ratio)) * this._totalVolume;
             this.setVolume(soundKey, volume);
         };
 
