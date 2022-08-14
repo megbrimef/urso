@@ -16,8 +16,6 @@ class ModulesObjectsModelsBitmapText extends Urso.Core.Modules.Objects.BaseModel
 
         this.fontName = Urso.helper.recursiveGet('fontName', params, false);
         this.fontSize = Urso.helper.recursiveGet('fontSize', params, false);
-
-        this.maxWidth = Urso.helper.recursiveGet('maxWidth', params, false); //todo
     }
 
     _addBaseObject() {

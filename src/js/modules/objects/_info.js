@@ -9,4 +9,5 @@ Urso.Core.Modules.Objects = {
     Service: require('./service.js'),
     Styles: require('./styles.js')
 };
+
 require('./models/_info.js');
