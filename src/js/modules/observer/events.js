@@ -40,6 +40,7 @@ class ModulesObserverConfig {
             MODULES_SCENES_PAUSE: 'modules.scenes.pause',
             MODULES_SCENES_RESUME: 'modules.scenes.resume',
             MODULES_SCENES_UPDATE: 'modules.scenes.update',
+            EXTRA_BROWSEREVENTS_POINTER_EVENT: 'extra.browserEvents.window.pointer.event',
             EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',
             EXTRA_BROWSEREVENTS_WINDOW_RESIZE: 'extra.browserEvents.window.resize',
             EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE: 'extra.browserEvents.window.visibilitychange'

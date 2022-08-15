@@ -17,12 +17,14 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
 
     constructor(params) {
         super(params);
+  
         this.type = Urso.types.objects.DRAGCONTAINER;
 
         this._onScrollSliderMove = this._onScrollSliderMove.bind(this);
         this._sliderHandleDrop = this._sliderHandleDrop.bind(this);
         this._setSliderHandler = this._setSliderHandler.bind(this);
         this._switchBlock = this._switchBlock.bind(this);
+        this._pointerEventsHandler = this._pointerEventsHandler.bind(this);
 
         this._setupDragContainer();
         containers.push(this);
@@ -81,7 +83,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._resizeInteractiveLayer();
         this._resizeMask();
         this._setResizeReactively();
-        this._setEvents();
     }
 
     /**
@@ -97,7 +98,9 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      */
     _setMask() {
         this._mask = this._makeMask();
+
         this._interactiveLayer = this._makeInteractiveLayer();
+        this._interactiveLayer.on('pointermove', (e) => this._onPointerMove(e));
 
         this._baseObject.addChild(this._mask);
         this._baseObject.addChild(this._interactiveLayer);
@@ -229,6 +232,9 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * @param { Object } e 
      */
     _documentPointerMove(e) {
+        if(!this._movePossible)
+            return;
+
         this._moveInProgress = true;
         let offset = e.offsetY || e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
 
@@ -242,6 +248,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * Callback on move end. Unblock all dragContainers and if move was longer than requred minimum starts easing
      */
     _documentPointerEnd() {
+        this._movePossible = false;
         const timeDelta = Date.now() - this._lastMoveTime;
         this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, { names: ['*'], needBlock: false });
 
@@ -433,6 +440,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._startY = this._getCurrentY();
         this._moveStartY = this._getCurrentY();
         this._startTime = Date.now();
+        this._movePossible = true;
         this._killTweens();
     }
 
@@ -450,36 +458,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      */
     _getCurrentY() {
         return this._baseObject.y;
-    }
-
-    /**
-     * Sets callbacks on pointer events
-     */
-    _setEvents() {
-        const eventCallback = (e) => this._documentPointerMove(e);
-
-        document.addEventListener('mousedown', (e) => {
-            this._moveStartedY = e.offsetY;
-            this._documentPointerStart(e);
-            document.addEventListener('mousemove', eventCallback);
-        });
-
-        document.addEventListener('mouseup', (e) => {
-            this._documentPointerEnd(e);
-            document.removeEventListener('mousemove', eventCallback);
-        });
-
-        document.addEventListener('touchstart', (e) => {
-            this._offsetStartY = e.changedTouches[0].offsetY;
-            this._moveStartedY = e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
-
-            this._documentPointerStart(e);
-        });
-
-        document.addEventListener('touchmove', (e) => this._documentPointerMove(e));
-        document.addEventListener('touchend', (e) => this._documentPointerEnd(e));
-        document.addEventListener('wheel', (e) => this._documentWheelScroll(e));
-        this._interactiveLayer.on('pointermove', (e) => this._onPointerMove(e));
     }
 
     /**
@@ -625,6 +603,11 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         }
     }
 
+    /**
+     * Checks if need to set slider. If no dragContainerName - slider will be set for all dragContainers.
+     * @param {String} dragContainerName 
+     * @returns 
+     */
     _setSliderHandler(dragContainerName) {
         if (dragContainerName && dragContainerName !== this.name)
             return;
@@ -633,9 +616,42 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     }
 
     /**
+     * Sets callbacks on pointer events
+     */
+    _pointerEventsHandler(event) {
+        switch (event.type) {
+            case 'mousedown':
+                this._moveStartedY = event.offsetY;
+                this._documentPointerStart(e);
+                break;
+            case 'touchstart':
+                this._offsetStartY = event.changedTouches[0].offsetY;
+                this._moveStartedY = event.changedTouches[0].offsetY || event.changedTouches[0].clientY;
+                this._documentPointerStart(event);
+                break;
+            case 'touchmove':
+                this._documentPointerMove(event);
+                break;
+            case 'touchend':
+            case 'mouseup':
+                this._documentPointerEnd(event);
+                break;
+            case 'wheel':
+                this._documentWheelScroll(event);
+                break;
+            case 'pointermove':
+                this._onPointerMove(event);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
      * Unsubscribes methods on object destroy.
      */
     _customDestroy() {
+        this.removeListener(Urso.events.EXTRA_BROWSEREVENTS_POINTER_EVENT, this._pointerEventsHandler);
         this.removeListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, this._onScrollSliderMove);
         this.removeListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_DROP, this._sliderHandleDrop);
         this.removeListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSliderHandler);
@@ -647,6 +663,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * Subscribes methods.
      */
     _subscribeOnce() {
+        this.addListener(Urso.events.EXTRA_BROWSEREVENTS_POINTER_EVENT, this._pointerEventsHandler);
         this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, this._onScrollSliderMove);
         this.addListener(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_DROP, this._sliderHandleDrop);
         this.addListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSliderHandler);
