@@ -1,4 +1,4 @@
-class ModulesObjectsCreate {
+class ModulesObjectsService {
     constructor() {
         this.singleton = true;
 
@@ -89,24 +89,24 @@ class ModulesObjectsCreate {
             case Urso.types.objects.BITMAPTEXT:
                 model = this.getInstance('Models.BitmapText', object);
                 break;
+            case Urso.types.objects.DRAGCONTAINER:
+                model = this.getInstance('Models.DragContainer', object);
+                break;
+            case Urso.types.objects.EMITTERFX:
+                model = this.getInstance('Models.EmitterFx', object);
+                break;  
             case Urso.types.objects.HITAREA:
                 model = this.getInstance('Models.HitArea', object);
                 break;
-            case Urso.types.objects.IMAGES_ANIMATION:
+            case Urso.types.objects.IMAGESANIMATION:
                 model = this.getInstance('Models.ImagesAnimation', object);
-                break;
-            case Urso.types.objects.TEXTINPUT:
-                model = this.getInstance('Models.TextInput', object);
                 break;
             case Urso.types.objects.NINESLICEPLANE:
                 model = this.getInstance('Models.NineSlicePlane', object);
                 break;
-            case Urso.types.objects.EMITTERFX:
-                model = this.getInstance('Models.EmitterFx', object);
+            case Urso.types.objects.TEXTINPUT:
+                model = this.getInstance('Models.TextInput', object);
                 break;
-            case Urso.types.objects.DRAGCONTAINER:
-                model = this.getInstance('Models.DragContainer', object);
-                break;  
             default:
                 const objectName = Urso.helper.capitaliseFirstLetter(
                     this._objectsTypesFlipped[object.type].toLowerCase()
@@ -239,4 +239,4 @@ class ModulesObjectsCreate {
     }
 }
 
-module.exports = ModulesObjectsCreate;
+module.exports = ModulesObjectsService;
