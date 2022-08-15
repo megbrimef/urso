@@ -13,6 +13,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     _dragStarted = false;
     _minMoveDurationForEasing = 100;
     _minMoveDistanceForEasing = 50;
+    _minMoveDistance = 15;
 
     constructor(params) {
         super(params);
@@ -40,12 +41,21 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this.easingTime = Urso.helper.recursiveGet('easingTime', params, 1.5);
         this.easingDistance = Urso.helper.recursiveGet('easingDistance', params, 200);
         this.zIndex = Urso.helper.recursiveGet('zIndex', params, 10);
+        this.width = Urso.helper.recursiveGet('width', params, 200); // Width of container visible area. Numbers only.
+        this.height = Urso.helper.recursiveGet('height', params, 200); // Height of container visible area. Numbers only.
     }
 
+    /**
+     * Checks if interactive layer is visible and move in progress.
+     * @returns { Boolean }
+     */
     get _moveInProgress() {
         return this._interactiveLayer.visible
     }
 
+    /**
+     * Sets interactiveLayer visibility.
+     */
     set _moveInProgress(inProgress) {
         this._interactiveLayer.visible = inProgress;
     }
@@ -135,7 +145,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * @param { Object } point2 
      * @returns { Number }
      */
-    _calculatePoint(pointerCoords, point1, point2) {
+    _getPointerRelativePosition(pointerCoords, point1, point2) {
         const xDelta = point2.x - point1.x;
         const yDelta = point2.y - point1.y;
         const poiterDeltaY = pointerCoords.y - point1.y;
@@ -154,11 +164,11 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * @returns { Boolean }
      */
     _checkPointerOver(pointerCoords, pointA, pointB, pointC, pointD) {
-        const point1 = this._calculatePoint(pointerCoords, pointA, pointB);
-        const point2 = this._calculatePoint(pointerCoords, pointB, pointC);
-        const point3 = this._calculatePoint(pointerCoords, pointC, pointD);
-        const point4 = this._calculatePoint(pointerCoords, pointD, pointA);
-        return (point1 < 0 && point2 < 0 && point3 < 0 && point4 < 0) || (point1 > 0 && point2 > 0 && point3 > 0 && point4 > 0)
+        const point1 = this._getPointerRelativePosition(pointerCoords, pointA, pointB);
+        const point2 = this._getPointerRelativePosition(pointerCoords, pointB, pointC);
+        const point3 = this._getPointerRelativePosition(pointerCoords, pointC, pointD);
+        const point4 = this._getPointerRelativePosition(pointerCoords, pointD, pointA);
+        return (point1 < 0 && point2 < 0 && point3 < 0 && point4 < 0) || (point1 > 0 && point2 > 0 && point3 > 0 && point4 > 0);
     }
 
     /**
@@ -222,7 +232,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._moveInProgress = true;
         let offset = e.offsetY || e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
 
-        if (Math.abs(this._moveStartedY - offset) > 15 && !this._dragStarted) {
+        if (Math.abs(this._moveStartedY - offset) > this._minMoveDistance && !this._dragStarted) {
             this._dragStarted = true;
             this.emit(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_DRAG_STARTED, { name: this.name, className: this.class, id: this.id });
         }
