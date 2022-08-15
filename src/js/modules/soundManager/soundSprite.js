@@ -59,20 +59,14 @@ class SoundSprite {
 
             if (!soundState)
                 return Urso.logger.error(`SoundSprite error: soundState for id '${id}' not found!`);
-
+            
             if (!soundState.loop)
                 soundState.id = null;
         });
     };
 
-    _getSoundStateById(id) {
-        for (const [name, state] of Object.entries(this._soundsState)) {
-            if (state.id === id) {
-                return {
-                    id: { ...state, name }
-                }
-            }
-        }
+    _getSoundStateById(soundId) {
+        return Object.values(this._soundsState).find(({ id }) => id === soundId);
     }
 
     canPlayCheck() {
