@@ -30,6 +30,7 @@ class PropertyAdapter {
         this._parentTypes = [
             Urso.types.objects.COMPONENT,
             Urso.types.objects.CONTAINER,
+            Urso.types.objects.DRAGCONTAINER,
             Urso.types.objects.GROUP,
             Urso.types.objects.SCROLLBOX,
             Urso.types.objects.SLIDER,
