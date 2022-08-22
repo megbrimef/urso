@@ -165,7 +165,7 @@ class PropertyAdapter {
     }
 
     /**
-     * main handler when parent was changed
+     * main handler when new parent was setted
      * @param {Object} child
      */
     _parentChangeHandler(child) {
