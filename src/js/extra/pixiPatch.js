@@ -122,18 +122,14 @@ PIXI.Container.prototype.renderAdvanced = function (renderer) {
         this._render(renderer);
 
         for (var i = 0, j = this.children.length; i < j; ++i) {
-            if (!this.children[i].ignoreParentMask) {
+            if (!this.children[i].ignoreParentMask || !mask) {
                 this.children[i].render(renderer);
-            } else {
-                if (mask) {
-                    renderer.batch.flush();
-                    renderer.mask.pop(this);
-                    this.children[i].render(renderer);
-                    renderer.batch.flush();
-                    renderer.mask.push(this, this._mask);
-                } else {
-                    this.children[i].render(renderer);
-                }
+            } else if (mask) {
+                renderer.batch.flush();
+                renderer.mask.pop(this);
+                this.children[i].render(renderer);
+                renderer.batch.flush();
+                renderer.mask.push(this, this._mask);
             }
         }
     }
