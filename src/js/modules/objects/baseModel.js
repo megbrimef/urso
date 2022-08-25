@@ -45,6 +45,7 @@ class ModulesObjectsBaseModel {
         this.visible = Urso.helper.recursiveGet('visible', params, true);
         this.alpha = Urso.helper.recursiveGet('alpha', params, 1);
         this.blendMode = Urso.helper.recursiveGet('blendMode', params, 1);
+        this.ignoreParentMask = Urso.helper.recursiveGet('blendMode', params, false); //if true - do not apply parent mask on rendering
 
         this.transitionDelay = Urso.helper.recursiveGet('transitionDelay', params, false); //time in ms
         this.transitionDuration = Urso.helper.recursiveGet('transitionDuration', params, false); //time in ms

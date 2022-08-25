@@ -284,7 +284,7 @@ class ModulesObjectsProxy {
             'textAlign ': 'style.align',
             'enabled': 'input.enabled',
             'cacheAsBitmap': 'cacheAsBitmap',
-
+            'ignoreParentMask': 'ignoreParentMask',
             //baseObject functions
             'toGlobal': 'toGlobal'
         };

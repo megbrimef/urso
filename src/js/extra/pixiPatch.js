@@ -77,3 +77,76 @@ PIXI.Text.prototype.drawLetterSpacing = function (text, x, y, isStroke) {
         previousWidth = currentWidth;
     }
 };
+
+/**
+ * Ignoring parent mask on render by ignoreParentMask flag.
+ * @param { Object } renderer 
+ */
+PIXI.Container.prototype.renderAdvanced = function (renderer) {
+    var filters = this.filters;
+    var mask = this._mask;
+    // push filter first as we need to ensure the stencil buffer is correct for any masking
+    if (filters) {
+
+        if (!this._enabledFilters) {
+            this._enabledFilters = [];
+        }
+
+        this._enabledFilters.length = 0;
+
+        for (var i = 0; i < filters.length; i++) {
+            if (filters[i].enabled) {
+                this._enabledFilters.push(filters[i]);
+            }
+        }
+    }
+
+    var flush = (filters && this._enabledFilters && this._enabledFilters.length)
+        || (mask && (!mask.isMaskData || (mask.enabled && (mask.autoDetect || mask.type !== constants.MASK_TYPES.NONE))));
+
+    if (flush) {
+        renderer.batch.flush();
+    }
+
+    if (filters && this._enabledFilters && this._enabledFilters.length) {
+        renderer.filter.push(this, this._enabledFilters);
+    }
+
+    if (mask) {
+        renderer.mask.push(this, this._mask);
+    }
+
+    if (this.cullable) {
+        this._renderWithCulling(renderer);
+    } else {
+        this._render(renderer);
+
+        for (var i = 0, j = this.children.length; i < j; ++i) {
+            if (!this.children[i].ignoreParentMask) {
+                this.children[i].render(renderer);
+            } else {
+                if (mask) {
+                    renderer.batch.flush();
+                    renderer.mask.pop(this);
+                    this.children[i].render(renderer);
+                    renderer.batch.flush();
+                    renderer.mask.push(this, this._mask);
+                } else {
+                    this.children[i].render(renderer);
+                }
+            }
+        }
+    }
+
+    if (flush) {
+        renderer.batch.flush();
+    }
+
+    if (mask) {
+        renderer.mask.pop(this);
+    }
+
+    if (filters && this._enabledFilters && this._enabledFilters.length) {
+        renderer.filter.pop();
+    }
+}
