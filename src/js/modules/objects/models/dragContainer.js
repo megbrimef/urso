@@ -622,7 +622,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         switch (event.type) {
             case 'mousedown':
                 this._moveStartedY = event.offsetY;
-                this._documentPointerStart(e);
+                this._documentPointerStart(event);
                 break;
             case 'touchstart':
                 this._offsetStartY = event.changedTouches[0].offsetY;
