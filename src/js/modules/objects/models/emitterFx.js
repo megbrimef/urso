@@ -90,7 +90,7 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
 
     _customDestroy() {
         this.removeListener(Urso.events.MODULES_SCENES_UPDATE, this.update);
-        this._emitter.stop(false);
+        this._emitter && this._emitter.stop(false);
         this._bundle = null;
         this._emitter = null;
     }
