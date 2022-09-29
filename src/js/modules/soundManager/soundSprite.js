@@ -52,6 +52,7 @@ class SoundSprite {
         this._player.on('unlock', () => setTimeout(() => {
             this._isAudioUnlocked = true;
             this._onUnlock();
+            this.emit(Urso.events.MODULES_SOUND_MANAGER_CONTEXT_UNLOCKED);
         }, 1000));
 
         this._player.on('end', id => {
