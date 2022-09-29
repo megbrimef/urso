@@ -85,6 +85,7 @@ PIXI.Text.prototype.drawLetterSpacing = function (text, x, y, isStroke) {
 PIXI.Container.prototype.renderAdvanced = function (renderer) {
     var filters = this.filters;
     var mask = this._mask;
+    let excludedFromMaskChildsIndexes = [];
     // push filter first as we need to ensure the stencil buffer is correct for any masking
     if (filters) {
 
@@ -125,11 +126,7 @@ PIXI.Container.prototype.renderAdvanced = function (renderer) {
             if (!this.children[i].ignoreParentMask || !mask) {
                 this.children[i].render(renderer);
             } else if (mask) {
-                renderer.batch.flush();
-                renderer.mask.pop(this);
-                this.children[i].render(renderer);
-                renderer.batch.flush();
-                renderer.mask.push(this, this._mask);
+                excludedFromMaskChildsIndexes.push(i);
             }
         }
     }
@@ -140,6 +137,11 @@ PIXI.Container.prototype.renderAdvanced = function (renderer) {
 
     if (mask) {
         renderer.mask.pop(this);
+    }
+
+    if(excludedFromMaskChildsIndexes.length > 0) {
+        excludedFromMaskChildsIndexes.forEach(index => this.children[index].render(renderer));
+        renderer.batch.flush();
     }
 
     if (filters && this._enabledFilters && this._enabledFilters.length) {
