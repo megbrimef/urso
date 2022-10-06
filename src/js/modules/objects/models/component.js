@@ -1,4 +1,5 @@
 class ModulesObjectsModelsComponent extends Urso.Core.Modules.Objects.BaseModel {
+
     constructor(params) {
         super(params);
 

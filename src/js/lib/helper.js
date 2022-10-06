@@ -248,6 +248,23 @@ class LibHelper {
     }
 
     /**
+     * rename objects key
+     * @param {Object} obj
+     * @param {String} oldKey
+     * @param {String} newKey
+     */
+    renameObjectsKey(obj, oldKey, newKey) {
+        if (oldKey !== newKey) {
+            Object.defineProperty(
+                obj, newKey,
+                Object.getOwnPropertyDescriptor(obj, oldKey)
+            );
+
+            delete obj[oldKey];
+        }
+    }
+
+    /**
      * clone object
      * @param {Object} obj 
      * @param {Number} recursiveCalls 

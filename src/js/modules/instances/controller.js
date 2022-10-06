@@ -133,7 +133,8 @@ class ModulesInstancesController {
         if (!callerObject.__entities)
             callerObject.__entities = [];
 
-        callerObject.__entities.push(classObject);
+        if (!callerObject.__entities.includes(classObject))
+            callerObject.__entities.push(classObject);
     }
 
     _entityAddListener() {

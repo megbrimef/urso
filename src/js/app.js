@@ -1,4 +1,5 @@
 class App {
+
     constructor() {
         this.version = 'APP_VERSION';
 
