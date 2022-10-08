@@ -1,7 +1,7 @@
 class ObjectPoolMember {
 
     free = true;
-    putTime = 0;
+    putCacheTimeKey = 0;
     key = null; //element branch;
     branchKey = 0; //element branch key
     data = null;
@@ -28,6 +28,7 @@ class LibObjectPool {
     _maxSize = 0;
 
     _lastBranchKeys = {};
+    _putTimeCache = {};
 
     constructor(constructorFunction, resetFunction = (obj) => obj, initialSize = 0, maxSize = 0) {
         this.resetFunction = resetFunction;
@@ -50,6 +51,13 @@ class LibObjectPool {
         for (const poolObject of Object.values(poolBranch)) {
             if (poolObject.free) {
                 poolObject.free = false;
+
+                //remove from putTimeCache
+                if (poolObject.putCacheTimeKey) {
+                    delete this._putTimeCache[poolObject.putCacheTimeKey];
+                    poolObject.putCacheTimeKey = 0;
+                }
+
                 return poolObject;
             }
         }
@@ -65,24 +73,58 @@ class LibObjectPool {
      */
     putElement(element) {
         element.free = true;
-        element.putTime = Urso.time.get();
         this.resetFunction(element.data);
 
         if (this._maxSize) {
-            //need update branchKey
-            const currentBranchKey = element.branchKey;
-            const branch = this._pool[element.key];
-            element.branchKey = this._getElementBranchKey(key);
-            Urso.helper.renameObjectsKey(branch, currentBranchKey, element.branchKey);
-
-            //todo remove old
-            const poolSize = this._getPoolSize();
-            if (poolSize > this._maxSize) {
-                //todo
-            }
+            //lets write put time cache
+            const putCacheTimeKey = this._getElementBranchKey('_putTimeCache', this._putTimeCache);
+            this._putTimeCache[putCacheTimeKey] = element;
+            element.putCacheTimeKey = putCacheTimeKey;
         }
+
+        this._checkMaxSize();
     }
 
+    /**
+     * check max pool size
+     */
+    _checkMaxSize() {
+        if (!this._maxSize)
+            return;
+
+        //remove oldest inactive element
+        const poolSize = this._getPoolSize();
+
+        if (poolSize > this._maxSize) {
+            this._removeOldestInactiveElement();
+        }
+
+    }
+
+    /**
+     * remove oldest inactive element
+     */
+    _removeOldestInactiveElement() {
+        const keyToRemove = Object.keys(this._putTimeCache)[0];
+        const element = this._putTimeCache[keyToRemove];
+
+        //remove from pool
+        delete this._pool[element.key][element.branchKey];
+
+        //reset element
+        element.free = false;
+        element.putCacheTimeKey = 0;
+        element.key = null;
+        element.branchKey = 0;
+        element.data = null;
+
+        //remove from putTimeCache
+        delete this._putTimeCache[keyToRemove];
+    }
+
+    /**
+     * pool size (all branches)
+     */
     _getPoolSize() {
         let size = 0;
 
@@ -101,7 +143,7 @@ class LibObjectPool {
      */
     _createElement(key, additionalCreateArguments = null) {
         const newObj = this.resetFunction(this.constructorFunction(key, additionalCreateArguments));
-        const branchKey = this._getElementBranchKey(key);
+        const branchKey = this._getElementBranchKey(key, this._pool[key]);
         const poolMember = new ObjectPoolMember(newObj, key, branchKey);
         this._pool[key][branchKey] = poolMember;
         return poolMember;
@@ -112,12 +154,11 @@ class LibObjectPool {
      * @param {String | Number} key - element key to get
      * @returns {Nymber}
      */
-    _getElementBranchKey(key) {
-        const ePool = this._pool[key];
+    _getElementBranchKey(key, poolBranch) {
         let branchKey = Urso.time.get();
 
         //prevent duplicates
-        if (ePool[branchKey]) {
+        if (poolBranch[branchKey]) {
             branchKey = this._lastBranchKeys[key] + 1;
         }
 
