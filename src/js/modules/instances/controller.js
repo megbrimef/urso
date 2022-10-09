@@ -16,6 +16,13 @@ class ModulesInstancesController {
         this.removeMode = this.removeMode.bind(this);
     }
 
+    /**
+     * get class by Path
+     * @param {String} path
+     * @param {Boolean} [noModes]
+     * @param {String} [modeName]
+     * @returns {Class}
+     */
     getByPath(path, noModes, modeName) {
         let callback = (a) => {
             return a;
@@ -24,10 +31,19 @@ class ModulesInstancesController {
         return this._findClass({ path, callback, noModes, modeName });
     }
 
+    /**
+     * get current modes
+     * @returns {Array}
+     */
     getModes() {
         return this._modes;
     }
 
+    /**
+     * add mode to system
+     * @param {String} mode
+     * @returns {Boolean}
+     */
     addMode(mode) {
         if (this._modes.indexOf(mode) !== -1)
             return false;
@@ -40,8 +56,8 @@ class ModulesInstancesController {
     /**
      * remove mode from system
      * @param {String} mode
-     * @param {Boolean} passiveMode - do not refresh styles
-     * @returns
+     * @param {Boolean} [passiveMode] - do not refresh styles
+     * @returns {Boolean}
      */
     removeMode(mode, passiveMode) {
         let index = this._modes.indexOf(mode);
@@ -58,6 +74,14 @@ class ModulesInstancesController {
         return true;
     }
 
+    /**
+     * get class instance by path
+     * @param {String} path
+     * @param {mixed} [params]
+     * @param {Boolean} [noModes]
+     * @param {String} [modeName]
+     * @returns {Class | false}
+     */
     getInstance(path, params, noModes, modeName) {
         let callback = (classObject) => {
             if (typeof classObject !== "function") { //typeof class is a function
@@ -84,11 +108,20 @@ class ModulesInstancesController {
         return this._findClass({ path, callback, noModes, modeName });
     }
 
+    /**
+     * get uid for instance
+     * @returns {String}
+     */
     _getUid() {
         this._counter++;
         return 'instance' + this._counter;
     }
 
+    /**
+     * set common functions to instance
+     * @param {Class} classObject
+     * @param {String} path
+     */
     _setComonFunctions(classObject, path) {
         classObject.prototype.getInstance = this._entityGetInstance(path);
         classObject.prototype.addListener = this._entityAddListener;
@@ -96,6 +129,11 @@ class ModulesInstancesController {
         classObject.prototype.emit = this._entityEmit;
     }
 
+    /**
+     * set common entities functions to instance
+     * @param {Class} classObject
+     * @param {ClassInstance} callerObject
+     */
     _setComonEntityFunctions(classObject, callerObject) {
         if (callerObject.common && !classObject.common) { //components common
             classObject.common = callerObject.common;
@@ -106,6 +144,10 @@ class ModulesInstancesController {
         }
     }
 
+    /**
+     * launch default functions after creation
+     * @param {ClassInstance} instance
+     */
     _launchDefaultFunctions(instance) {
         //_subscribe
         if (instance && instance._subscribe)
@@ -118,6 +160,11 @@ class ModulesInstancesController {
         }
     }
 
+    /**
+     * entity get instance (with parent deps)
+     * @param {String} path
+     * @returns {Function}
+     */
     _entityGetInstance(path) {
         const entityPath = Urso.helper.initial(path.split('.')).join('.');
         const self = this;
@@ -138,6 +185,11 @@ class ModulesInstancesController {
         };
     }
 
+    /**
+     * add entity to caller class
+     * @param {ClassInstance} classObject
+     * @param {ClassInstance} callerObject
+     */
     _addEntityToClass(classObject, callerObject) {
         if (!callerObject.__entities)
             callerObject.__entities = [];
@@ -146,18 +198,32 @@ class ModulesInstancesController {
             callerObject.__entities.push(classObject);
     }
 
+    /**
+     * entity addListener function
+     */
     _entityAddListener() {
         Urso.observer.add.apply(Urso.observer, arguments);
     }
 
+    /**
+     * entity removeListener function
+     */
     _entityRemoveListener() {
         Urso.observer.remove.apply(Urso.observer, arguments);
     }
 
+    /**
+     * entity emit function
+     */
     _entityEmit() {
         Urso.observer.fire.apply(Urso.observer, arguments);
     }
 
+    /**
+     * find class by params
+     * @param {Object} params
+     * @returns {Class | false}
+     */
     _findClass(params) {
         //put all params exept callback in key
         let cacheKey = [
@@ -190,6 +256,12 @@ class ModulesInstancesController {
         return params.callback(this._cache[cacheKey]);
     }
 
+    /**
+     * get class by path
+     * @param {String} path
+     * @param {Boolean} [noModes]
+     * @returns {Class | false}
+     */
     _getClassByPath(path, noModes) {
         let pathArr = path.split('.');
         let entitiesArray = Urso.helper.mergeArrays(['Urso', 'Game'], pathArr);
@@ -199,7 +271,7 @@ class ModulesInstancesController {
     /**
      * check if object exist
      * @param {Object} entitiesArray like ['Urso', 'Game', 'Lib', 'Helper']
-     * @returns {mixed}
+     * @returns {Class | false}
      */
     _checkPathExist(entitiesArray, noModes) {
         let currentTestObject = window;
@@ -235,6 +307,13 @@ class ModulesInstancesController {
         return currentTestObject;
     }
 
+    /**
+     * check path for modes
+     * @param {Object} currentTestObject
+     * @param {Array} entitiesArray
+     * @param {Number} entitiesIndex
+     * @returns {Class | false}
+     */
     _checkPathWithModes(currentTestObject, entitiesArray, entitiesIndex) {
         for (let mode of this._modes) {
             const capMode = Urso.helper.capitaliseFirstLetter(mode);
@@ -253,6 +332,13 @@ class ModulesInstancesController {
         return false;
     }
 
+    /**
+     * check path for mixins
+     * @param {Object} currentTestObject
+     * @param {Array} entitiesArray
+     * @param {Number} entitiesIndex
+     * @returns {Array}
+     */
     _getMixins(currentTestObject, entitiesArray, entitiesIndex) {
         const mixins = [];
 
