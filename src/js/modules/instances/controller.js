@@ -5,6 +5,7 @@ class ModulesInstancesController {
     constructor() {
         this._modes = [];
         this._cache = {};
+        this._counter = 0;
 
         this.getInstance = this.getInstance.bind(this);
         this.getByPath = this.getByPath.bind(this);
@@ -73,12 +74,19 @@ class ModulesInstancesController {
             if (instance.singleton)
                 classObject._instance = instance;
 
+            instance._iuid = this._getUid();
+
             this._launchDefaultFunctions(instance);
 
             return instance;
         };
 
         return this._findClass({ path, callback, noModes, modeName });
+    }
+
+    _getUid() {
+        this._counter++;
+        return 'instance' + this._counter;
     }
 
     _setComonFunctions(classObject, path) {
