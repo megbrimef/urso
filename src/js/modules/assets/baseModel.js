@@ -1,5 +1,7 @@
 class ModulesAssetsBaseModel {
     constructor(params) {
+        this.simpleClass = true;
+
         this.setupParams(params);
         this._templatePath = false;
     }

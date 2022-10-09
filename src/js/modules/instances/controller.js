@@ -128,10 +128,11 @@ class ModulesInstancesController {
                 params, noModes, modeName
             );
 
-            self._addEntityToClass(instance, this);
-
-            if (instance)
+            //no simpleClasses like ModulesAssetsBaseModel && ModulesObjectsBaseModel
+            if (instance && !instance.simpleClass) {
+                self._addEntityToClass(instance, this);
                 self._setComonEntityFunctions(instance, this);
+            }
 
             return instance;
         };
