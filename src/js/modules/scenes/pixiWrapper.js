@@ -316,8 +316,9 @@ class ModulesScenesPixiWrapper {
             if (this.passiveCallIntervalId) {
                 clearInterval(this.passiveCallIntervalId);
                 this.passiveCallIntervalId = null;
-                return;
             }
+
+            return;
         }
 
         this.passiveCallIntervalId = setInterval(() => {
