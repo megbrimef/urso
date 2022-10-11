@@ -6,6 +6,7 @@ class ExtraBrowserEvents {
 
         this.resizeHandler = this.resizeHandler.bind(this);
         this.visibilitychangeHandler = this.visibilitychangeHandler.bind(this);
+        this._pointerEventsHandler = this._pointerEventsHandler.bind(this);
 
         this._resizeTimeoutId;
 
@@ -20,6 +21,14 @@ class ExtraBrowserEvents {
         document.addEventListener('fullscreenchange', this.resizeHandler);
         document.addEventListener('webkitfullscreenchange', this.resizeHandler);
         document.addEventListener('mozfullscreenchange', this.resizeHandler);
+
+        document.addEventListener('mousedown', this._pointerEventsHandler);
+        document.addEventListener('mousemove', this._pointerEventsHandler);
+        document.addEventListener('mouseup', this._pointerEventsHandler);
+        document.addEventListener('touchstart', this._pointerEventsHandler);
+        document.addEventListener('touchmove', this._pointerEventsHandler);
+        document.addEventListener('touchend', this._pointerEventsHandler);
+        document.addEventListener('wheel', this._pointerEventsHandler);
     }
 
     visibilitychangeHandler() {
@@ -32,6 +41,10 @@ class ExtraBrowserEvents {
 
         this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE);
         this._resizeTimeoutId = Urso.setTimeout(() => this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE), this.RESIZE_DELAY);
+    }
+
+    _pointerEventsHandler(event) {
+        this.emit(Urso.events.EXTRA_BROWSEREVENTS_POINTER_EVENT, event);
     }
 }
 

@@ -131,8 +131,11 @@ class ModulesScenesService {
         //call all components create
         this._sceneModel.create();
 
-        this.emit(Urso.events.MODULES_SCENES_DISPLAY_FINISHED);
+        //reset display flag
         this._displayInProgress = false;
+
+        //emit end of display event
+        this.emit(Urso.events.MODULES_SCENES_DISPLAY_FINISHED);
     }
 }
 

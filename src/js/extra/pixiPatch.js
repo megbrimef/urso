@@ -77,3 +77,74 @@ PIXI.Text.prototype.drawLetterSpacing = function (text, x, y, isStroke) {
         previousWidth = currentWidth;
     }
 };
+
+/**
+ * Ignoring parent mask on render by ignoreParentMask flag.
+ * @param { Object } renderer 
+ */
+PIXI.Container.prototype.renderAdvanced = function (renderer) {
+    var filters = this.filters;
+    var mask = this._mask;
+    let excludedFromMaskChildsIndexes = [];
+    // push filter first as we need to ensure the stencil buffer is correct for any masking
+    if (filters) {
+
+        if (!this._enabledFilters) {
+            this._enabledFilters = [];
+        }
+
+        this._enabledFilters.length = 0;
+
+        for (var i = 0; i < filters.length; i++) {
+            if (filters[i].enabled) {
+                this._enabledFilters.push(filters[i]);
+            }
+        }
+    }
+
+    var flush = (filters && this._enabledFilters && this._enabledFilters.length)
+        || (mask && (!mask.isMaskData || (mask.enabled && (mask.autoDetect || mask.type !== constants.MASK_TYPES.NONE))));
+
+    if (flush) {
+        renderer.batch.flush();
+    }
+
+    if (filters && this._enabledFilters && this._enabledFilters.length) {
+        renderer.filter.push(this, this._enabledFilters);
+    }
+
+    if (mask) {
+        renderer.mask.push(this, this._mask);
+    }
+
+    if (this.cullable) {
+        this._renderWithCulling(renderer);
+    } else {
+        this._render(renderer);
+
+        for (var i = 0, j = this.children.length; i < j; ++i) {
+            if (!this.children[i].ignoreParentMask || !mask) {
+                this.children[i].render(renderer);
+            } else if (mask) {
+                excludedFromMaskChildsIndexes.push(i);
+            }
+        }
+    }
+
+    if (flush) {
+        renderer.batch.flush();
+    }
+
+    if (mask) {
+        renderer.mask.pop(this);
+    }
+
+    if(excludedFromMaskChildsIndexes.length > 0) {
+        excludedFromMaskChildsIndexes.forEach(index => this.children[index].render(renderer));
+        renderer.batch.flush();
+    }
+
+    if (filters && this._enabledFilters && this._enabledFilters.length) {
+        renderer.filter.pop();
+    }
+}

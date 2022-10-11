@@ -2,7 +2,7 @@ class ModulesObjectsModelsImagesAnimation extends Urso.Core.Modules.Objects.Base
     constructor(params) {
         super(params);
 
-        this.type = Urso.types.objects.IMAGES_ANIMATION;
+        this.type = Urso.types.objects.IMAGESANIMATION;
 
         //sys
         this._tween = null;

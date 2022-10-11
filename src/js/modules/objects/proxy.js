@@ -118,10 +118,22 @@ class ModulesObjectsProxy {
         const baseObjectWidth = baseObject._texture ? Math.abs(baseObject.scale.x) * baseObject._texture.orig.width : baseObject.width;
         const baseObjectHeight = baseObject._texture ? Math.abs(baseObject.scale.y) * baseObject._texture.orig.height : baseObject.height;
 
-        if (target.maxWidth && target.maxWidth < baseObjectWidth) //check maxWidth
+        if (
+            target.maxWidth &&
+            (
+                target.maxWidth < baseObjectWidth ||  //maxWidth is lower than object width
+                (target.maxWidth > baseObjectWidth && target._baseObject.scale.x < 1) //maxWidth is higher than object width and object is downscaled
+            )
+        ) //check maxWidth
             calculationNeed = true;
 
-        if (target.maxHeight && target.maxHeight < baseObjectHeight) //check maxHeight
+        if (
+            target.maxHeight &&
+            (
+                target.maxHeight < baseObjectHeight ||  //maxHeight is lower than object height
+                (target.maxHeight > baseObjectHeight && target._baseObject.scale.y < 1) //maxHeight is higher than object height and object is downscaled
+            )
+        ) //check maxHeight
             calculationNeed = true;
 
         if (!calculationNeed)
@@ -155,7 +167,7 @@ class ModulesObjectsProxy {
 
     _checkSelectorProperties(key) {
         if (!this._safeFlag && this._getSelectorProperties().includes(key)) {
-            Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector propertie: ' + key);
+            Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector property: ' + key);
             Urso.logger.error('Notice: use functions addClass, removeClass, setId, setName');
         }
     }
@@ -272,7 +284,7 @@ class ModulesObjectsProxy {
             'textAlign ': 'style.align',
             'enabled': 'input.enabled',
             'cacheAsBitmap': 'cacheAsBitmap',
-
+            'ignoreParentMask': 'ignoreParentMask',
             //baseObject functions
             'toGlobal': 'toGlobal'
         };

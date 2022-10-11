@@ -35,7 +35,7 @@ class ModulesObjectsController {
             return Urso.scenes.addObject(object, parent, doNotRefreshStylesFlag);
         }
 
-        return this.getInstance('Create').add(object, parent);
+        return this.getInstance('Service').add(object, parent);
     }
 
     find(selector) {
@@ -85,19 +85,19 @@ class ModulesObjectsController {
     }
 
     getWorld() {
-        return this.getInstance('Create').getWorld();
+        return this.getInstance('Service').getWorld();
     }
 
     addChild(parent, child, doNotRefreshStylesFlag) {
-        this.getInstance('Create').addChild(parent, child, doNotRefreshStylesFlag);
+        this.getInstance('Service').addChild(parent, child, doNotRefreshStylesFlag);
     }
 
     removeChild(parent, child, doNotRefreshStylesFlag) {
-        this.getInstance('Create').removeChild(parent, child, doNotRefreshStylesFlag);
+        this.getInstance('Service').removeChild(parent, child, doNotRefreshStylesFlag);
     }
 
     destroy(object, doNotRefreshStylesFlag) {
-        this.getInstance('Create').destroy(object, doNotRefreshStylesFlag);
+        this.getInstance('Service').destroy(object, doNotRefreshStylesFlag);
     }
 
     //do not use outside engine
@@ -106,19 +106,19 @@ class ModulesObjectsController {
     }
 
     _updateCommonProperties(object) {
-        this.getInstance('Create')._updateCommonProperties(object);
+        this.getInstance('Service')._updateCommonProperties(object);
     }
 
     _newResolutionHandler(params) {
-        this.getInstance('Create').updateWorldBounds(params);
+        this.getInstance('Service').updateWorldBounds(params);
     }
 
     _resetWorld() {
-        this.getInstance('Create').resetWorld();
+        this.getInstance('Service').resetWorld();
     }
 
     _applyClassesToWorld() {
-        this.getInstance('Create').applyClassesToWorld();
+        this.getInstance('Service').applyClassesToWorld();
     }
 
     _subscribeOnce() {

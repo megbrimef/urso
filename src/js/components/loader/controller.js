@@ -25,7 +25,6 @@ class ComponentsLoaderController extends Urso.Core.Components.Base.Controller {
 
     create(){
         this.setMask();
-
         //todo remove all objects
     }
     
