@@ -21,12 +21,14 @@ class ComponentsDebugFps {
         this.frames++;
 
         if (currentTime - this.lastUpdateTime < 1000)
-            return
+            return;
 
         const fps = Math.round(1000 * this.frames / (currentTime - this.lastUpdateTime));
         this.lastUpdateTime = currentTime;
         this.frames = 0;
-        this._coordsText.text = 'fps:' + fps;
+
+        const fpsData = Urso.scenes.getFpsData();
+        this._coordsText.text = `fps: ${fps}, sceneFps: ${fpsData.fps}, limit: ${fpsData.limit}`;
     };
 
 }

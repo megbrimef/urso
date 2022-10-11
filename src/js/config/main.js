@@ -6,7 +6,11 @@ let ConfigMain = {
     extendingChain: ['Urso.Core'], //chain that will be set as Urso.Game
     defaultScene: 'play', //default scene to display
     useBinPath: false, // use assets from bin directory
-    useTransport: false // use transport module for connetcting with server
+    useTransport: false, // use transport module for connetcting with server
+    fps: {
+        limit: 60, //max fps limit
+        optimizeLowPerformance: true //down to 30 fps if lower 60
+    }
 };
 
 module.exports = ConfigMain;
