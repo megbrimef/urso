@@ -28,7 +28,7 @@ class ComponentsDebugFps {
         this.frames = 0;
 
         const fpsData = Urso.scenes.getFpsData();
-        this._coordsText.text = 'fps:' + fps + ` sceneFps: ${fpsData.fps}, limit: ${fpsData.limit}`;
+        this._coordsText.text = `fps: ${fps}, sceneFps: ${fpsData.fps}, limit: ${fpsData.limit}`;
     };
 
 }
