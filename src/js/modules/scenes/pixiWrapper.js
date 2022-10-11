@@ -1,3 +1,6 @@
+const NORMAL_FPS_COUNT = 60;
+const LOW_PERFORMANCE_FPS_COUNT = 30;
+
 class ModulesScenesPixiWrapper {
     constructor() {
         this.singleton = true;
@@ -13,10 +16,17 @@ class ModulesScenesPixiWrapper {
         this._loopPaused = false;
         this._loopLastCall = 0;
 
-        this.loop = this.loop.bind(this);
+        this._loop = this._loop.bind(this);
         this.passiveCallIntervalId = null;
 
         this._mouseCoords = { x: 0, y: 0 };
+
+
+        this._maxFPSLimit = Urso.config.fps.limit;
+        this._lastUpdateTime = 0;
+        this._frames = 0;
+        this._currentFPS = Urso.config.fps.limit;
+        this._lastTimeCheckFPS = 0;
     }
 
     init() {
@@ -35,7 +45,7 @@ class ModulesScenesPixiWrapper {
         this.interaction = new PIXI.InteractionManager(this.renderer);
 
         this._loaderScene = this.getInstance('Model');
-        this._requestAnimFrame(this.loop);
+        this._requestAnimFrame(this._loop);
 
         this.getInstance('Resolutions');
     }
@@ -62,7 +72,7 @@ class ModulesScenesPixiWrapper {
     resume() {
         this._loopLastCall = Date.now();
         this._loopPaused = false;
-        this.update();
+        this._update();
         PIXI.spine.settings.GLOBAL_AUTO_UPDATE = true;
     }
 
@@ -107,19 +117,64 @@ class ModulesScenesPixiWrapper {
         return deltaTime * 60 / 1000;
     };
 
-    loop() {
+    _loop() {
         if (this._loopStopped)
             return false;
 
-        this._requestAnimFrame(this.loop);
+        this._requestAnimFrame(this._loop);
 
-        if (!this._loopPaused)
-            this.update();
+        if (!this._loopPaused) {
+            if (!this._fpsCheckAllowUpdate())
+                return;
+
+            this._update();
+        }
 
         return true;
     };
 
-    update() {
+    getFps() {
+        return this._currentFPS;
+    }
+
+    getFpsData() {
+        return {
+            fps: this._currentFPS,
+            limit: this._maxFPSLimit
+        }
+    }
+
+    _fpsCheckAllowUpdate() {
+        const currentTime = Urso.time.get();
+        this._updateCurrentFPS(currentTime);
+
+        //setup maxFPSLimit
+        if (Urso.config.fps.optimizeLowPerformance)
+            if (this._currentFPS < NORMAL_FPS_COUNT)
+                this._maxFPSLimit = LOW_PERFORMANCE_FPS_COUNT;
+            else
+                this._maxFPSLimit = Urso.config.fps.limit;
+
+        //check need update
+        if (currentTime - this._lastUpdateTime < ~~(1000 / this._maxFPSLimit))
+            return false;
+
+        this._lastUpdateTime = currentTime;
+        return true;
+    }
+
+    _updateCurrentFPS(currentTime) {
+        this._frames++;
+
+        if (currentTime - this._lastTimeCheckFPS < 1000)
+            return;
+
+        this._currentFPS = Math.round(1000 * this._frames / (currentTime - this._lastTimeCheckFPS));
+        this._lastTimeCheckFPS = currentTime;
+        this._frames = 0;
+    }
+
+    _update() {
         if (!this.currentScene)
             return;
 
@@ -215,7 +270,7 @@ class ModulesScenesPixiWrapper {
 
         this.passiveCallIntervalId = setInterval(() => {
             if (!this._loopStopped && !this._loopPaused) {
-                this.update();
+                this._update();
             }
         }, 16);
     }
@@ -225,7 +280,7 @@ class ModulesScenesPixiWrapper {
      * @param {Object} obj
      * @returns {Object} - pixi.Texture
      */
-     generateTexture(obj) {
+    generateTexture(obj) {
         return this.renderer.generateTexture(obj);
     }
 
