@@ -9,7 +9,7 @@ let ConfigMain = {
     useTransport: false, // use transport module for connetcting with server
     fps: {
         limit: 60, //max fps limit
-        optimizeLowPerformance: true //down to 30 fps if lower 60
+        optimizeLowPerformance: false //down to 30 fps if lower 60
     }
 };
 
