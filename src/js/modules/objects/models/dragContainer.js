@@ -14,6 +14,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     _minMoveDurationForEasing = 100;
     _minMoveDistanceForEasing = 50;
     _minMoveDistance = 15;
+    _currentPosition = 0;
 
     constructor(params) {
         super(params);
@@ -25,6 +26,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._setSliderHandler = this._setSliderHandler.bind(this);
         this._switchBlock = this._switchBlock.bind(this);
         this._pointerEventsHandler = this._pointerEventsHandler.bind(this);
+        this._onResolutionChange = this._onResolutionChange.bind(this);
 
         this._setupDragContainer();
         containers.push(this);
@@ -83,6 +85,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._resizeInteractiveLayer();
         this._resizeMask();
         this._setResizeReactively();
+        this._currentPosition = this._baseObject.y;
     }
 
     /**
@@ -396,8 +399,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this._onMoveCallback();
         const y = this._validateY(nextY, isWheel);
         this._setNewPosition(y);
-        this._mask.y = -y;
-        this._interactiveLayer.y = -y;
         this._needMoveSlider && this._setSliderPosition(y);
     }
 
@@ -450,6 +451,9 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      */
     _setNewPosition(y) {
         this._baseObject.y = y;
+        this._mask.y = -y;
+        this._interactiveLayer.y = -y;
+        this._currentPosition = y;
     }
 
     /**
@@ -530,7 +534,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     }
 
     /**
-     * Creates a PIXI.Graohics rectangle which represents area in which we can interact with dragContainer.
+     * Creates a PIXI.Graphics rectangle which represents area in which we can interact with dragContainer.
      * @returns { Object }
      */
     _makeInteractiveLayer() {
@@ -546,7 +550,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     }
 
     /**
-     * Create PIXI.Graohics object that used as mask of dragContainer.
+     * Create PIXI.Graphics object that used as mask of dragContainer.
      * @returns { Object }
      */
     _makeMask() {
@@ -648,6 +652,13 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     }
 
     /**
+     * Resets last saved position of dragContainer on resolution change.
+     */
+    _onResolutionChange() {
+        this._setNewPosition(this._currentPosition);
+    }
+
+    /**
      * Unsubscribes methods on object destroy.
      */
     _customDestroy() {
@@ -657,6 +668,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this.removeListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSliderHandler);
         this.removeListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SETSLIDER, this._setSliderHandler);
         this.removeListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, this._switchBlock);
+        this.removeListener(Urso.events.MODULES_SCENES_NEW_RESOLUTION, this._onResolutionChange);
     }
 
     /**
@@ -669,6 +681,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
         this.addListener(Urso.events.MODULES_SCENES_DISPLAY_FINISHED, this._setSliderHandler);
         this.addListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SETSLIDER, this._setSliderHandler);
         this.addListener(Urso.events.MODULES_OBJECTS_DRAGCONTAINER_SWITCHBLOCK, this._switchBlock);
+        this.addListener(Urso.events.MODULES_SCENES_NEW_RESOLUTION, this._onResolutionChange);
     }
 }
 
