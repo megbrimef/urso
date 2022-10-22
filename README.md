@@ -222,4 +222,5 @@ Also, any class inside itself can call the following construction this.getInstan
 
 ### License ###
 By Lancecat Games
+
 This content is released under the (http://opensource.org/licenses/MIT) MIT License.
