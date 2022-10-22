@@ -218,3 +218,8 @@ These two methods also support any number of modifiers, which allows more flexib
 For example, if you apply the modifier 'mobile', then Urso.getInstance ('Modules.Observer.Controller') will look for the constructor first in Modules.Observer.Mobile.Controller. If no such constructor is found, then the “default option” Modules.Observer.Controller will be returned;
 
 Also, any class inside itself can call the following construction this.getInstance ('View'), which will return the desired class of the same entity, in our case it is a View instance
+
+
+### License ###
+By Lancecat Games
+This content is released under the (http://opensource.org/licenses/MIT) MIT License.
