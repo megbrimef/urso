@@ -1,5 +1,7 @@
 class ModulesObjectsBaseModel {
     constructor(params) {
+        this.simpleClass = true;
+
         this.setupParams(params);
 
         this.parent = false;

@@ -1,4 +1,5 @@
 class ModulesAssetsService {
+
     constructor() {
         this.singleton = true;
 

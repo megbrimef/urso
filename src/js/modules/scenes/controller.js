@@ -22,6 +22,22 @@ class ModulesScenesController {
     }
 
     /**
+     * get fps
+     * @returns {Number}
+     */
+    getFps() {
+        return this.getInstance('PixiWrapper').getFps();
+    }
+
+    /**
+     * get fps data
+     * @returns {Object}
+     */
+    getFpsData() {
+        return this.getInstance('PixiWrapper').getFpsData();
+    }
+
+    /**
      * pause scene
      */
     pause() {
