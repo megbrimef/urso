@@ -58,7 +58,7 @@ class ModulesScenesService {
 
         if (newTemplatePart.assets.length) {
             Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag));
-            return null; //objects will be created soon. Maybe we can return a promice
+            return null; //objects will be created soon. Maybe we can return a promice //todo
         } else
             return this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag);
     }
