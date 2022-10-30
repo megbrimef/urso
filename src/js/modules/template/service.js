@@ -87,7 +87,7 @@ class ModulesTemplateService {
         let componentInstance = Urso.getInstance(path, obj.options);
 
         if (!componentInstance) {
-            Urso.logger.error(`ModulesTemplateController Component error. Component ${obj.componentName} not found. Please check components _info.js file.`);
+            Urso.logger.error(`ModulesTemplateController Component error. Component "${obj.componentName}" not found. Please check components _info.js file.`);
             Urso.logger.error(`To use only templates use Groups please.`);
         }
 
