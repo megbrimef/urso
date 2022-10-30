@@ -3,6 +3,7 @@ Urso.Core.Components = {};
 require('./base/_info.js');
 require('./debug/_info.js');
 require('./deviceRotate/_info.js');
+//require('./editor/_info.js');
 require('./fullscreen/_info.js');
 require('./layersSwitcher/_info.js');
 require('./loader/_info.js');
