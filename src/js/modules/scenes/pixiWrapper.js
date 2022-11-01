@@ -42,7 +42,7 @@ class ModulesScenesPixiWrapper {
         this._createWorld();
 
         // setup interaction
-        this.interaction = new PIXI.InteractionManager(this.renderer);
+        this.interaction = Urso.helper.recursiveGet('plugins.interaction', this.renderer) || new PIXI.InteractionManager(this.renderer);
 
         this._loaderScene = this.getInstance('Model');
         this._requestAnimFrame(this._loop);
