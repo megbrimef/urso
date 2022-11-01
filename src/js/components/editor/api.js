@@ -14,7 +14,7 @@ class ComponentsEditorApi {
         const template = Urso.template.get();
         return template.styles;
     }
-    
+
 
     //assets
 
@@ -83,24 +83,44 @@ class ComponentsEditorApi {
     ////////////////  sys
 
     _assetsKeys = {
-        ATLAS: ['key', 'path'], // path to json file
-        BITMAPFONT: ['key', 'path'], // path to json file
-        CONTAINER: ['name'],
-        FONT: ['key', 'path'],
-        IMAGE: ['key', 'path'],
-        JSON: ['key', 'path'],
-        SPINE: ['key', 'path'], // path to json file
+        ATLAS: [{ name: 'key', type: 'text' }, { name: 'path', type: 'file' }], // path to json file
+        BITMAPFONT: [{ name: 'key', type: 'text' }, { name: 'path', type: 'file' }], // path to json file
+        CONTAINER: [{ name: 'key', type: 'text' }],
+        FONT: [{ name: 'key', type: 'text' }, { name: 'path', type: 'file' }], // path to json file
+        IMAGE: [{ name: 'key', type: 'text' }, { name: 'path', type: 'file' }], // path to json file
+        JSON: [{ name: 'key', type: 'text' }, { name: 'path', type: 'file' }], // path to json file
+        SPINE: [{ name: 'key', type: 'text' }, { name: 'path', type: 'file' }], // path to json file
     }
 
-    _commonObjectsKeys = ['id', 'name', 'class', 'x', 'y', 'z', 'anchorX', 'anchorY', 'scaleX', 'scaleY', 'angle', 'visible', 'alpha'];
+    _commonObjectsKeys = [
+        { name: 'id', type: 'text' },
+        { name: 'name', type: 'text' },
+        { name: 'class', type: 'text' },
+        { name: 'x', type: 'number' },
+        { name: 'y', type: 'number' },
+        { name: 'z', type: 'number' },
+        { name: 'anchorX', type: 'number', range: [-1, 1] },
+        { name: 'anchorY', type: 'number', range: [-1, 1] },
+        { name: 'scaleX', type: 'number' },
+        { name: 'scaleY', type: 'number' },
+        { name: 'angle', type: 'number', range: [0, 360] },
+        { name: 'alpha', type: 'number', range: [0, 1] },
+        { name: 'visible', type: 'boolean' },
+    ];
 
     _objectsKeys = {
-        BITMAPTEXT: Urso.helper.mergeArrays(this._commonObjectsKeys, ['text', 'fontName', 'fontSize']),
-        COMPONENT: Urso.helper.mergeArrays(this._commonObjectsKeys, ['componentName']),
+        BITMAPTEXT: Urso.helper.mergeArrays(this._commonObjectsKeys, [{ name: 'text', type: 'text' }, { name: 'fontName', type: 'text' }, { name: 'fontSize', type: 'text' }]),
+        COMPONENT: Urso.helper.mergeArrays(this._commonObjectsKeys, [{ name: 'componentName', type: 'text' }]),
         CONTAINER: this._commonObjectsKeys,
-        GROUP: Urso.helper.mergeArrays(this._commonObjectsKeys, ['groupName']),
-        IMAGE: Urso.helper.mergeArrays(this._commonObjectsKeys, ['assetKey']),
-        TEXT: Urso.helper.mergeArrays(this._commonObjectsKeys, ['text', 'fontFamily', 'fontSize', 'fill', 'stroke'])
+        GROUP: Urso.helper.mergeArrays(this._commonObjectsKeys, [{ name: 'groupName', type: 'text' }]),
+        IMAGE: Urso.helper.mergeArrays(this._commonObjectsKeys, [{ name: 'assetKey', type: 'text' }]),
+        TEXT: Urso.helper.mergeArrays(this._commonObjectsKeys, [
+            { name: 'text', type: 'text' },
+            { name: 'fontFamily', type: 'text' },
+            { name: 'fontSize', type: 'text' },
+            { name: 'fill', type: 'text' },
+            { name: 'stroke', type: 'text' }
+        ])
     }
 }
 
