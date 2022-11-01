@@ -8,6 +8,7 @@ URSO — The HTML5 Game Framework
 - Explore working [examples](https://ursojs.io/examples.html) demos and see the code structure
 - Also you can use [slot base game](https://github.com/megbrimef/urso-slot-base) as a slot game engine (slot framework)
 - Clone [examples repository](https://github.com/megbrimef/urso-examples) to fast learning
+- Join [discord channel](https://discord.gg/JauD9CbDHA) to ask questions and read changelogs
 
 ### How to ###
 ```js
