@@ -3,6 +3,7 @@ class ModulesStatesManagerAction {
     constructor(name) {
         this.name = name;
 
+        this._running = false;
         this._terminating = false;
         this.finished = false;
         this._onFinishCallback = false;
@@ -12,10 +13,11 @@ class ModulesStatesManagerAction {
 
     //can we start this action?
     guard() {
-        return this.getInstance('Controller').checkActionGuard(this.name);
+        return !this._running && this.getInstance('Controller').checkActionGuard(this.name);
     }
 
     run(onFinishCallback) {
+        this._running = true;
         log(`%c action run ---> ${this.name}`, 'color: blue');
 
         this.emit(Urso.events.MODULES_STATES_MANAGER_ACTION_START, this.name);
@@ -31,6 +33,11 @@ class ModulesStatesManagerAction {
     }
 
     terminate() {
+        if (!this._running) {
+            Urso.logger.warn('ModulesStatesManagerAction: action run from terminating', this.name);
+            this.run(() => { });
+        }
+
         if (this._terminating) {
             Urso.logger.error('ModulesStatesManagerAction: action alredy terminating', this.name);
             return;
@@ -47,11 +54,12 @@ class ModulesStatesManagerAction {
             return;
         }
 
+        this._running = false;
         this._terminating = false;
         this.finished = true;
 
         this.emit(Urso.events.MODULES_STATES_MANAGER_ACTION_FINISH, this.name);
-        
+
         log(`%c action finish <--- ${this.name}`, 'color: blue');
         this._onFinishCallback();
     }
