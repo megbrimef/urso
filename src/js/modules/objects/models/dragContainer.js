@@ -125,7 +125,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             .filter((container) => container._baseObject.worldVisible)
             .filter((container) => !container._needBlock)
             .filter((container) => {
-                let height = container.getAbsoluteSize().height;
+                const height = container.getAbsoluteSize().height;
                 return container.height - height < 0;
             })
             .sort((firstContainer, secondContainer) => secondContainer.dragIndex - firstContainer.dragIndex);
@@ -184,30 +184,17 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * @returns { Array }
      */
     _getObjectPoints(container) {
-        if (Urso.device.desktop) {
-            const { x, y } = this._getScaleAndPositionRecursive(this);
-            const { width, height } = container._mask;
-            const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
+        const { x, y } = container._mask.toGlobal(new PIXI.Point(0, 0));
 
-            return [
-                { x, y },
-                { x: x + width * scaleX, y },
-                { x: x + width * scaleX, y: y + height * scaleY },
-                { x, y: y + height * scaleY }
-            ];
+        const { width, height } = container._mask;
+        const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
 
-        } else {
-            const { x, y } = container._mask.toGlobal(new PIXI.Point(0, 0));
-            const { width, height } = container._mask;
-            const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
-            return [
-                { x, y },
-                { x: x + width * scaleX, y },
-                { x: x + width * scaleX, y: y + height * scaleY },
-                { x, y: y + height * scaleY }
-            ];
-        }
-
+        return [
+            { x, y },
+            { x: x + width * scaleX, y },
+            { x: x + width * scaleX, y: y + height * scaleY },
+            { x, y: y + height * scaleY }
+        ];
     }
 
     /**
@@ -495,18 +482,12 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * Drags container on pointer move.
      * @param { Object } event 
      */
-    _onPointerMove(event) {
+     _onPointerMove(event) {
         let { data: { global: { x, y } } } = event;
-
-        if (Urso.device.desktop) {
-            x = Urso.scenes.getMouseCoords().x;
-            y = Urso.scenes.getMouseCoords().y;
-        }
 
         if (!this._startPosition) {
             this._startPosition = { x, y };
         }
-
 
         if (!this._isActive({ x, y })) {
             this._moveInProgress = false;
@@ -633,6 +614,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
                 this._moveStartedY = event.changedTouches[0].offsetY || event.changedTouches[0].clientY;
                 this._documentPointerStart(event);
                 break;
+            case 'mousemove':
             case 'touchmove':
                 this._documentPointerMove(event);
                 break;
@@ -642,9 +624,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
                 break;
             case 'wheel':
                 this._documentWheelScroll(event);
-                break;
-            case 'pointermove':
-                this._onPointerMove(event);
                 break;
             default:
                 break;
