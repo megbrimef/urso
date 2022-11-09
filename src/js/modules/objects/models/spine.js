@@ -36,6 +36,17 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
+     * set up the mixes between animations
+     * @param {String} from - animation name
+     * @param {String} to - animation name
+     * @param {Number} duration - time in seconds
+     * @example setMix("walk", "jump", 0.2)
+     */
+    setMix(from, to, duration) {
+        this._baseObject.state.setMix(from, to, duration);
+    }
+
+    /**
      * set skin by name
      * @param {String} skinName 
      */
