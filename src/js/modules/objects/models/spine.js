@@ -43,7 +43,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      * @example setMix("walk", "jump", 0.2)
      */
     setMix(from, to, duration) {
-        this._baseObject.state.setMix(from, to, duration);
+        this._baseObject.stateData.setMix(from, to, duration);
     }
 
     /**
