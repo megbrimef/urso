@@ -1,7 +1,7 @@
 /**
  * adapter Urso to Pixi objects
  */
- class PropertyAdapter {
+class PropertyAdapter {
 
     constructor() {
         this.singleton = true;
