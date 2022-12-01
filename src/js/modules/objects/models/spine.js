@@ -37,6 +37,25 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
+     * set up the mixes between animations
+     * @param {String} from - animation name
+     * @param {String} to - animation name
+     * @param {Number} duration - time in seconds
+     * @example setMix("walk", "jump", 0.2)
+     */
+    setMix(from, to, duration) {
+        this._baseObject.stateData.setMix(from, to, duration);
+    }
+
+    /**
+     * Clears all listeners and resubscribes to spine events
+     */
+    clearListeners() {
+        this._baseObject.state.clearListeners();
+        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
+    }
+
+    /**
      * set skin by name
      * @param {String} skinName 
      */
@@ -75,22 +94,6 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     playInSequenceAndThen(animations, func) {
         this._playInSequenceAndThen(animations, func);
-    }
-
-    /**
-     * set up the mixes between animations
-     * @param {String} from - animation name
-     * @param {String} to - animation name
-     * @param {Number} duration - time in seconds
-     * @example setMix("walk", "jump", 0.2)
-     */
-    setMix(from, to, duration) {
-        this._baseObject.stateData.setMix(from, to, duration);
-    }
-
-    clearListeners() {
-        this._baseObject.state.clearListeners();
-        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     }
 
     /**
@@ -183,8 +186,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (this._baseObject.state.listeners.length !== 0) {
                 Urso.logger.warn('ModulesObjectsModelsSpine setAnimationConfig warning: animation state listeners will be cleared');
             }
-
-            this.clearListeners();
+            this._baseObject.state.clearListeners();
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
         }
     }
