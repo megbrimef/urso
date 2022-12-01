@@ -46,6 +46,7 @@ class PropertyAdapter {
             Urso.types.objects.GROUP,
             Urso.types.objects.SCROLLBOX,
             Urso.types.objects.SLIDER,
+            Urso.types.objects.SPINE,
             Urso.types.objects.WORLD
         ];
 
@@ -203,7 +204,7 @@ class PropertyAdapter {
         if (typeof object.anchorX !== 'number' || object.anchorX < 0 || object.anchorX > 1)
             Urso.logger.error('AnchorX value is not valid!', object);
 
-        if (this._canBeParent(object)) { //parent types
+        if (this._canBeParent(object) && !this._typesWithoutAnchor.includes(object.type)) { //parent types
             if (object.anchorX === 0)
                 return 0;
 
@@ -231,7 +232,7 @@ class PropertyAdapter {
         if (typeof object.anchorY !== 'number' || object.anchorY < 0 || object.anchorY > 1)
             Urso.logger.error('AnchorY value is not valid!', object);
 
-        if (this._canBeParent(object)) { //parent types
+        if (this._canBeParent(object) && !this._typesWithoutAnchor.includes(object.type)) { //parent types
             if (object.anchorY === 0)
                 return 0;
 

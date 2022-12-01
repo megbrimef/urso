@@ -23,6 +23,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         };
 
         params.animation = this.animation; //we redefine original property here
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 
     /**
@@ -44,6 +45,14 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     setMix(from, to, duration) {
         this._baseObject.stateData.setMix(from, to, duration);
+    }
+
+    /**
+     * Clears all listeners and resubscribes to spine events
+     */
+    clearListeners() {
+        this._baseObject.state.clearListeners();
+        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     }
 
     /**
@@ -267,7 +276,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (replaceSlotContents)
                 currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            object.parent = this; //todo make removeChild for addedToSlotObjects
+            this.addChild(object); //todo make removeChild for addedToSlotObjects
             currentSlot.addChild(object._baseObject);
             Urso.objects.refreshStyles();
         } else {
