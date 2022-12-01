@@ -23,6 +23,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         };
 
         params.animation = this.animation; //we redefine original property here
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 
     /**
@@ -33,17 +34,6 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     play(animationName, loopFlag = false, track = 0) {
         this._baseObject.state.setAnimation(track, animationName, loopFlag);
-    }
-
-    /**
-     * set up the mixes between animations
-     * @param {String} from - animation name
-     * @param {String} to - animation name
-     * @param {Number} duration - time in seconds
-     * @example setMix("walk", "jump", 0.2)
-     */
-    setMix(from, to, duration) {
-        this._baseObject.stateData.setMix(from, to, duration);
     }
 
     /**
@@ -85,6 +75,22 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     playInSequenceAndThen(animations, func) {
         this._playInSequenceAndThen(animations, func);
+    }
+
+    /**
+     * set up the mixes between animations
+     * @param {String} from - animation name
+     * @param {String} to - animation name
+     * @param {Number} duration - time in seconds
+     * @example setMix("walk", "jump", 0.2)
+     */
+    setMix(from, to, duration) {
+        this._baseObject.stateData.setMix(from, to, duration);
+    }
+
+    clearListeners() {
+        this._baseObject.state.clearListeners();
+        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     }
 
     /**
@@ -177,7 +183,8 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (this._baseObject.state.listeners.length !== 0) {
                 Urso.logger.warn('ModulesObjectsModelsSpine setAnimationConfig warning: animation state listeners will be cleared');
             }
-            this._baseObject.state.clearListeners();
+
+            this.clearListeners();
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
         }
     }
@@ -267,7 +274,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (replaceSlotContents)
                 currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            object.parent = this; //todo make removeChild for addedToSlotObjects
+            this.addChild(object); //todo make removeChild for addedToSlotObjects
             currentSlot.addChild(object._baseObject);
             Urso.objects.refreshStyles();
         } else {
