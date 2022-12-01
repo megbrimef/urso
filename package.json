@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.6.17-dev",
+  "version": "0.6.17",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",
@@ -32,7 +32,7 @@
     "pixi-spine": "^3.0.13",
     "pixi-text-input": "^1.0.6",
     "pixi-viewport": "^4.34.0",
-    "pixi.js-legacy": "6.5.8"
+    "pixi.js": "^6.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

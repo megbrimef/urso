@@ -34,7 +34,7 @@ class ModulesScenesPixiWrapper {
 
         //define renderer
         PIXI.utils.skipHello();
-        this.renderer = new PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
+        this.renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
         document.body.appendChild(this.renderer.view);
 
         //root and world

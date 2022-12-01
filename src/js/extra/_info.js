@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 window.PIXI = PIXI;
 window.PIXI.particles = require('pixi-particles');
 
