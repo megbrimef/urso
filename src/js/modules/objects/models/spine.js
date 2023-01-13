@@ -23,6 +23,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         };
 
         params.animation = this.animation; //we redefine original property here
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 
     /**
@@ -43,7 +44,15 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      * @example setMix("walk", "jump", 0.2)
      */
     setMix(from, to, duration) {
-        this._baseObject.state.setMix(from, to, duration);
+        this._baseObject.stateData.setMix(from, to, duration);
+    }
+
+    /**
+     * Clears all listeners and resubscribes to spine events
+     */
+    clearListeners() {
+        this._baseObject.state.clearListeners();
+        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     }
 
     /**
@@ -237,6 +246,9 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         if (!spineAsset)
             Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine object ' + this.assetKey);
 
+        if (!spineAsset.spineData)
+            Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine correct object (no spineData) for key ' + this.assetKey);
+
         this._baseObject = new PIXI.spine.Spine(spineAsset.spineData);
         //this._baseObject.state.timeScale = this.animation.timeScale;
         Object.defineProperty(this._baseObject.state, 'timeScale', { get: this.getTimeScale.bind(this) });
@@ -267,7 +279,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (replaceSlotContents)
                 currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            object.parent = this; //todo make removeChild for addedToSlotObjects
+            this.addChild(object); //todo make removeChild for addedToSlotObjects
             currentSlot.addChild(object._baseObject);
             Urso.objects.refreshStyles();
         } else {

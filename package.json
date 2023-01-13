@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",
@@ -29,7 +29,7 @@
     "pixi-particles": "^4.3.0",
     "pixi-projection": "0.3.15",
     "pixi-scrollbox": "^2.3.1",
-    "pixi-spine": "^3.0.13",
+    "pixi-spine": "^3.1.2",
     "pixi-text-input": "^1.0.6",
     "pixi-viewport": "^4.34.0",
     "pixi.js": "^6.2.0"
