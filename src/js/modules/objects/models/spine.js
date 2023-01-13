@@ -246,6 +246,9 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         if (!spineAsset)
             Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine object ' + this.assetKey);
 
+        if (!spineAsset.spineData)
+            Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine correct object (no spineData) for key ' + this.assetKey);
+
         this._baseObject = new PIXI.spine.Spine(spineAsset.spineData);
         //this._baseObject.state.timeScale = this.animation.timeScale;
         Object.defineProperty(this._baseObject.state, 'timeScale', { get: this.getTimeScale.bind(this) });
