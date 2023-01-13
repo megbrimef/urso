@@ -18,6 +18,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this.animation = {
             timeScale: Urso.helper.recursiveGet('animation.timeScale', params, 1),
             name: Urso.helper.recursiveGet('animation.name', params, false),
+            skinName: Urso.helper.recursiveGet('animation.skinName', params, false),
             loop: Urso.helper.recursiveGet('animation.loop', params, false),
             onComplete: Urso.helper.recursiveGet('animation.onComplete', params, false)
         };
@@ -255,6 +256,9 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
 
         if (this.animation.onComplete)
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
+
+        if (this.animation.skinName)
+            this.setSkinByName(this.animation.skinName);
 
         if (this.animation.name)
             this.play(this.animation.name, this.animation.loop);
