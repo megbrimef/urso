@@ -117,6 +117,11 @@ class ModulesAssetsService {
                     newFilename = folderPath + '/' + frame.filename;
 
                 Urso.cache.addFile(newFilename, texture);
+
+                if(assetModel.cacheTextures) {
+                    const textureKey = newFilename.split('/').pop().split('.')[0];
+                    Urso.cache.addTexture(textureKey, texture);
+                }
             }
         }
     }
