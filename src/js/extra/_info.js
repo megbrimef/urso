@@ -14,7 +14,6 @@ require("pixi-text-input");
 
 import { gsap } from 'gsap';
 window.gsap = gsap;
-require('./setTimeout');
 
 import Howler from 'howler';
 window.Howler = Howler;

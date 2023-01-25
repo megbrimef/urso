@@ -6,6 +6,9 @@ class App {
         this.setup = this.setup.bind(this);
     }
 
+    /**
+     * global init
+     */
     setup() {
         this.sayHello();
 
@@ -32,6 +35,7 @@ class App {
 
         //Extra
         Urso.browserEvents = Urso.getInstance('Extra.BrowserEvents');
+        this._addTimeouts();
 
         //libs
         Urso.cache = Urso.getInstance('Lib.Cache'); //all assets cache
@@ -67,12 +71,31 @@ class App {
         });
     }
 
+    /**
+     * log engine name and its version
+     */
     sayHello() {
         console.log(`%c ${String.fromCodePoint(0x1F43B)} Urso ${this.version} `, 'background: #222; color: #bada55');
     }
 
+    /**
+     * run default scene
+     */
     run() {
         Urso.scenes.display(Urso.config.defaultScene);
+    }
+
+    /**
+     * add Urso.setTimeout && Urso.clearTimeout functions. It will helps to manage time
+     */
+    _addTimeouts() {
+        Urso.setTimeout = (callback, delay) => {
+            return gsap.delayedCall(delay / 1000, callback);
+        }
+
+        Urso.clearTimeout = (tween) => {
+            tween.kill();
+        }
     }
 }
 
