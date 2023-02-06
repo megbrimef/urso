@@ -28,7 +28,7 @@ class LibLoader {
         }
 
         if (!Urso.config.useBinPath) {
-            return `assets/${path}`;
+            return `${Urso.config.gamePath}assets/${path}`;
         }
 
         const quality = Urso.getInstance('Modules.Assets.Service').getQuality();
@@ -38,7 +38,7 @@ class LibLoader {
             splitted.splice(1, 0, quality);
         }
 
-        return `bin/${splitted.join('/')}`;
+        return `${Urso.config.gamePath}/bin/${splitted.join('/')}`;
     };
 
     /**
