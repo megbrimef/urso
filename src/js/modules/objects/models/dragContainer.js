@@ -200,7 +200,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     /**
      * Function takes dragContainer object and recurcievly calculates it's global scale and position
      * @param { Object } 
-     * @returns 
+     * @returns { Object } 
      */
     _getScaleAndPositionRecursive({ scaleX, scaleY, parent, x, y }) {
         if (!parent) {
@@ -368,7 +368,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * Validates next dragContainer position.
      * @param { Number } lastY 
      * @param { Boolean } isWheel 
-     * @returns 
+     * @returns { Number }
      */
     _validateY(lastY, isWheel) {
         const deltaY = isWheel ? lastY * this.speed : ((lastY - this._startPosition.y) * this.speed);
@@ -416,8 +416,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return;
 
         const { height } = this.getAbsoluteSize();
-        const positionCoef = Math.abs(y / (height - this.height));
-        this._slider.setHandlePosition(positionCoef);
+        const positionCoefficient = Math.abs(y / (height - this.height));
+        this._slider.setHandlePosition(positionCoefficient);
     }
 
     /**
@@ -551,7 +551,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return
 
         if (this.height >= this._baseObject.height) {
-            this._slider._moveSlider({ x: 0, y: 0 }, true, true);
+            this._slider.setHandlePosition(0);
             return;
         }
 
@@ -590,7 +590,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     /**
      * Checks if need to set slider. If no dragContainerName - slider will be set for all dragContainers.
      * @param {String} dragContainerName 
-     * @returns 
      */
     _setSliderHandler(dragContainerName) {
         if (dragContainerName && dragContainerName !== this.name)
