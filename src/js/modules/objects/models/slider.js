@@ -13,7 +13,9 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
 
     /**
      * Returns slider size according to handle size.
+     * @returns { Number }
      */
+
     get sliderSize() {
         const anchorType = this.sizeKey === 'width' ? 'anchorX' : 'anchorY';
         const anchor = this._sliderHandle[anchorType];
@@ -37,12 +39,12 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
 
     /**
      * Sets handle position on a nearest possible point.
-     * @param { Number } coef  - might be in range 0 - 1.
+     * @param { Number } coefficient  - might be in range 0 - 1.
      */
-    setHandlePosition(coef) {
+    setHandlePosition(coefficient) {
         let position = {};
 
-        const targetPosition = this.sliderSize * coef;
+        const targetPosition = this.sliderSize * coefficient;
         position[this.positionKey] = targetPosition;
 
         const { coord, value } = this._calculateClosestPoint(position);
@@ -193,7 +195,6 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
     /**
      * Handler for touchmove and pointermove events. 
      * @param { Object } param 
-     * @returns 
      */
     _onPointerMove({ x, y }) {
         if (!this._handleIsDragging)
@@ -287,7 +288,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
     /**
      * Calculates closest possible value (point) from given coords. 
      * @param { Object } obj
-     * @returns 
+     * @returns { Object }
      */
     _calculateClosestPoint(obj) {
         const givenValue = obj[this.positionKey];
