@@ -226,7 +226,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return;
 
         this._moveInProgress = true;
-        let offset = e.offsetY || e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
+
+        const offset = e.offsetY ?? changedOffsetY ?? clientY ?? 0;
 
         if (Math.abs(this._moveStartedY - offset) > this._minMoveDistance && !this._dragStarted) {
             this._dragStarted = true;
@@ -415,10 +416,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return;
 
         const { height } = this.getAbsoluteSize();
-
-        const positionChange = y / (height - this.height);
-        const { _sliderHandle, _sliderSize } = this._slider;
-        _sliderHandle.y = -(_sliderSize * positionChange);
+        const positionCoef = Math.abs(y / (height - this.height));
+        this._slider.setHandlePosition(positionCoef);
     }
 
     /**
@@ -556,9 +555,9 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return;
         }
 
-        const { _sliderSize } = this._slider;
+        const { sliderSize } = this._slider;
         const containerHeight = this._mask.height - this._baseObject.height;
-        const diffY = position > 0 ? position / _sliderSize * containerHeight : 0;
+        const diffY = position > 0 ? position / sliderSize * containerHeight : 0;
 
         this._needMoveSlider = false;
         this._move(diffY, true)
