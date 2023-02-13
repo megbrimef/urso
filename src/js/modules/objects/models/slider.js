@@ -15,7 +15,6 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
      * Returns slider size according to handle size.
      * @returns { Number }
      */
-
     get sliderSize() {
         const anchorType = this.sizeKey === 'width' ? 'anchorX' : 'anchorY';
         const anchor = this._sliderHandle[anchorType];
