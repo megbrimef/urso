@@ -82,6 +82,7 @@ class App {
      * run default scene
      */
     run() {
+        Urso.logic.do('run');
         Urso.scenes.display(Urso.config.defaultScene);
     }
 
