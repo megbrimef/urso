@@ -227,7 +227,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
 
         this._moveInProgress = true;
 
-        const offset = e.offsetY ?? changedOffsetY ?? clientY ?? 0;
+        const offset = e.offsetY ?? e.changedTouches[0].changedOffsetY ?? e.changedTouches[0].clientY ?? 0;
 
         if (Math.abs(this._moveStartedY - offset) > this._minMoveDistance && !this._dragStarted) {
             this._dragStarted = true;
