@@ -1,6 +1,6 @@
 class ModulesLogicController {
     constructor() { 
-        this._baseLogicBlocks = ['sounds', 'buttons'];
+        this._baseLogicBlocks = ['main', 'sounds'];
         const additionalLogicBlocks = this.getAdditionalLogicBlocks();
         this.logicBlocks = [...this._baseLogicBlocks, ...additionalLogicBlocks];
 
