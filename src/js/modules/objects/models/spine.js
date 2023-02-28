@@ -187,6 +187,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (this._baseObject.state.listeners.length !== 0) {
                 Urso.logger.warn('ModulesObjectsModelsSpine setAnimationConfig warning: animation state listeners will be cleared');
             }
+
             this._baseObject.state.clearListeners();
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
         }
