@@ -35,6 +35,34 @@ class LibHelper {
     }
 
     /**
+     * waiter for dom element on page
+     * @param {String} selector 
+     * @returns {Promice}
+     * 
+     * @example
+     * waitForDomElement(.game-container).then(()=>{...})
+     */
+    waitForDomElement(selector) {
+        return new Promise(resolve => {
+            if (document.querySelector(selector)) {
+                return resolve(document.querySelector(selector));
+            }
+
+            const observer = new MutationObserver(mutations => {
+                if (document.querySelector(selector)) {
+                    resolve(document.querySelector(selector));
+                    observer.disconnect();
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    }
+
+    /**
      * get uniq elements from two arrays
      * @param {Array} array1 
      * @param {Array} array2 
