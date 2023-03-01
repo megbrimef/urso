@@ -31,15 +31,15 @@ class ModulesAssetsController {
     /**
      * instantly load initial assets and start lazy loading process, if needed
      * @param {Mixed} assets - asset or array of assets
-     * @param {Function} callback 
+     * @param {Function} callback
      */
     preload(assets, callback) {
-        this.getInstance('Service').sortAssets(assets);
-        this.getInstance('Service').startLoad(callback);
+        const assetsSpace = this.getInstance('Service').sortAssets(assets);
+        this.getInstance('Service').startLoad(assetsSpace, callback);
     }
 
     loadGroup(name, callback) {
-        this.getInstance('Service').loadGroup(name, callback);
+        this.getInstance('Service').loadGroup(null, name, callback);
     }
 }
 

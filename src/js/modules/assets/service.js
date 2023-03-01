@@ -4,52 +4,104 @@ class ModulesAssetsService {
         this.singleton = true;
 
         this.assets = {};
+        this._loadCounter = 0;
 
         this._currentQuality = 'auto';
         this._addedAssetsCache = [];
         this.lazyLoadProcessStarted = false;
     };
 
+    /**
+     * get current quality
+     * @returns {String}
+     */
     getQuality() {
         return this._currentQuality;
     }
 
+    /**
+     * Update quality
+     */
     updateQuality() {
         this._currentQuality = this._detectQuality();
         Urso.addInstancesMode(this._currentQuality + 'Quality');
     }
 
+    /**
+     * sort assets and store to assets space
+     * @param {Mixed} assets - asset or array of assets
+     * @returns {Object}
+     */
     sortAssets(assets) {
-        this.assets[this.getInstance('Config').loadingGroups.initial] = [];
+        const assetsSpace = this._createNewAssetsSpace();
+        assetsSpace[this.getInstance('Config').loadingGroups.initial] = [];
 
         if (Array.isArray(assets))
             for (let asset of assets)
-                this._addAsset(asset);
+                this._addAsset(assetsSpace, asset);
         else
-            this._addAsset(assets);
+            this._addAsset(assetsSpace, assets);
+
+        return assetsSpace;
     }
 
-    startLoad(callback) {
+    /**
+     * start load assetsSpace
+     * @param {Object} assetsSpace
+     * @param {Function} callback
+     */
+    startLoad(assetsSpace, callback) {
         this.loadGroup(
+            assetsSpace,
             this.getInstance('Config').loadingGroups.initial,
             (() => { callback(); this._startLazyLoad(); }).bind(this)
         )
     }
 
+    /**
+     * load update handler. Setup to pixi loader
+     * @param {Number} param
+     */
     loadUpdate(param) {
         Urso.scenes.loadUpdate(Math.floor(param.progress));
     }
 
-    loadGroup(group, callback = () => { }) {
-        if (!this.assets[group])
+    /**
+     * load assets group by name
+     * @param {Object} assetsSpace
+     * @param {String} group
+     * @param {Function} callback
+     * @returns
+     */
+    loadGroup(assetsSpace, group, callback = () => { }) {
+        if (!assetsSpace) //global space
+            assetsSpace = this.assets;
+
+        if (!assetsSpace[group])
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
         //we need load and parse atlases at first (!)
-        this._loadGroupAtlases(group, () => { this._loadGroupRestAssets(group, callback) });
+        this._loadGroupAtlases(assetsSpace, group, () => { this._loadGroupRestAssets(assetsSpace, group, callback) });
     }
 
-    _loadGroupAtlases(group, callback) {
-        const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+    /**
+     * create new assets space for loading
+     * @returns {Object}
+     */
+    _createNewAssetsSpace() {
+        this._loadCounter++;
+        this.assets[this._loadCounter] = {};
+        return this.assets[this._loadCounter];
+    }
+
+    /**
+     * load atlases from assets group
+     * @param {Object} assetsSpace
+     * @param {String} group
+     * @param {Function} callback
+     */
+    _loadGroupAtlases(assetsSpace, group, callback) {
+        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
 
         if (!atlases.length)
             return callback();
@@ -59,15 +111,21 @@ class ModulesAssetsService {
         for (let assetModel of atlases)
             this._addAssetToLoader(assetModel, loader);
 
-        loader.start(() => { this._processLoadedAtlases(group); callback(); });
+        loader.start(() => { this._processLoadedAtlases(assetsSpace, group); callback(); });
     }
 
-    _loadGroupRestAssets(group, callback) {
+    /**
+     * load rest assets (atkases is loaded)
+     * @param {Object} assetsSpace
+     * @param {String} group
+     * @param {Function} callback
+     */
+    _loadGroupRestAssets(assetsSpace, group, callback) {
         let loader = Urso.getInstance('Lib.Loader');
         loader.setOnLoadUpdate(this.loadUpdate.bind(this));
         const noAtlasSpines = [];
 
-        for (let assetModel of this.assets[group])
+        for (let assetModel of assetsSpace[group])
             if (assetModel.type !== Urso.types.assets.ATLAS)
                 if (!Urso.cache.getFile(assetModel.path)) {
                     //filter noAtlas Spine files
@@ -79,7 +137,7 @@ class ModulesAssetsService {
 
         loader.start(
             () => {
-                this._processLoadedAssets(group);
+                this._processLoadedAssets(assetsSpace, group);
                 this._loadNoAtlasSpines(noAtlasSpines, () => {
                     this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group);
                     callback();
@@ -88,6 +146,12 @@ class ModulesAssetsService {
         );
     }
 
+    /**
+     * load spines without .atlas files
+     * @param {Array} noAtlasSpines
+     * @param {Function} callback
+     * @returns
+     */
     _loadNoAtlasSpines(noAtlasSpines, callback) {
         if (!noAtlasSpines.length)
             return callback();
@@ -100,8 +164,13 @@ class ModulesAssetsService {
         loader.start(callback);
     }
 
-    _processLoadedAtlases(group) {
-        const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+    /**
+     * process loaded atlases
+     * @param {Object} assetsSpace
+     * @param {String} group
+     */
+    _processLoadedAtlases(assetsSpace, group) {
+        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
 
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
@@ -117,17 +186,17 @@ class ModulesAssetsService {
                     newFilename = folderPath + '/' + frame.filename;
 
                 Urso.cache.addFile(newFilename, texture);
-
-                if(assetModel.cacheTextures) {
-                    const textureKey = newFilename.split('/').pop().split('.')[0];
-                    Urso.cache.addTexture(textureKey, texture);
-                }
             }
         }
     }
 
-    _processLoadedAssets(group) {
-        for (let assetModel of this.assets[group]) {
+    /**
+     * process loaded assets
+     * @param {Object} assetsSpace
+     * @param {String} group
+     */
+    _processLoadedAssets(assetsSpace, group) {
+        for (let assetModel of assetsSpace[group]) {
             if (assetModel.type === Urso.types.assets.IMAGE)
                 this._processLoadedImage(assetModel);
 
@@ -138,9 +207,13 @@ class ModulesAssetsService {
                 this._processLoadedFont(assetModel);
         }
 
-        delete this.assets[group];
+        delete assetsSpace[group];
     }
 
+    /**
+     * process loaded font
+     * @param {Object} source
+     */
     _processLoadedFont(source) {
         const data = Urso.cache.getFile(source.key);
         const font = new FontFace(source.key, data.data);
@@ -149,10 +222,19 @@ class ModulesAssetsService {
         });
     }
 
+    /**
+     * process loaded bitmap font
+     * @param {Object} source
+     */
     _processLoadedBitmapFont(assetModel) {
         this._updateFontKey(assetModel.key)
     }
 
+    /**
+     * Update font key if cannot use original
+     * @param {String} fontName
+     * @returns
+     */
     _updateFontKey(fontName) {
         const fontData = Urso.cache.getBitmapFont(fontName);
 
@@ -167,11 +249,19 @@ class ModulesAssetsService {
         }
     }
 
+    /**
+     * get current assets resolution
+     * @returns {Number}
+     */
     getCurrentResolution() {
         const { qualityFactors, defaultQualityFactor } = this.getInstance('Config');
         return qualityFactors[this._currentQuality] || defaultQualityFactor || 1;
     }
 
+    /**
+     * process loaded image
+     * @param {Object} assetModel
+     */
     _processLoadedImage(assetModel) {
         const resolution = this.getCurrentResolution();
 
@@ -205,7 +295,13 @@ class ModulesAssetsService {
         }
     }
 
-    _addAsset(asset, loadingGroup) {
+    /**
+     * add asset
+     * @param {Object} assetsSpace
+     * @param {Object} asset
+     * @param {String} loadingGroup
+     */
+    _addAsset(assetsSpace, asset, loadingGroup) {
         //cache for all assets. We do not need to load same assets twice or more
         if (asset.type !== Urso.types.assets.CONTAINER) {
             let addedAssetKey = `${asset.type}_${asset.key}`;
@@ -257,19 +353,26 @@ class ModulesAssetsService {
         //check if container
         if (model.contents) {
             for (let content of model.contents) {
-                this._addAsset(content, model.loadingGroup);
+                this._addAsset(assetsSpace, content, model.loadingGroup);
             }
 
             return;
         }
 
-        //add single asset to loading group
-        if (!this.assets[model.loadingGroup])
-            this.assets[model.loadingGroup] = [];
+        if (model.loadingGroup === this.getInstance('Config').loadingGroups.initial) {
+            assetsSpace[model.loadingGroup].push(model);
+        } else {
+            //add single asset to loading group
+            if (!this.assets[model.loadingGroup])
+                this.assets[model.loadingGroup] = [];
 
-        this.assets[model.loadingGroup].push(model);
+            this.assets[model.loadingGroup].push(model);
+        }
     }
 
+    /**
+     * start lazy load process
+     */
     _startLazyLoad() {
         if (this.lazyLoadProcessStarted)
             return;
@@ -278,6 +381,10 @@ class ModulesAssetsService {
         this._continueLazyLoad();
     }
 
+    /**
+     * continue lazy load process (with current step)
+     * @param {Number} step
+     */
     _continueLazyLoad(step) {
         if (!step)
             step = 0;
@@ -297,6 +404,12 @@ class ModulesAssetsService {
         this.loadGroup(groupName, () => { this._continueLazyLoad(step + 1); })
     }
 
+    /**
+     * quality reducer
+     * @param {Object} qualityFactors
+     * @param {Number} widthFactor
+     * @returns
+     */
     _qualityReducer(qualityFactors, widthFactor) {
         return [(acc, val) => {
             if (acc === null) {
@@ -315,6 +428,10 @@ class ModulesAssetsService {
         }, null]
     }
 
+    /**
+     * detect assets quality
+     * @returns {Number}
+     */
     _detectQuality() {
         const { qualityFactors } = this.getInstance('Config');
         const userQuality = Urso.helper.parseGetParams()['quality'];
@@ -326,6 +443,10 @@ class ModulesAssetsService {
         return this._calculateQuality(qualityFactors);
     }
 
+    /**
+     * calculate quality
+     * @param {Object} qualityFactors
+     */
     _calculateQuality(qualityFactors) {
         const { android, iOS, iPad, macOS } = Urso.device;
         const isMobile = android || iOS || iPad;
@@ -358,6 +479,11 @@ class ModulesAssetsService {
             .reduce(...this._qualityReducer(qualityFactors, widthFactor));
     }
 
+    /**
+     * add asset to loader instance
+     * @param {Object} assetModel
+     * @param {Object} loader
+     */
     _addAssetToLoader(assetModel, loader) {
         if (assetModel.path)
             loader.addAsset(assetModel);
