@@ -315,32 +315,35 @@ class ModulesAssetsService {
         let model;
 
         switch (asset.type) {
-            case Urso.types.assets.IMAGE:
-                model = this.getInstance('Models.Image', asset)
-                break;
-            case Urso.types.assets.CONTAINER:
-                model = this.getInstance('Models.Container', asset)
-                break;
             case Urso.types.assets.ATLAS:
                 model = this.getInstance('Models.Atlas', asset)
                 break;
             case Urso.types.assets.AUDIOSPRITE:
                 model = this.getInstance('Models.Audiosprite', asset)
                 break;
-            case Urso.types.assets.JSON:
-                model = this.getInstance('Models.Json', asset)
-                break;
-            case Urso.types.assets.SPINE:
-                model = this.getInstance('Models.Spine', asset)
-                break;
             case Urso.types.assets.BITMAPFONT:
                 model = this.getInstance('Models.BitmapFont', asset)
+                break;
+            case Urso.types.assets.CONTAINER:
+                model = this.getInstance('Models.Container', asset)
                 break;
             case Urso.types.assets.FONT:
                 model = this.getInstance('Models.Font', asset)
                 break;
+            case Urso.types.assets.HTML:
+                model = this.getInstance('Models.Html', asset)
+                break;
+            case Urso.types.assets.IMAGE:
+                model = this.getInstance('Models.Image', asset)
+                break;
+            case Urso.types.assets.JSON:
+                model = this.getInstance('Models.Json', asset)
+                break;
             case Urso.types.assets.SOUND:
                 model = this.getInstance('Models.Sound', asset)
+                break;
+            case Urso.types.assets.SPINE:
+                model = this.getInstance('Models.Spine', asset)
                 break;
             default:
                 Urso.logger.error('ModulesAssetsService asset type error', asset);

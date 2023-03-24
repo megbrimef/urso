@@ -10,7 +10,8 @@ class ModulesTemplateTypes {
                 IMAGE: 6,
                 JSON: 7,
                 SOUND: 8,
-                SPINE: 9
+                SPINE: 9,
+                HTML: 100
             },
 
             objects: {
