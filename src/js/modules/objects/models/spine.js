@@ -72,6 +72,15 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     }
 
     /**
+     * set skin by name and reset animation to first frame
+     * @param {String} skinName
+     */
+    setSkinByNameAndReset(skinName) {
+        this.setSkinByName(skinName);
+        this.setToSetupPose();
+    }
+
+    /**
      * play spine animation and execute function after animation completes
      * @param {String} animation - name of the animation to be played
      * @param {Function} func - function to be executed
@@ -130,6 +139,15 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      * @param {Number} [track] - you can define track number to stop
      */
     stopTrack(track) {
+        this.clearTrack(track);
+        this._baseObject.state.addEmptyAnimation(track, 0.2, 0); //int trackIndex, float mixDuration, float delay
+    }
+
+    /**
+     * clear track animation
+     * @param {Number} [track] - you can define track number to stop
+     */
+    clearTrack(track) {
         this._baseObject.state.clearTrack(track);
     }
 
