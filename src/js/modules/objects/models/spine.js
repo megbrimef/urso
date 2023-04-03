@@ -141,6 +141,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
     stopTrack(track) {
         this.clearTrack(track);
         this._baseObject.state.addEmptyAnimation(track, 0.2, 0); //int trackIndex, float mixDuration, float delay
+        this.setToSetupPose();
     }
 
     /**
