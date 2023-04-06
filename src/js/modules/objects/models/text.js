@@ -31,6 +31,7 @@ class ModulesObjectsModelsText extends Urso.Core.Modules.Objects.BaseModel {
         this.wordWrap = Urso.helper.recursiveGet('wordWrap', params, false);
         this.wordWrapWidth = Urso.helper.recursiveGet('wordWrapWidth', params, 100);
         this.leading = Urso.helper.recursiveGet('leading', params, 0);
+        this.letterSpacing = Urso.helper.recursiveGet('letterSpacing', params, 0);
         this.textAlign = Urso.helper.recursiveGet('textAlign', params, 'left');
     }
 
