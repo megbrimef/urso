@@ -6,6 +6,10 @@ class ModulesObserverConfig {
             COMPONENTS_FULLSCREEN_CHANGE: 'components.fullscreen.change',
             COMPONENTS_FULLSCREEN_SWITCH: 'components.fullscreen.switch',
             COMPONENTS_LAYERS_SWITCHER_SWITCH: 'components.layersSwitcher.switch',
+            EXTRA_BROWSEREVENTS_POINTER_EVENT: 'extra.browserEvents.window.pointer.event',
+            EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',
+            EXTRA_BROWSEREVENTS_WINDOW_RESIZE: 'extra.browserEvents.window.resize',
+            EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE: 'extra.browserEvents.window.visibilitychange',
             MODULES_ASSETS_GROUP_LOADED: 'modules.assets.group.loaded',
             MODULES_ASSETS_LOAD_PROGRESS: 'modules.assets.load.progress',
             MODULES_ASSETS_LAZYLOAD_FINISHED: 'modules.assets.lazyLoad.finished',
@@ -41,10 +45,6 @@ class ModulesObserverConfig {
             MODULES_SCENES_PAUSE: 'modules.scenes.pause',
             MODULES_SCENES_RESUME: 'modules.scenes.resume',
             MODULES_SCENES_UPDATE: 'modules.scenes.update',
-            EXTRA_BROWSEREVENTS_POINTER_EVENT: 'extra.browserEvents.window.pointer.event',
-            EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',
-            EXTRA_BROWSEREVENTS_WINDOW_RESIZE: 'extra.browserEvents.window.resize',
-            EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE: 'extra.browserEvents.window.visibilitychange'
         }
     }
 }
