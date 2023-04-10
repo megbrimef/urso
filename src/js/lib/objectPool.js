@@ -16,22 +16,25 @@ class ObjectPoolMember {
 
 /**
  * @param {Function} constructorFunction - function to constract element
- * @param {Function} constructorFunction - function to reset element when put back to pool
+ * @param {Function} resetFunction - function to reset element when put back to pool
  * @param {Number} [initialSize] - initial pool size. Use only if you not using keys when constract
  * @param {Number} [maxSize] - max pool size. Old elements will be removed from pool
+ * @param {Function} removeFunction - function to remove element from pool. Happens, when max size is reached
  */
 class LibObjectPool {
 
     _pool = {};
-    resetFunction = () => { };
     constructorFunction = () => { };
+    resetFunction = () => { };
+    removeFunction = () => { };
     _maxSize = 0;
 
     _lastBranchKeys = {};
     _putTimeCache = {};
 
-    constructor(constructorFunction, resetFunction = (obj) => obj, initialSize = 0, maxSize = 0) {
+    constructor(constructorFunction, resetFunction = (obj) => obj, initialSize = 0, maxSize = 0, removeFunction = (obj) => obj) {
         this.resetFunction = resetFunction;
+        this.removeFunction = removeFunction;
         this.constructorFunction = constructorFunction;
         this._maxSize = maxSize;
 
@@ -112,6 +115,7 @@ class LibObjectPool {
         delete this._pool[element.key][element.branchKey];
 
         //reset element
+        this.removeFunction(element.data);
         element.free = false;
         element.putCacheTimeKey = 0;
         element.key = null;

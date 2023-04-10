@@ -18,11 +18,13 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         this.animation = {
             timeScale: Urso.helper.recursiveGet('animation.timeScale', params, 1),
             name: Urso.helper.recursiveGet('animation.name', params, false),
+            skinName: Urso.helper.recursiveGet('animation.skinName', params, false),
             loop: Urso.helper.recursiveGet('animation.loop', params, false),
             onComplete: Urso.helper.recursiveGet('animation.onComplete', params, false)
         };
 
         params.animation = this.animation; //we redefine original property here
+        this.contents = Urso.helper.recursiveGet('contents', params, []);
     }
 
     /**
@@ -33,6 +35,25 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     play(animationName, loopFlag = false, track = 0) {
         this._baseObject.state.setAnimation(track, animationName, loopFlag);
+    }
+
+    /**
+     * set up the mixes between animations
+     * @param {String} from - animation name
+     * @param {String} to - animation name
+     * @param {Number} duration - time in seconds
+     * @example setMix("walk", "jump", 0.2)
+     */
+    setMix(from, to, duration) {
+        this._baseObject.stateData.setMix(from, to, duration);
+    }
+
+    /**
+     * Clears all listeners and resubscribes to spine events
+     */
+    clearListeners() {
+        this._baseObject.state.clearListeners();
+        this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     }
 
     /**
@@ -48,6 +69,15 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      */
     setToSetupPose() {
         this._baseObject.skeleton.setToSetupPose();
+    }
+
+    /**
+     * set skin by name and reset animation to first frame
+     * @param {String} skinName
+     */
+    setSkinByNameAndReset(skinName) {
+        this.setSkinByName(skinName);
+        this.setToSetupPose();
     }
 
     /**
@@ -109,6 +139,16 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
      * @param {Number} [track] - you can define track number to stop
      */
     stopTrack(track) {
+        this.clearTrack(track);
+        this._baseObject.state.addEmptyAnimation(track, 0.2, 0); //int trackIndex, float mixDuration, float delay
+        this.setToSetupPose();
+    }
+
+    /**
+     * clear track animation
+     * @param {Number} [track] - you can define track number to stop
+     */
+    clearTrack(track) {
         this._baseObject.state.clearTrack(track);
     }
 
@@ -166,6 +206,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (this._baseObject.state.listeners.length !== 0) {
                 Urso.logger.warn('ModulesObjectsModelsSpine setAnimationConfig warning: animation state listeners will be cleared');
             }
+
             this._baseObject.state.clearListeners();
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
         }
@@ -226,12 +267,18 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
         if (!spineAsset)
             Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine object ' + this.assetKey);
 
+        if (!spineAsset.spineData)
+            Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine correct object (no spineData) for key ' + this.assetKey);
+
         this._baseObject = new PIXI.spine.Spine(spineAsset.spineData);
         //this._baseObject.state.timeScale = this.animation.timeScale;
         Object.defineProperty(this._baseObject.state, 'timeScale', { get: this.getTimeScale.bind(this) });
 
         if (this.animation.onComplete)
             this._baseObject.state.addListener({ complete: this.animation.onComplete });
+
+        if (this.animation.skinName)
+            this.setSkinByName(this.animation.skinName);
 
         if (this.animation.name)
             this.play(this.animation.name, this.animation.loop);
@@ -256,7 +303,7 @@ class ModulesObjectsModelsSpine extends Urso.Core.Modules.Objects.BaseModel {
             if (replaceSlotContents)
                 currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            object.parent = this; //todo make removeChild for addedToSlotObjects
+            this.addChild(object); //todo make removeChild for addedToSlotObjects
             currentSlot.addChild(object._baseObject);
             Urso.objects.refreshStyles();
         } else {

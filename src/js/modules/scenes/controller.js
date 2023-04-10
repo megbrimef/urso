@@ -102,6 +102,14 @@ class ModulesScenesController {
     }
 
     /**
+     * get current renderer
+     * @returns {Object} - PIXI.Renderer
+     */
+    getRenderer() {
+        return this.getInstance('PixiWrapper').getRenderer();
+    }
+
+    /**
      * global timeScale getter
      */
     get timeScale() {

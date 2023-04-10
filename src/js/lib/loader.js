@@ -28,7 +28,7 @@ class LibLoader {
         }
 
         if (!Urso.config.useBinPath) {
-            return `assets/${path}`;
+            return `${Urso.config.gamePath}assets/${path}`;
         }
 
         const quality = Urso.getInstance('Modules.Assets.Service').getQuality();
@@ -38,7 +38,7 @@ class LibLoader {
             splitted.splice(1, 0, quality);
         }
 
-        return `bin/${splitted.join('/')}`;
+        return `${Urso.config.gamePath}/bin/${splitted.join('/')}`;
     };
 
     /**
@@ -56,11 +56,12 @@ class LibLoader {
             case Urso.types.assets.BITMAPFONT:
                 Urso.cache.addBitmapFont(asset.key, resource);
                 break;
-            case Urso.types.assets.FONT:
-                Urso.cache.addFile(asset.key, resource);
-                break;
             case Urso.types.assets.CONTAINER:
                 Urso.cache.addContainer(asset.key, resource);
+                break;
+            case Urso.types.assets.FONT:
+            case Urso.types.assets.HTML:
+                Urso.cache.addFile(asset.key, resource);
                 break;
             case Urso.types.assets.IMAGE:
                 Urso.cache.addImage(asset.key, resource);

@@ -125,7 +125,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             .filter((container) => container._baseObject.worldVisible)
             .filter((container) => !container._needBlock)
             .filter((container) => {
-                let height = container.getAbsoluteSize().height;
+                const height = container.getAbsoluteSize().height;
                 return container.height - height < 0;
             })
             .sort((firstContainer, secondContainer) => secondContainer.dragIndex - firstContainer.dragIndex);
@@ -184,36 +184,23 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * @returns { Array }
      */
     _getObjectPoints(container) {
-        if (Urso.device.desktop) {
-            const { x, y } = this._getScaleAndPositionRecursive(this);
-            const { width, height } = container._mask;
-            const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
+        const { x, y } = container._mask.toGlobal(new PIXI.Point(0, 0));
 
-            return [
-                { x, y },
-                { x: x + width * scaleX, y },
-                { x: x + width * scaleX, y: y + height * scaleY },
-                { x, y: y + height * scaleY }
-            ];
+        const { width, height } = container._mask;
+        const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
 
-        } else {
-            const { x, y } = container._mask.toGlobal(new PIXI.Point(0, 0));
-            const { width, height } = container._mask;
-            const { scaleX, scaleY } = this._getScaleAndPositionRecursive(this);
-            return [
-                { x, y },
-                { x: x + width * scaleX, y },
-                { x: x + width * scaleX, y: y + height * scaleY },
-                { x, y: y + height * scaleY }
-            ];
-        }
-
+        return [
+            { x, y },
+            { x: x + width * scaleX, y },
+            { x: x + width * scaleX, y: y + height * scaleY },
+            { x, y: y + height * scaleY }
+        ];
     }
 
     /**
      * Function takes dragContainer object and recurcievly calculates it's global scale and position
      * @param { Object } 
-     * @returns 
+     * @returns { Object } 
      */
     _getScaleAndPositionRecursive({ scaleX, scaleY, parent, x, y }) {
         if (!parent) {
@@ -239,7 +226,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return;
 
         this._moveInProgress = true;
-        let offset = e.offsetY || e.changedTouches[0].offsetY || e.changedTouches[0].clientY;
+
+        const offset = e.offsetY ?? e.changedTouches[0].changedOffsetY ?? e.changedTouches[0].clientY ?? 0;
 
         if (Math.abs(this._moveStartedY - offset) > this._minMoveDistance && !this._dragStarted) {
             this._dragStarted = true;
@@ -380,7 +368,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * Validates next dragContainer position.
      * @param { Number } lastY 
      * @param { Boolean } isWheel 
-     * @returns 
+     * @returns { Number }
      */
     _validateY(lastY, isWheel) {
         const deltaY = isWheel ? lastY * this.speed : ((lastY - this._startPosition.y) * this.speed);
@@ -428,10 +416,8 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return;
 
         const { height } = this.getAbsoluteSize();
-
-        const positionChange = y / (height - this.height);
-        const { _sliderHandle, _sliderSize } = this._slider;
-        _sliderHandle.y = -(_sliderSize * positionChange);
+        const positionCoefficient = Math.abs(y / (height - this.height));
+        this._slider.setHandlePosition(positionCoefficient);
     }
 
     /**
@@ -495,18 +481,12 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
      * Drags container on pointer move.
      * @param { Object } event 
      */
-    _onPointerMove(event) {
+     _onPointerMove(event) {
         let { data: { global: { x, y } } } = event;
-
-        if (Urso.device.desktop) {
-            x = Urso.scenes.getMouseCoords().x;
-            y = Urso.scenes.getMouseCoords().y;
-        }
 
         if (!this._startPosition) {
             this._startPosition = { x, y };
         }
-
 
         if (!this._isActive({ x, y })) {
             this._moveInProgress = false;
@@ -571,13 +551,13 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
             return
 
         if (this.height >= this._baseObject.height) {
-            this._slider._moveSlider({ x: 0, y: 0 }, true, true);
+            this._slider.setHandlePosition(0);
             return;
         }
 
-        const { _sliderSize } = this._slider;
+        const { sliderSize } = this._slider;
         const containerHeight = this._mask.height - this._baseObject.height;
-        const diffY = position > 0 ? position / _sliderSize * containerHeight : 0;
+        const diffY = position > 0 ? position / sliderSize * containerHeight : 0;
 
         this._needMoveSlider = false;
         this._move(diffY, true)
@@ -610,7 +590,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
     /**
      * Checks if need to set slider. If no dragContainerName - slider will be set for all dragContainers.
      * @param {String} dragContainerName 
-     * @returns 
      */
     _setSliderHandler(dragContainerName) {
         if (dragContainerName && dragContainerName !== this.name)
@@ -633,6 +612,7 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
                 this._moveStartedY = event.changedTouches[0].offsetY || event.changedTouches[0].clientY;
                 this._documentPointerStart(event);
                 break;
+            case 'mousemove':
             case 'touchmove':
                 this._documentPointerMove(event);
                 break;
@@ -642,9 +622,6 @@ class ModulesObjectsModelsDragContainer extends ModulesObjectsModelsContainer {
                 break;
             case 'wheel':
                 this._documentWheelScroll(event);
-                break;
-            case 'pointermove':
-                this._onPointerMove(event);
                 break;
             default:
                 break;

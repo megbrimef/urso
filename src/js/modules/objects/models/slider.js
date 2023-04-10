@@ -11,6 +11,17 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._addBaseObject();
     }
 
+    /**
+     * Returns slider size according to handle size.
+     * @returns { Number }
+     */
+    get sliderSize() {
+        const anchorType = this.sizeKey === 'width' ? 'anchorX' : 'anchorY';
+        const anchor = this._sliderHandle[anchorType];
+        const handleSize = this._sliderHandle[this.sizeKey];
+        return this._sliderBg._baseObject[this.sizeKey] - handleSize + handleSize * anchor * 2; 
+    }
+
     setupParams(params) {
         super.setupParams(params);
         this.contents = [];
@@ -25,6 +36,23 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this.isVertical = Urso.helper.recursiveGet('isVertical', params, false);
     }
 
+    /**
+     * Sets handle position on a nearest possible point.
+     * @param { Number } coefficient  - might be in range 0 - 1.
+     */
+    setHandlePosition(coefficient) {
+        let position = {};
+
+        const targetPosition = this.sliderSize * coefficient;
+        position[this.positionKey] = targetPosition;
+
+        const { coord, value } = this._calculateClosestPoint(position);
+        this._setNewValue( coord, value);
+    }
+
+    /**
+     * Sets variables depends on slider type: vertical or horizontal.
+     */
     _setVariables() {
         if (this.isVertical) {
             this.positionKey = 'y';
@@ -35,6 +63,9 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         }
     }
 
+    /**
+     * Creates Urso objects from given models of handle and background. If needed - creates fill texture.
+     */
     _createSliderTextures() {
         this._sliderBg = this._createTexture(this.bgTexture);
 
@@ -47,9 +78,15 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._setEvents(this._sliderHandle._baseObject);
     }
 
+    /**
+     * Creates and returns Urso GRAPHICS object for fill bar.
+     * @param { Object } model 
+     * @returns { Object }
+     */
     _createFillTexture(model) {
         const fillTexture = this._createTexture(model);
         const { width, height } = fillTexture._baseObject;
+
         this._fillMask = Urso.objects.create({
             type: Urso.types.objects.GRAPHICS,
             figure: {
@@ -60,9 +97,12 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         }, this);
 
         fillTexture._baseObject.mask = this._fillMask._baseObject;
-        return fillTexture
+        return fillTexture;
     }
 
+    /**
+     * If needed creates Urso TEXT objects for min max and current value.
+     */
     _createValueText() {
         if (this.minValueTextModel) {
             this.minValueText = Urso.objects.create(this.minValueTextModel, this);
@@ -78,7 +118,11 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
             this.currentValueText = Urso.objects.create(this.currentValueTextModel, this);
         }
     }
-
+    /**
+     * Creates and return Urso object for texture. Model type might be GRAPHICS or IMAGE.
+     * @param { Object } model 
+     * @returns { Object }
+     */
     _createTexture(model) {
         if (model.type === Urso.types.objects.GRAPHICS || model.type === Urso.types.objects.IMAGE)
             return Urso.objects.create(model, this);
@@ -86,6 +130,10 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
             Urso.logger.error('ModulesObjectsModelsSlider objects error: textures should be GRAPHICS or IMAGE type');
     }
 
+    /**
+     * Subscribes on pointer events.
+     * @param { Object } obj 
+     */
     _setEvents(obj) {
         obj.interactive = true;
         obj.buttonMode = true;
@@ -97,11 +145,20 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
             .on('touchmove', this._onTouchmove.bind(this));
     };
 
+    /**
+     * Handler for touchmove event.
+     * @param { Object } event 
+     */
     _onTouchmove(event) {
         const position = this._getEventLocalPosition(event);
         this._onPointerMove(position);
     }
 
+    /**
+     * Calculate pointer coords inside PIXI World.
+     * @param { Object } event 
+     * @returns 
+     */
     _getEventLocalPosition(event) {
         const world = Urso.objects.getWorld();
         const worldScale = world._baseObject.scale;
@@ -112,6 +169,9 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         return { x, y };
     }
 
+    /**
+     * Creates base object and set up slider.
+     */
     _addBaseObject() {
         this._baseObject = new PIXI.Container();
         
@@ -122,11 +182,19 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._setDefaultValue();
     };
 
+    /**
+     * Handler for pointerdown event.
+     * @param { Object } event 
+     */
     _onPointerDown(obj) {
         if (obj.target === this._sliderHandle._baseObject)
             this._handleIsDragging = true;
     }
 
+    /**
+     * Handler for touchmove and pointermove events. 
+     * @param { Object } param 
+     */
     _onPointerMove({ x, y }) {
         if (!this._handleIsDragging)
             return
@@ -136,14 +204,17 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
 
         if (value < globalPosition)
             this._sliderHandle[this.positionKey] = 0;
-        else if (value >= globalPosition + this._sliderBg._baseObject[this.sizeKey])
-            this._sliderHandle[this.positionKey] = this._sliderBg._baseObject[this.sizeKey];
+        else if (value >= globalPosition + this.sliderSize)
+            this._sliderHandle[this.positionKey] = this.sliderSize;
         else
-            this._sliderHandle[this.positionKey] = value - globalPosition
+            this._sliderHandle[this.positionKey] = value - globalPosition;
 
         this._updateValueOnMove()
     }
 
+    /**
+     * Updates slider value while moving.
+     */
     _updateValueOnMove() {
         const { value } = this._calculateClosestPoint(this._sliderHandle);
 
@@ -154,6 +225,10 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this.emit(Urso.events.MODULES_OBJECTS_SLIDER_HANDLE_MOVE, data)
     }
 
+    /**
+     * Handler for pointerup event. 
+     * @param { Object } obj 
+     */
     _onPointerUp(obj) {
         this._handleIsDragging = false;
         let targetObj;
@@ -167,6 +242,9 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._dropHandle(coord, value);
     }
 
+    /**
+     * Sets possible values (points) of slider 
+     */
     _setPoints() {
         if (this.points.length > 1) {
             this._points = [...this.points];
@@ -180,6 +258,9 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
             this._points.push(i);
     }
 
+    /**
+     * Sets given default value or 0. 
+     */
     _setDefaultValue() {
         if(!this.defaultValue)
             this.defaultValue = this._points[0];
@@ -187,12 +268,15 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         if (!this._points.includes(this.defaultValue))
             this.defaultValue = this._points[0];
 
-        let value = this._points.indexOf(this.defaultValue) *
-            this._sliderBg._baseObject[this.sizeKey] / (this._points.length - 1);
-
+        let value = this._points.indexOf(this.defaultValue) * this.sliderSize / (this._points.length - 1);
         this._setNewValue(value, this.defaultValue);
     }
 
+    /**
+     * When handle drops sets final value and emits event
+     * @param { Number } coord 
+     * @param { Number } value 
+     */
     _dropHandle(coord, value) {
         const data = { class: this.class, name: this.name, position: coord, value: value };
 
@@ -200,18 +284,23 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._setNewValue(coord, value);
     }
 
-    _calculateClosestPoint({ x, y }) {
-        const givenValue = this.isVertical ? y : x;
+    /**
+     * Calculates closest possible value (point) from given coords. 
+     * @param { Object } obj
+     * @returns { Object }
+     */
+    _calculateClosestPoint(obj) {
+        const givenValue = obj[this.positionKey];
         let value, coord;
 
         if (this._points.length <= 2) {
             coord = givenValue;
-            value = ~~(100 / this._sliderBg._baseObject[this.sizeKey] * givenValue);
+            value = ~~(100 / this.sliderSize * givenValue);
         }
         // calculate closest point
         else {
             for (let i = 0; i < this._points.length; i++) {
-                let pointCoord = i * this._sliderBg._baseObject[this.sizeKey] / (this._points.length - 1);
+                let pointCoord = i * this.sliderSize / (this._points.length - 1);
 
                 if (typeof (coord) === 'number' && givenValue - pointCoord < coord - givenValue) {
                     coord = coord;
@@ -225,6 +314,9 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         return { coord, value };
     }
 
+    /**
+     * Set mask for fill texture depends on handle position.
+     */
     _setFillMask() {
         if (!this._fillMask)
             return
@@ -236,6 +328,11 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         this._fillMask[scaleKey] = progress;
     }
 
+    /**
+     * Set handle position and value.
+     * @param { Number } coord 
+     * @param { Number } value 
+     */
     _setNewValue(coord, value) {
         this._sliderHandle[this.positionKey] = coord;
 

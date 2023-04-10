@@ -34,15 +34,15 @@ class ModulesScenesPixiWrapper {
 
         //define renderer
         PIXI.utils.skipHello();
-        this.renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
-        document.body.appendChild(this.renderer.view);
+        this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
+        document.body.appendChild(this._renderer.view);
 
         //root and world
         this._root = new PIXI.Container();
         this._createWorld();
 
         // setup interaction
-        this.interaction = Urso.helper.recursiveGet('plugins.interaction', this.renderer) || new PIXI.InteractionManager(this.renderer);
+        this.interaction = Urso.helper.recursiveGet('plugins.interaction', this._renderer) || new PIXI.InteractionManager(this._renderer);
 
         this._loaderScene = this.getInstance('Model');
         this._requestAnimFrame(this._loop);
@@ -82,21 +82,21 @@ class ModulesScenesPixiWrapper {
      * @param {Number} height
      */
     resize(width, height) {
-        this.renderer.resize(width, height);
+        this._renderer.resize(width, height);
     };
 
     /**
      * hide canvas
      */
     hideCanvas() {
-        this.renderer.view.style.display = 'none';
+        this._renderer.view.style.display = 'none';
     }
 
     /**
      * show canvas
      */
     showCanvas() {
-        this.renderer.view.style.display = '';
+        this._renderer.view.style.display = '';
     }
 
     /**
@@ -114,7 +114,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasWidth(val) {
-        this.renderer.view.style.width = val + 'px';
+        this._renderer.view.style.width = val + 'px';
     };
 
     /**
@@ -122,8 +122,16 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasHeight(val) {
-        this.renderer.view.style.height = val + 'px';
+        this._renderer.view.style.height = val + 'px';
     };
+
+    /**
+     * get current renderer
+     * @returns {Object} - PIXI.Renderer
+     */
+    getRenderer() {
+        return this._renderer;
+    }
 
     /**
      * get pixi world (main Container)
@@ -175,7 +183,7 @@ class ModulesScenesPixiWrapper {
      * @returns {Object} - pixi.Texture
      */
     generateTexture(obj) {
-        return this.renderer.generateTexture(obj);
+        return this._renderer.generateTexture(obj);
     }
 
     _setPixiSettings() {
@@ -278,7 +286,7 @@ class ModulesScenesPixiWrapper {
 
         this.currentScene.update(deltaTime);
         this.currentScene.render();
-        this.renderer.render(this._root);
+        this._renderer.render(this._root);
     };
 
     _checkMouse() {
