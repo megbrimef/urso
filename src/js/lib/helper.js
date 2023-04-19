@@ -168,6 +168,7 @@ class LibHelper {
 
     /**
      * recursive set value to object by key
+     * (*) you can use '.' as objects keys splitter
      * @param {String} key 
      * @param {Mixed} value 
      * @param {Object} object 
@@ -200,6 +201,7 @@ class LibHelper {
 
     /**
      * recursive get value from object by key
+     * (*) you can use '.' as objects keys splitter
      * @param {String} key 
      * @param {Object} object 
      * @returns {Mixed}
@@ -222,6 +224,7 @@ class LibHelper {
 
     /**
      * recursive delete value from object by key
+     * (*) you can use '.' as objects keys splitter
      * @param {String} key 
      * @param {Object} object 
      * @returns {Boolean}
