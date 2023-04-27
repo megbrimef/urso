@@ -582,6 +582,23 @@ class LibHelper {
 
         return results;
     }
+
+    /**
+     * apply params to string
+     * @param {String} string 
+     * @param {Object} params 
+     * @returns {String}
+     * 
+     *  @example interpolate('Bet ${bet} with Multi ${multi}', {bet:12,multi:13})
+     *  returns 'Bet 12 with Multi 13'
+     */
+    interpolate(string, params) {
+        for (const [key, value] of Object.entries(params)) {
+            string = Urso.helper.stringReplace('${' + key + '}', value, string);
+        }
+
+        return string
+    }
 }
 
 module.exports = LibHelper;
