@@ -12,6 +12,14 @@ class ModulesAssetsService {
     };
 
     /**
+     * system; check webP support
+     */
+    checkWebPSupport() {
+        if (Urso.device.webP)
+            Urso.addInstancesMode('webP');
+    }
+
+    /**
      * get current quality
      * @returns {String}
      */

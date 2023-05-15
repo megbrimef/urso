@@ -67,6 +67,7 @@ class App {
         //App.run
         Urso.device.whenReady(() => {
             Urso.assets.updateQuality();
+            Urso.assets.checkWebPSupport();
             Urso.getInstance('App').run();
         });
     }
