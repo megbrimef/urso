@@ -177,8 +177,8 @@ class ModulesAssetsService {
      * @param {Object} assetsSpace
      * @param {String} group
      */
-    _processLoadedAtlases(assetsSpace, group) {
-        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+    _processLoadedAtlases(group) {
+        const atlases = this.assets[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
 
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
