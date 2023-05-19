@@ -74,7 +74,7 @@ class SoundSprite {
         return this._isAudioUnlocked;
     };
 
-    play({ loop = false, volume = this._volume, relaunch = false, soundKey }) {
+    play({ soundKey, loop = false, volume = this._volume, relaunch = false, resetVolume = true }) {
         if (!this.canPlayCheck() || (this._soundsState[soundKey].id !== null && !relaunch))
             return false;
 
@@ -84,7 +84,9 @@ class SoundSprite {
 
         this.setRelaunch(soundKey, relaunch);
         this.setLoop(soundKey, loop);
-        this.setVolume({ soundKey, volume });
+
+        if (resetVolume)
+            this.setVolume({ soundKey, volume });
 
         return true;
     };
