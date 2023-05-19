@@ -60,7 +60,7 @@ class SoundSprite {
 
             if (!soundState)
                 return Urso.logger.error(`SoundSprite error: soundState for id '${id}' not found!`);
-            
+
             if (!soundState.loop)
                 soundState.id = null;
         });
@@ -84,7 +84,7 @@ class SoundSprite {
 
         this.setRelaunch(soundKey, relaunch);
         this.setLoop(soundKey, loop);
-        this.setVolume(soundKey, volume);
+        this.setVolume({ soundKey, volume });
 
         return true;
     };
@@ -94,17 +94,17 @@ class SoundSprite {
         this._player.loop(loop, this._soundsState[soundKey].id);
     };
 
-    setVolume(soundKey, volume = 1, saveVolumeState = true) {
+    setVolume({ soundKey, volume = 1, saveVolumeState = true }) {
         this._player.volume(volume, this._soundsState[soundKey].id);
-        
-        if(volume === 0) {
+
+        if (volume === 0) {
             this._changeSoundMute(true, soundKey);
             return;
-        }else if(this._soundsState[soundKey]._muted) {
+        } else if (this._soundsState[soundKey]._muted) {
             this._changeSoundMute(false, soundKey);
         }
 
-        if(saveVolumeState) {
+        if (saveVolumeState) {
             this._soundsState[soundKey].volume = volume;
         }
     };
@@ -123,7 +123,7 @@ class SoundSprite {
         this._player._volume = this._totalVolume;
         soundKeys.forEach(soundKey => {
             const soundVolume = this._soundsState[soundKey].volume * this._totalVolume;
-            this.setVolume(soundKey, soundVolume, false);
+            this.setVolume({ soundKey, volume: soundVolume, saveVolumeState: false });
         });
     }
 
@@ -161,7 +161,7 @@ class SoundSprite {
     };
 
     _stopPrevFade(soundKey) {
-        if(this._fadeTweens[soundKey]) {
+        if (this._fadeTweens[soundKey]) {
             this._fadeTweens[soundKey].kill();
         }
 
@@ -173,18 +173,18 @@ class SoundSprite {
         const delta = fadeTo - fadeFrom;
 
         const onUpdate = () => {
-            const volume  = (fadeFrom + (delta * this._fadeTweens[soundKey].ratio)) * this._totalVolume;
-            this.setVolume(soundKey, volume);
+            const volume = (fadeFrom + (delta * this._fadeTweens[soundKey].ratio)) * this._totalVolume;
+            this.setVolume({ soundKey, volume });
         };
 
         this._fadeTweens[soundKey] = gsap.to({}, fadeDuration / 1000, { onUpdate });
     }
 
     fade({ fadeTo = 1, fadeDuration = 200, startSound = false, soundKey, ...others }) {
-        if(startSound) {
+        if (startSound) {
             this.play({ ...others, soundKey });
         }
-        if(this._soundsState[soundKey].id === null) {
+        if (this._soundsState[soundKey].id === null) {
             return;
         }
 

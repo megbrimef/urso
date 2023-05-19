@@ -38,7 +38,7 @@ class ModulesLogicSounds {
                     relaunch,
                     loop,
                     volume,
-                };;
+                };
             });
         });
 
