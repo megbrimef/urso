@@ -195,6 +195,12 @@ class ModulesObjectsBaseModel {
 
         return newTexture;
     }
+
+    // sorts children by zIndex
+    sortChildren() {
+        if(this._baseObject.children?.length > 0)
+            this._baseObject.sortChildren();
+    }
 }
 
 module.exports = ModulesObjectsBaseModel;
