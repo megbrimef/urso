@@ -599,6 +599,67 @@ class LibHelper {
 
         return string
     }
+
+    /**
+     * Converts color number to object that contents RGB values
+     * @param { Number } color - Color number hex or decimal 
+     * @returns { Object }
+     */
+    getRGB(color) {
+        return  {
+            alpha: 16777215 < color ? color >>> 24 : 255,
+            red: color >> 16 & 255,
+            green: color >> 8 & 255,
+            blue: 255 & color
+        };
+    }
+
+    /**
+     * Converts RGB values to 32 bit
+     * @param { Number } alpha 
+     * @param { Number } red 
+     * @param { Number } green 
+     * @param { Number } blue 
+     * @returns { Number }
+     */
+    getColor32(alpha, red, green, blue) {
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    /**
+     * Returns color interpolation depends on step value
+     * @param { Number } startColor 
+     * @param { Number } targetColor 
+     * @param { Number } step - intermediate value from 0 to 1
+     * @returns { Number }
+     */
+    interpolateColor32(startColor, targetColor, step) {
+        if(startColor === targetColor)
+            return startColor;
+
+        const startColorRGB = this.getRGB(startColor);
+        const targetColorRGB = this.getRGB(targetColor);
+        const nextColorRGB = this.interpolateColorRGB(startColorRGB, targetColorRGB, step);
+        const color32 = this.getColor32(255, nextColorRGB.red, nextColorRGB.green, nextColorRGB.blue);
+        return 16777215 + color32;
+    }
+
+    /**
+     * Returns color interpolation as RGB object depends on step value
+     * @param { Number } startColorRGB 
+     * @param { Number } targetColorRGB 
+     * @param { Number } step - intermediate value from 0 to 1
+     * @returns { Object }
+     */
+    interpolateColorRGB(startColorRGB, targetColorRGB, step) {
+        const nextRGB = {};
+
+        Object.keys(startColorRGB).forEach(color => {
+            nextRGB[color] = (targetColorRGB[color] - startColorRGB[color]) * step + startColorRGB[color];
+        });
+
+        return nextRGB;
+    }
 }
 
 module.exports = LibHelper;
