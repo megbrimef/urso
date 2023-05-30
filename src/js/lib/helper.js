@@ -602,7 +602,7 @@ class LibHelper {
 
     /**
      * Converts color number to object that contents RGB values
-     * @param { Number } color - Color number hex or decimal 
+     * @param { Number } color - color number
      * @returns { Object }
      */
     getRGB(color) {
@@ -646,8 +646,8 @@ class LibHelper {
 
     /**
      * Returns color interpolation as RGB object depends on step value
-     * @param { Number } startColorRGB 
-     * @param { Number } targetColorRGB 
+     * @param { Object } startColorRGB - object that contents start values for red, green and blue
+     * @param { Object } targetColorRGB - object that contents target values for red, green and blue
      * @param { Number } step - intermediate value from 0 to 1
      * @returns { Object }
      */
