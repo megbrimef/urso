@@ -17,7 +17,7 @@ class LibCache {
 
     _setDataToAssetsList(assetType, key, data) {
         if (this.assetsList[assetType][key])
-            console.warn(`LibCache ${assetType}: key alredy exists: `, key, data);
+            console.warn(`LibCache ${assetType}: key already exists: `, key, data);
 
         this.assetsList[assetType][key] = data;
     }

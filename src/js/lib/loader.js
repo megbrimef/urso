@@ -104,6 +104,7 @@ class LibLoader {
             return false;
 
         this._isRunning = true;
+        this._lastLoadFailed = false;
         this._iterationNumber++;
         const currentIteration = this._iterationNumber;
         this._completeCallback = callback;
@@ -135,7 +136,7 @@ class LibLoader {
         this._loader.onError.add(this._onError);
 
         this._loader.load(function (loader, resources) {
-            if (currentIteration !== this._iterationNumber)
+            if (currentIteration !== this._iterationNumber || this._lastLoadFailed)
                 return;
 
             this._onLoadUpdate({ progress: 100 });
@@ -150,6 +151,7 @@ class LibLoader {
         Urso.logger.warn('LibLoader file load error: ', error);
         this._loader.reset();
         this._isRunning = false;
+        this._lastLoadFailed = true;
 
         this._resizeTimeoutId = Urso.setTimeout(() => this.start(this._completeCallback), this.RELOAD_DELAY);
     }
