@@ -1,5 +1,6 @@
 class LibLoader {
     constructor() {
+        this.RELOAD_DELAY = 250;
         this._isRunning = false;
         this._iterationNumber = 0;
         this._assetsQuery = [];
@@ -146,9 +147,11 @@ class LibLoader {
 
 
     _onError(error) {
+        Urso.logger.warn('LibLoader file load error: ', error);
         this._loader.reset();
         this._isRunning = false;
-        this.start(this._completeCallback);
+
+        this._resizeTimeoutId = Urso.setTimeout(() => this.start(this._completeCallback), this.RELOAD_DELAY);
     }
 
 };

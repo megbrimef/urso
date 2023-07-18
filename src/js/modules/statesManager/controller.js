@@ -4,6 +4,7 @@ class ModulesStatesManagerController {
 
         this._configStates;
         this._currentState;
+        this._forceNextStateKey = null;
         this._started = false;
         this._paused = false;
         this._pauseNeedResume = false;
@@ -42,6 +43,14 @@ class ModulesStatesManagerController {
         }
     }
 
+    setForceNextState(stateKey) {
+        if (!this._configStates[stateKey]) {
+            Urso.logger.error('ModulesStatesManagerController: setForceNextState name error', stateKey);
+        }
+
+        this._forceNextStateKey = stateKey
+    }
+
     _iteratorConstructor() {
         let nextIndex = 0;
 
@@ -57,6 +66,12 @@ class ModulesStatesManagerController {
 
         return {
             next: (() => {
+                if (this._forceNextStateKey) {
+                    const forceNextStateKey = this._forceNextStateKey;
+                    this._forceNextStateKey = null;
+                    return forceNextStateKey;
+                }
+
                 let statesArray = Object.keys(this._configStates);
 
                 //nextState
