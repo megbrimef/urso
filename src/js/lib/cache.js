@@ -19,7 +19,7 @@ class LibCache {
         if (this.assetsList[assetType][key])
             console.warn(`LibCache ${assetType}: key alredy exists: `, key, data);
 
-        this.assetsList[assetType][key] = someData;
+        this.assetsList[assetType][key] = data;
     }
 
     addFile(key, someData) {
