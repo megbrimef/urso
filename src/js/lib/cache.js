@@ -15,45 +15,52 @@ class LibCache {
         this.globalAtlas = new PIXI.spine.TextureAtlas();
     };
 
+    _setDataToAssetsList(assetType, key, data) {
+        if (this.assetsList[assetType][key])
+            console.warn(`LibCache ${assetType}: key alredy exists: `, key, data);
+
+        this.assetsList[assetType][key] = someData;
+    }
+
     addFile(key, someData) {
-        this.assetsList.file[key] = someData;
+        this._setDataToAssetsList('file', key, someData);
     };
 
     addAtlas(key, someData) {
-        this.assetsList.atlas[key] = someData;
+        this._setDataToAssetsList('atlas', key, someData);
     };
 
     addBinary(key, someData) {
-        this.assetsList.binary[key] = someData;
+        this._setDataToAssetsList('binary', key, someData);
     };
 
     addBitmapFont(key, someData) {
-        this.assetsList.bitmapFont[key] = someData;
+        this._setDataToAssetsList('bitmapFont', key, someData);
     };
 
     addContainer(key, someData) {
-        this.assetsList.container[key] = someData;
+        this._setDataToAssetsList('container', key, someData);
     };
 
     addImage(key, someData) {
-        this.assetsList.image[key] = someData;
+        this._setDataToAssetsList('image', key, someData);
     };
 
     addJson(key, someData) {
-        this.assetsList.json[key] = someData;
+        this._setDataToAssetsList('json', key, someData);
     };
 
     addSound(key, someData) {
-        this.assetsList.sound[key] = someData;
+        this._setDataToAssetsList('sound', key, someData);
     };
 
     addTexture(key, someData) {
-        this.assetsList.texture[key] = someData;
+        this._setDataToAssetsList('texture', key, someData);
         this.globalAtlas.addTexture(key, someData);
     };
 
     addSpine(key, someData) {
-        this.assetsList.spine[key] = someData;
+        this._setDataToAssetsList('spine', key, someData);
     };
 
     getFile(key) {
