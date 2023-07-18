@@ -185,18 +185,17 @@ class ModulesAssetsService {
             let imageData = Urso.cache.getAtlas(assetKey);
             const folderPath = imageData.url.split('/').slice(0, -1).join('/');
 
-            for (let i = 0; i < imageData.spritesheet._frames.length; i++) {
-                let frame = imageData.spritesheet._frames[i];
-                let texture = imageData.textures[i];
-                let newFilename = frame.filename;
+            for (const name of Object.keys(imageData.spritesheet._frames)) {
+                let texture = imageData.textures[name];
+                let newFilename = name;
 
-                if (!frame.filename.includes('/'))
-                    newFilename = folderPath + '/' + frame.filename;
+                if (!name.includes('/'))
+                    newFilename = folderPath + '/' + name;
 
                 Urso.cache.addFile(newFilename, texture);
 
-                if(assetModel.cacheTextures) {
-                    const textureKey = newFilename.split('/').pop().split('.')[0];
+                if (assetModel.cacheTextures) {
+                    const textureKey = newFilename.split('.')[0];
                     Urso.cache.addTexture(textureKey, texture);
                 }
             }
