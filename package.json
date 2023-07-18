@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.7.38",
+  "version": "0.7.39",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",

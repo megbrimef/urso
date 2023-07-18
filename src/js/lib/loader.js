@@ -146,13 +146,14 @@ class LibLoader {
         }.bind(this));
     };
 
-
     _onError(error) {
         Urso.logger.warn('LibLoader file load error: ', error);
+
         this._loader.reset();
         this._isRunning = false;
         this._lastLoadFailed = true;
 
+        Urso.logger.warn('LibLoader all assets RELOAD...');
         this._resizeTimeoutId = Urso.setTimeout(() => this.start(this._completeCallback), this.RELOAD_DELAY);
     }
 
