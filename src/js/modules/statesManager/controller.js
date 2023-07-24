@@ -1,4 +1,5 @@
 class ModulesStatesManagerController {
+
     constructor() {
         this.singleton = true;
 
@@ -66,13 +67,15 @@ class ModulesStatesManagerController {
 
         return {
             next: (() => {
+                let statesArray = Object.keys(this._configStates);
+
+                //force next state
                 if (this._forceNextStateKey) {
                     const forceNextStateKey = this._forceNextStateKey;
                     this._forceNextStateKey = null;
+                    nextIndex = statesArray.indexOf(forceNextStateKey) + 1;
                     return forceNextStateKey;
                 }
-
-                let statesArray = Object.keys(this._configStates);
 
                 //nextState
                 if (this._currentState) {
@@ -173,7 +176,9 @@ class ModulesStatesManagerController {
     }
 
     checkStateGuard = (key) => {
-        return this.statesGuards.checkGuard(key);
+        const guardResult = this.statesGuards.checkGuard(key);
+        log('%c State guard ' + key + ' is ' + guardResult, 'background: #DA55C4; color: #000')
+        return guardResult;
     }
 
     removeStateGuard = (key, guard) => {
