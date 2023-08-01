@@ -28,6 +28,7 @@ class ModulesStatesManagerRace extends Action {
         log(`%c action run ---> ${this.name}`, 'color: orange', this.params);
 
         this.finished = false;
+        this._startTime = Urso.time.get();
         this._onFinishCallback = onFinishCallback;
 
         for (let action of this._actions)
@@ -67,7 +68,8 @@ class ModulesStatesManagerRace extends Action {
 
     _onFinish() {
         this.finished = true;
-        log(`%c action finish <--- ${this.name}`, 'color: orange');
+        const elapsedTime = Urso.time.get() - this._startTime;
+        log(`%c action finish <--- ${this.name}  (${elapsedTime}ms)`, 'color: orange');
         this._onFinishCallback();
     }
 }

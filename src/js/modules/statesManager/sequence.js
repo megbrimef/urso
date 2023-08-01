@@ -10,6 +10,7 @@ class ModulesStatesManagerSequence extends All {
         log(`%c action run ---> ${this.name}`, 'color: orange', this.params);
 
         this.finished = false;
+        this._startTime = Urso.time.get();
         this._onFinishCallback = onFinishCallback;
 
         this._checkFinish();

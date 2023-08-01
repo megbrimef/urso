@@ -7,6 +7,7 @@ class ModulesStatesManagerAction {
         this._terminating = false;
         this.finished = false;
         this._onFinishCallback = false;
+        this._startTime = 0;
 
         this._onFinish = this._onFinish.bind(this);
     }
@@ -18,6 +19,7 @@ class ModulesStatesManagerAction {
 
     run(onFinishCallback) {
         this._running = true;
+        this._startTime = Urso.time.get();
         log(`%c action run ---> ${this.name}`, 'color: blue');
 
         this.emit(Urso.events.MODULES_STATES_MANAGER_ACTION_START, this.name);
@@ -57,10 +59,11 @@ class ModulesStatesManagerAction {
         this._running = false;
         this._terminating = false;
         this.finished = true;
+        const elapsedTime = Urso.time.get() - this._startTime;
 
         this.emit(Urso.events.MODULES_STATES_MANAGER_ACTION_FINISH, this.name);
 
-        log(`%c action finish <--- ${this.name}`, 'color: blue');
+        log(`%c action finish <--- ${this.name} (${elapsedTime}ms)`, 'color: blue');
         this._onFinishCallback();
     }
 }
