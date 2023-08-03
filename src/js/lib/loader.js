@@ -1,8 +1,14 @@
 class LibLoader {
     constructor() {
+        this.RELOAD_DELAY = 250;
         this._isRunning = false;
+        this._iterationNumber = 0;
         this._assetsQuery = [];
         this._onLoadUpdate = () => { };
+        this._loader = null;
+        this._completeCallback = () => { };
+
+        this._onError = this._onError.bind(this);
     };
 
     isRunning() {
@@ -98,11 +104,15 @@ class LibLoader {
             return false;
 
         this._isRunning = true;
-        const loader = new PIXI.Loader();
+        this._lastLoadFailed = false;
+        this._iterationNumber++;
+        const currentIteration = this._iterationNumber;
+        this._completeCallback = callback;
+        this._loader = new PIXI.Loader();
         const appVersion = Urso.config.appVersion;
 
         if (appVersion) {
-            loader.defaultQueryString = `appVersion=${appVersion}`;
+            this._loader.defaultQueryString = `appVersion=${appVersion}`;
         }
 
         this._assetsQuery.forEach(asset => {
@@ -118,19 +128,34 @@ class LibLoader {
             }
 
             const loadPath = this._getLoadPath(asset);
-            loader.add(asset.key, loadPath, params, (resource) => this._storeAsset(asset, resource))  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
+            this._loader.add(asset.key, loadPath, params, (resource) => this._storeAsset(asset, resource))  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
         });
 
         this._onLoadUpdate({ progress: 0 });
-        loader.onProgress.add(this._onLoadUpdate);
+        this._loader.onProgress.add(this._onLoadUpdate);
+        this._loader.onError.add(this._onError);
 
-        loader.load(function (loader, resources) {
+        this._loader.load(function (loader, resources) {
+            if (currentIteration !== this._iterationNumber || this._lastLoadFailed)
+                return;
+
             this._onLoadUpdate({ progress: 100 });
             this._assetsQuery = [];
             this._isRunning = false;
             callback();
         }.bind(this));
     };
+
+    _onError(error) {
+        Urso.logger.warn('LibLoader file load error: ', error);
+
+        this._loader.reset();
+        this._isRunning = false;
+        this._lastLoadFailed = true;
+
+        Urso.logger.warn('LibLoader all assets RELOAD...');
+        this._resizeTimeoutId = Urso.setTimeout(() => this.start(this._completeCallback), this.RELOAD_DELAY);
+    }
 
 };
 

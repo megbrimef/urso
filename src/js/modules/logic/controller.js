@@ -1,5 +1,5 @@
 class ModulesLogicController {
-    constructor() { 
+    constructor() {
         this._baseLogicBlocks = ['main', 'sounds'];
         const additionalLogicBlocks = this.getAdditionalLogicBlocks();
         this.logicBlocks = [...this._baseLogicBlocks, ...additionalLogicBlocks];
@@ -7,16 +7,16 @@ class ModulesLogicController {
         this._instances = {};
         this._init();
     };
-    
-    _init(){
+
+    _init() {
         this._createLogicInstances();
     };
 
-    getAdditionalLogicBlocks(){
+    getAdditionalLogicBlocks() {
         return [];
     };
 
-    _createLogicInstances(){
+    _createLogicInstances() {
         //console.log('[Modules.Brain.Controller]', ' Creating logic blocks:', JSON.stringify(this.logicBlocks));
 
         for (let i = 0; i < this.logicBlocks.length; i++) {
@@ -26,23 +26,27 @@ class ModulesLogicController {
         }
     };
 
-    do(){
+    /**
+     * launch function with current name (first agrument) per each logic block (if exists)
+     * @returns {Mixed}
+     */
+    do() {
         const results = [];
-        const params =  [ ...arguments ];
-        const funName = params.shift(); 
+        const params = [...arguments];
+        const functionName = params.shift();
 
         for (let blockName in this._instances) {
             const instance = this._instances[blockName];
 
-            if(instance && instance[funName]){
-                results[blockName] = instance[funName].apply(this, params);
+            if (instance && instance[functionName]) {
+                results[blockName] = instance[functionName].apply(this, params);
             }
         }
 
-       return results;
+        return results;
     };
 
-    _subscribe(){};
+    _subscribe() { };
 }
 
 module.exports = ModulesLogicController;

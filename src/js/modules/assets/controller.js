@@ -38,8 +38,20 @@ class ModulesAssetsController {
         this.getInstance('Service').startLoad(assetsSpace, callback);
     }
 
+    /**
+     * load assets group bu name
+     * @param {String} name
+     * @param {Function} callback
+     */
     loadGroup(name, callback) {
         this.getInstance('Service').loadGroup(null, name, callback);
+    }
+
+    /**
+     * system; check webP support
+     */
+    checkWebPSupport() {
+        this.getInstance('Service').checkWebPSupport();
     }
 }
 

@@ -233,7 +233,7 @@ class ModulesObjectsProxy {
             'class': 'class',
             'x': 'x',
             'y': 'y',
-            'z': 'z',
+            'z': 'zIndex',
             'angle': 'angle',
             'anchorX': 'anchor.x', //'anchor.x',
             'anchorY': 'anchor.y', //'anchor.y',

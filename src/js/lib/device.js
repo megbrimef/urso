@@ -33,37 +33,37 @@ LibDevice = function () {
     * @default
     */
     this.cocoonJS = false;
-    
+
     /**
     * @property {boolean} cocoonJSApp - Is this game running with CocoonJS.App?
     * @default
     */
     this.cocoonJSApp = false;
-    
+
     /**
     * @property {boolean} cordova - Is the game running under Apache Cordova?
     * @default
     */
     this.cordova = false;
-    
+
     /**
     * @property {boolean} node - Is the game running under Node.js?
     * @default
     */
     this.node = false;
-    
+
     /**
     * @property {boolean} nodeWebkit - Is the game running under Node-Webkit?
     * @default
     */
     this.nodeWebkit = false;
-    
+
     /**
     * @property {boolean} electron - Is the game running under GitHub Electron?
     * @default
     */
     this.electron = false;
-    
+
     /**
     * @property {boolean} ejecta - Is the game running under Ejecta?
     * @default
@@ -191,6 +191,18 @@ LibDevice = function () {
     * @default
     */
     this.quirksMode = false;
+
+    /**
+    * @property {boolean} webP - Is the browser support webP
+    * @default
+    */
+    this.webP = false;
+
+    /**
+    * @property {boolean} _webPTestComplete - Is the webP test complete
+    * @default
+    */
+    this._webPTestComplete = false;
 
     //  Input
 
@@ -418,7 +430,7 @@ LibDevice = function () {
     * @property {boolean} iPhone5 - Is running on iPhone5?
     * @default
     */
-   this.iPhone5 = false;
+    this.iPhone5 = false;
 
     /**
     * @property {boolean} iPad - Is running on iPad?
@@ -510,37 +522,31 @@ LibDevice.whenReady = function (callback, context, nonPrimer) {
 
     let readyCheck = this._readyCheck;
 
-    if (this.deviceReadyAt || !readyCheck)
-    {
+    if (this.deviceReadyAt || !readyCheck) {
         callback.call(context, this);
     }
-    else if (readyCheck._monitor || nonPrimer)
-    {
+    else if (readyCheck._monitor || nonPrimer) {
         readyCheck._queue = readyCheck._queue || [];
         readyCheck._queue.push([callback, context]);
     }
-    else
-    {
+    else {
         readyCheck._monitor = readyCheck.bind(this);
         readyCheck._queue = readyCheck._queue || [];
         readyCheck._queue.push([callback, context]);
-        
+
         let cordova = typeof window.cordova !== 'undefined';
         let cocoonJS = navigator['isCocoonJS'];
 
-        if (document.readyState === 'complete' || document.readyState === 'interactive')
-        {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
             // Why is there an additional timeout here?
             window.setTimeout(readyCheck._monitor, 0);
         }
-        else if (cordova && !cocoonJS)
-        {
+        else if (cordova && !cocoonJS) {
             // Ref. http://docs.phonegap.com/en/3.5.0/cordova_events_events.md.html#deviceready
             //  Cordova, but NOT Cocoon?
             document.addEventListener('deviceready', readyCheck._monitor, false);
         }
-        else
-        {
+        else {
             document.addEventListener('DOMContentLoaded', readyCheck._monitor, false);
             window.addEventListener('load', readyCheck._monitor, false);
         }
@@ -559,12 +565,10 @@ LibDevice._readyCheck = function () {
 
     let readyCheck = this._readyCheck;
 
-    if (!document.body)
-    {
+    if (!document.body || !this._webPTestComplete) {
         window.setTimeout(readyCheck._monitor, 20);
     }
-    else if (!this.deviceReadyAt)
-    {
+    else if (!this.deviceReadyAt) {
         this.deviceReadyAt = Date.now();
 
         document.removeEventListener('deviceready', readyCheck._monitor);
@@ -575,8 +579,7 @@ LibDevice._readyCheck = function () {
         this.initialized = true;
 
         let item;
-        while ((item = readyCheck._queue.shift()))
-        {
+        while ((item = readyCheck._queue.shift())) {
             let callback = item[0];
             let context = item[1];
             callback.call(context, this);
@@ -603,47 +606,38 @@ LibDevice._initialize = function () {
     /**
     * Check which OS is game running on.
     */
-    function _checkOS () {
+    function _checkOS() {
 
         let ua = navigator.userAgent;
 
-        if (/Playstation Vita/.test(ua))
-        {
+        if (/Playstation Vita/.test(ua)) {
             device.vita = true;
         }
-        else if (/Kindle/.test(ua) || /\bKF[A-Z][A-Z]+/.test(ua) || /Silk.*Mobile Safari/.test(ua))
-        {
+        else if (/Kindle/.test(ua) || /\bKF[A-Z][A-Z]+/.test(ua) || /Silk.*Mobile Safari/.test(ua)) {
             device.kindle = true;
             // This will NOT detect early generations of Kindle Fire, I think there is no reliable way...
             // E.g. "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us; Silk/1.1.0-80) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16 Silk-Accelerated=true"
         }
-        else if (/Android/.test(ua))
-        {
+        else if (/Android/.test(ua)) {
             device.android = true;
         }
-        else if (/CrOS/.test(ua))
-        {
+        else if (/CrOS/.test(ua)) {
             device.chromeOS = true;
         }
-        else if (/iP[ao]d|iPhone/i.test(ua))
-        {
+        else if (/iP[ao]d|iPhone/i.test(ua)) {
             device.iOS = true;
         }
-        else if (/Linux/.test(ua))
-        {
+        else if (/Linux/.test(ua)) {
             device.linux = true;
         }
-        else if (/Mac OS/.test(ua))
-        {
+        else if (/Mac OS/.test(ua)) {
             device.macOS = true;
         }
-        else if (/Windows/.test(ua))
-        {
+        else if (/Windows/.test(ua)) {
             device.windows = true;
         }
 
-        if (/Windows Phone/i.test(ua) || /IEMobile/i.test(ua))
-        {
+        if (/Windows Phone/i.test(ua) || /IEMobile/i.test(ua)) {
             device.android = false;
             device.iOS = false;
             device.macOS = false;
@@ -653,14 +647,12 @@ LibDevice._initialize = function () {
 
         let silk = /Silk/.test(ua); // detected in browsers
 
-        if (device.windows || device.macOS || (device.linux && !silk) || device.chromeOS)
-        {
+        if (device.windows || device.macOS || (device.linux && !silk) || device.chromeOS) {
             device.desktop = true;
         }
 
         //  Windows Phone / Table reset
-        if (device.windowsPhone || ((/Windows NT/i.test(ua)) && (/Touch/i.test(ua))))
-        {
+        if (device.windowsPhone || ((/Windows NT/i.test(ua)) && (/Touch/i.test(ua)))) {
             device.desktop = false;
         }
 
@@ -669,7 +661,7 @@ LibDevice._initialize = function () {
     /**
     * Check HTML5 features of the host environment.
     */
-    function _checkFeatures () {
+    function _checkFeatures() {
 
         device.canvas = !!window['CanvasRenderingContext2D'] || device.cocoonJS;
 
@@ -682,7 +674,7 @@ LibDevice._initialize = function () {
         device.file = !!window['File'] && !!window['FileReader'] && !!window['FileList'] && !!window['Blob'];
         device.fileSystem = !!window['requestFileSystem'];
 
-        device.webGL = ( function () { try { let canvas = document.createElement( 'canvas' ); /*Force screencanvas to false*/ canvas.screencanvas = false; return !! window.WebGLRenderingContext && ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) ); } catch( e ) { return false; } } )();
+        device.webGL = (function () { try { let canvas = document.createElement('canvas'); /*Force screencanvas to false*/ canvas.screencanvas = false; return !!window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')); } catch (e) { return false; } })();
         device.webGL = !!device.webGL;
 
         device.worker = !!window['Worker'];
@@ -698,21 +690,18 @@ LibDevice._initialize = function () {
         device.getUserMedia = device.getUserMedia && !!navigator.getUserMedia && !!window.URL;
 
         // Older versions of firefox (< 21) apparently claim support but user media does not actually work
-        if (device.firefox && device.firefoxVersion < 21)
-        {
+        if (device.firefox && device.firefoxVersion < 21) {
             device.getUserMedia = false;
         }
 
         // Excludes iOS versions as they generally wrap UIWebView (eg. Safari WebKit) and it
         // is safer to not try and use the fast copy-over method.
-        if (!device.iOS && (device.ie || device.firefox || device.chrome))
-        {
+        if (!device.iOS && (device.ie || device.firefox || device.chrome)) {
             device.canvasBitBltShift = true;
         }
 
         // Known not to work
-        if (device.safari || device.mobileSafari)
-        {
+        if (device.safari || device.mobileSafari) {
             device.canvasBitBltShift = false;
         }
 
@@ -721,33 +710,27 @@ LibDevice._initialize = function () {
     /**
     * Checks/configures letious input.
     */
-    function _checkInput () {
+    function _checkInput() {
 
-        if ('ontouchstart' in document.documentElement || (window.navigator.maxTouchPoints && window.navigator.maxTouchPoints >= 1))
-        {
+        if ('ontouchstart' in document.documentElement || (window.navigator.maxTouchPoints && window.navigator.maxTouchPoints >= 1)) {
             device.touch = true;
         }
 
-        if (window.navigator.msPointerEnabled || window.navigator.pointerEnabled)
-        {
+        if (window.navigator.msPointerEnabled || window.navigator.pointerEnabled) {
             device.mspointer = true;
         }
 
-        if (!device.cocoonJS)
-        {
+        if (!device.cocoonJS) {
             // See https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-            if ('onwheel' in window || (device.ie && 'WheelEvent' in window))
-            {
+            if ('onwheel' in window || (device.ie && 'WheelEvent' in window)) {
                 // DOM3 Wheel Event: FF 17+, IE 9+, Chrome 31+, Safari 7+
                 device.wheelEvent = 'wheel';
             }
-            else if ('onmousewheel' in window)
-            {
+            else if ('onmousewheel' in window) {
                 // Non-FF legacy: IE 6-9, Chrome 1-31, Safari 5-7.
                 device.wheelEvent = 'mousewheel';
             }
-            else if (device.firefox && 'MouseScrollEvent' in window)
-            {
+            else if (device.firefox && 'MouseScrollEvent' in window) {
                 // FF prior to 17. This should probably be scrubbed.
                 device.wheelEvent = 'DOMMouseScroll';
             }
@@ -758,7 +741,7 @@ LibDevice._initialize = function () {
     /**
     * Checks for support of the Full Screen API.
     */
-    function _checkFullScreenSupport () {
+    function _checkFullScreenSupport() {
 
         let fs = [
             'requestFullscreen',
@@ -773,10 +756,8 @@ LibDevice._initialize = function () {
 
         let element = document.createElement('div');
 
-        for (let i = 0; i < fs.length; i++)
-        {
-            if (element[fs[i]])
-            {
+        for (let i = 0; i < fs.length; i++) {
+            if (element[fs[i]]) {
                 device.fullscreen = true;
                 device.requestFullscreen = fs[i];
                 break;
@@ -794,12 +775,9 @@ LibDevice._initialize = function () {
             'mozExitFullscreen'
         ];
 
-        if (device.fullscreen)
-        {
-            for (let i = 0; i < cfs.length; i++)
-            {
-                if (document[cfs[i]])
-                {
+        if (device.fullscreen) {
+            for (let i = 0; i < cfs.length; i++) {
+                if (document[cfs[i]]) {
                     device.cancelFullscreen = cfs[i];
                     break;
                 }
@@ -807,8 +785,7 @@ LibDevice._initialize = function () {
         }
 
         //  Keyboard Input?
-        if (window['Element'] && Element['ALLOW_KEYBOARD_INPUT'])
-        {
+        if (window['Element'] && Element['ALLOW_KEYBOARD_INPUT']) {
             device.fullscreenKeyboard = true;
         }
 
@@ -817,51 +794,41 @@ LibDevice._initialize = function () {
     /**
     * Check what browser is game running in.
     */
-    function _checkBrowser () {
+    function _checkBrowser() {
 
         let ua = navigator.userAgent;
 
-        if (/Arora/.test(ua))
-        {
+        if (/Arora/.test(ua)) {
             device.arora = true;
         }
-        else if (/Chrome\/(\d+)/.test(ua) && !device.windowsPhone)
-        {
+        else if (/Chrome\/(\d+)/.test(ua) && !device.windowsPhone) {
             device.chrome = true;
             device.chromeVersion = parseInt(RegExp.$1, 10);
         }
-        else if (/Epiphany/.test(ua))
-        {
+        else if (/Epiphany/.test(ua)) {
             device.epiphany = true;
         }
-        else if (/Firefox\D+(\d+)/.test(ua))
-        {
+        else if (/Firefox\D+(\d+)/.test(ua)) {
             device.firefox = true;
             device.firefoxVersion = parseInt(RegExp.$1, 10);
         }
-        else if (/AppleWebKit/.test(ua) && device.iOS)
-        {
+        else if (/AppleWebKit/.test(ua) && device.iOS) {
             device.mobileSafari = true;
         }
-        else if (/MSIE (\d+\.\d+);/.test(ua))
-        {
+        else if (/MSIE (\d+\.\d+);/.test(ua)) {
             device.ie = true;
             device.ieVersion = parseInt(RegExp.$1, 10);
         }
-        else if (/Midori/.test(ua))
-        {
+        else if (/Midori/.test(ua)) {
             device.midori = true;
         }
-        else if (/Opera/.test(ua))
-        {
+        else if (/Opera/.test(ua)) {
             device.opera = true;
         }
-        else if (/Safari/.test(ua) && !device.windowsPhone)
-        {
+        else if (/Safari/.test(ua) && !device.windowsPhone) {
             device.safari = true;
         }
-        else if (/Trident\/(\d+\.\d+)(.*)rv:(\d+\.\d+)/.test(ua))
-        {
+        else if (/Trident\/(\d+\.\d+)(.*)rv:(\d+\.\d+)/.test(ua)) {
             device.ie = true;
             device.trident = true;
             device.tridentVersion = parseInt(RegExp.$1, 10);
@@ -869,57 +836,47 @@ LibDevice._initialize = function () {
         }
 
         //  Silk gets its own if clause because its ua also contains 'Safari'
-        if (/Silk/.test(ua))
-        {
+        if (/Silk/.test(ua)) {
             device.silk = true;
         }
 
         //  WebApp mode in iOS
-        if (navigator['standalone'])
-        {
+        if (navigator['standalone']) {
             device.webApp = true;
         }
-        
-        if (typeof window.cordova !== "undefined")
-        {
+
+        if (typeof window.cordova !== "undefined") {
             device.cordova = true;
         }
-        
-        if (typeof process !== "undefined" && typeof require !== "undefined")
-        {
+
+        if (typeof process !== "undefined" && typeof require !== "undefined") {
             device.node = true;
         }
-        
-        if (device.node && typeof process.versions === 'object')
-        {
+
+        if (device.node && typeof process.versions === 'object') {
             device.nodeWebkit = !!process.versions['node-webkit'];
-            
+
             device.electron = !!process.versions.electron;
         }
-        
-        if (navigator['isCocoonJS'])
-        {
+
+        if (navigator['isCocoonJS']) {
             device.cocoonJS = true;
         }
-        
-        if (device.cocoonJS)
-        {
+
+        if (device.cocoonJS) {
             try {
                 device.cocoonJSApp = (typeof CocoonJS !== "undefined");
             }
-            catch(error)
-            {
+            catch (error) {
                 device.cocoonJSApp = false;
             }
         }
 
-        if (typeof window.ejecta !== "undefined")
-        {
+        if (typeof window.ejecta !== "undefined") {
             device.ejecta = true;
         }
 
-        if (/Crosswalk/.test(ua))
-        {
+        if (/Crosswalk/.test(ua)) {
             device.crosswalk = true;
         }
 
@@ -928,48 +885,42 @@ LibDevice._initialize = function () {
     /**
     * Check video support.
     */
-    function _checkVideo () {
+    function _checkVideo() {
 
         let videoElement = document.createElement("video");
         let result = false;
 
         try {
-            if (result = !!videoElement.canPlayType)
-            {
-                if (videoElement.canPlayType('video/ogg; codecs="theora"').replace(/^no$/, ''))
-                {
+            if (result = !!videoElement.canPlayType) {
+                if (videoElement.canPlayType('video/ogg; codecs="theora"').replace(/^no$/, '')) {
                     device.oggVideo = true;
                 }
 
-                if (videoElement.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/, ''))
-                {
+                if (videoElement.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/, '')) {
                     // Without QuickTime, this value will be `undefined`. github.com/Modernizr/Modernizr/issues/546
                     device.h264Video = true;
                     device.mp4Video = true;
                 }
 
-                if (videoElement.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/, ''))
-                {
+                if (videoElement.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/, '')) {
                     device.webmVideo = true;
                 }
 
-                if (videoElement.canPlayType('video/webm; codecs="vp9"').replace(/^no$/, ''))
-                {
+                if (videoElement.canPlayType('video/webm; codecs="vp9"').replace(/^no$/, '')) {
                     device.vp9Video = true;
                 }
 
-                if (videoElement.canPlayType('application/x-mpegURL; codecs="avc1.42E01E"').replace(/^no$/, ''))
-                {
+                if (videoElement.canPlayType('application/x-mpegURL; codecs="avc1.42E01E"').replace(/^no$/, '')) {
                     device.hlsVideo = true;
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     /**
     * Check audio support.
     */
-    function _checkAudio () {
+    function _checkAudio() {
 
         device.audioData = !!(window['Audio']);
         device.webAudio = !!(window['AudioContext'] || window['webkitAudioContext']);
@@ -977,38 +928,31 @@ LibDevice._initialize = function () {
         let result = false;
 
         try {
-            if (result = !!audioElement.canPlayType)
-            {
-                if (audioElement.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, ''))
-                {
+            if (result = !!audioElement.canPlayType) {
+                if (audioElement.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, '')) {
                     device.ogg = true;
                 }
 
-                if (audioElement.canPlayType('audio/ogg; codecs="opus"').replace(/^no$/, '') || audioElement.canPlayType('audio/opus;').replace(/^no$/, ''))
-                {
+                if (audioElement.canPlayType('audio/ogg; codecs="opus"').replace(/^no$/, '') || audioElement.canPlayType('audio/opus;').replace(/^no$/, '')) {
                     device.opus = true;
                 }
 
-                if (audioElement.canPlayType('audio/mpeg;').replace(/^no$/, ''))
-                {
+                if (audioElement.canPlayType('audio/mpeg;').replace(/^no$/, '')) {
                     device.mp3 = true;
                 }
 
                 // Mimetypes accepted:
                 //   developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
                 //   bit.ly/iphoneoscodecs
-                if (audioElement.canPlayType('audio/wav; codecs="1"').replace(/^no$/, ''))
-                {
+                if (audioElement.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '')) {
                     device.wav = true;
                 }
 
-                if (audioElement.canPlayType('audio/x-m4a;') || audioElement.canPlayType('audio/aac;').replace(/^no$/, ''))
-                {
+                if (audioElement.canPlayType('audio/x-m4a;') || audioElement.canPlayType('audio/aac;').replace(/^no$/, '')) {
                     device.m4a = true;
                 }
 
-                if (audioElement.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, ''))
-                {
+                if (audioElement.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, '')) {
                     device.webm = true;
                 }
             }
@@ -1020,7 +964,7 @@ LibDevice._initialize = function () {
     /**
     * Check PixelRatio, iOS device, Vibration API, ArrayBuffers and endianess.
     */
-    function _checkDevice () {
+    function _checkDevice() {
 
         device.pixelRatio = window['devicePixelRatio'] || 1;
         device.iPhone = navigator.userAgent.toLowerCase().indexOf('iphone') != -1;
@@ -1029,17 +973,14 @@ LibDevice._initialize = function () {
             ((screen.availWidth === 320 && screen.availHeight === 568) || (screen.availWidth === 568 && screen.availHeight === 320));
         device.iPad = navigator.userAgent.toLowerCase().indexOf('ipad') != -1;
 
-        if (typeof Int8Array !== 'undefined')
-        {
+        if (typeof Int8Array !== 'undefined') {
             device.typedArray = true;
         }
-        else
-        {
+        else {
             device.typedArray = false;
         }
 
-        if (typeof ArrayBuffer !== 'undefined' && typeof Uint8Array !== 'undefined' && typeof Uint32Array !== 'undefined')
-        {
+        if (typeof ArrayBuffer !== 'undefined' && typeof Uint8Array !== 'undefined' && typeof Uint32Array !== 'undefined') {
             device.littleEndian = _checkIsLittleEndian();
             device.LITTLE_ENDIAN = device.littleEndian;
         }
@@ -1048,8 +989,7 @@ LibDevice._initialize = function () {
 
         navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 
-        if (navigator.vibrate)
-        {
+        if (navigator.vibrate) {
             device.vibration = true;
         }
 
@@ -1060,7 +1000,7 @@ LibDevice._initialize = function () {
     *
     * @author Matt DesLauriers (@mattdesl)
     */
-    function _checkIsLittleEndian () {
+    function _checkIsLittleEndian() {
 
         let a = new ArrayBuffer(4);
         let b = new Uint8Array(a);
@@ -1071,17 +1011,14 @@ LibDevice._initialize = function () {
         b[2] = 0xc3;
         b[3] = 0xd4;
 
-        if (c[0] == 0xd4c3b2a1)
-        {
+        if (c[0] == 0xd4c3b2a1) {
             return true;
         }
 
-        if (c[0] == 0xa1b2c3d4)
-        {
+        if (c[0] == 0xa1b2c3d4) {
             return false;
         }
-        else
-        {
+        else {
             //  Could not determine endianness
             return null;
         }
@@ -1093,18 +1030,16 @@ LibDevice._initialize = function () {
     *
     * @author Matt DesLauriers (@mattdesl)
     */
-    function _checkIsUint8ClampedImageData () {
+    function _checkIsUint8ClampedImageData() {
 
-        if (Uint8ClampedArray === undefined)
-        {
+        if (Uint8ClampedArray === undefined) {
             return false;
         }
 
         let elem = document.createElement('canvas');
         let ctx = elem.getContext('2d');
 
-        if (!ctx)
-        {
+        if (!ctx) {
             return false;
         }
 
@@ -1117,7 +1052,7 @@ LibDevice._initialize = function () {
     /**
     * Check whether the host environment support 3D CSS.
     */
-    function _checkCSS3D () {
+    function _checkCSS3D() {
 
         let el = document.createElement('p');
         let has3d;
@@ -1132,10 +1067,8 @@ LibDevice._initialize = function () {
         // Add it to the body to get the computed style.
         document.body.insertBefore(el, null);
 
-        for (let t in transforms)
-        {
-            if (el.style[t] !== undefined)
-            {
+        for (let t in transforms) {
+            if (el.style[t] !== undefined) {
                 el.style[t] = "translate3d(1px,1px,1px)";
                 has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
             }
@@ -1169,28 +1102,22 @@ LibDevice._initialize = function () {
 */
 LibDevice.canPlayAudio = function (type) {
 
-    if (type === 'mp3' && this.mp3)
-    {
+    if (type === 'mp3' && this.mp3) {
         return true;
     }
-    else if (type === 'ogg' && (this.ogg || this.opus))
-    {
+    else if (type === 'ogg' && (this.ogg || this.opus)) {
         return true;
     }
-    else if (type === 'm4a' && this.m4a)
-    {
+    else if (type === 'm4a' && this.m4a) {
         return true;
     }
-    else if (type === 'opus' && this.opus)
-    {
+    else if (type === 'opus' && this.opus) {
         return true;
     }
-    else if (type === 'wav' && this.wav)
-    {
+    else if (type === 'wav' && this.wav) {
         return true;
     }
-    else if (type === 'webm' && this.webm)
-    {
+    else if (type === 'webm' && this.webm) {
         return true;
     }
 
@@ -1208,20 +1135,16 @@ LibDevice.canPlayAudio = function (type) {
 */
 LibDevice.canPlayVideo = function (type) {
 
-    if (type === 'webm' && (this.webmVideo || this.vp9Video))
-    {
+    if (type === 'webm' && (this.webmVideo || this.vp9Video)) {
         return true;
     }
-    else if (type === 'mp4' && (this.mp4Video || this.h264Video))
-    {
+    else if (type === 'mp4' && (this.mp4Video || this.h264Video)) {
         return true;
     }
-    else if ((type === 'ogg' || type === 'ogv') && this.oggVideo)
-    {
+    else if ((type === 'ogg' || type === 'ogv') && this.oggVideo) {
         return true;
     }
-    else if (type === 'mpeg' && this.hlsVideo)
-    {
+    else if (type === 'mpeg' && this.hlsVideo) {
         return true;
     }
 
@@ -1239,23 +1162,19 @@ LibDevice.canPlayVideo = function (type) {
 */
 LibDevice.isConsoleOpen = function () {
 
-    if (window.console && window.console['firebug'])
-    {
+    if (window.console && window.console['firebug']) {
         return true;
     }
 
-    if (window.console)
-    {
+    if (window.console) {
         console.profile();
         console.profileEnd();
 
-        if (console.clear)
-        {
+        if (console.clear) {
             console.clear();
         }
 
-        if (console['profiles'])
-        {
+        if (console['profiles']) {
             return console['profiles'].length > 0;
         }
     }
@@ -1282,5 +1201,15 @@ LibDevice.isAndroidStockBrowser = function () {
     return matches && matches[1] < 537;
 
 };
+
+//webP check
+(function () {
+    const webP = new Image();
+    webP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+    webP.onload = webP.onerror = function () {
+        LibDevice.webP = (webP.height === 2);
+        LibDevice._webPTestComplete = true;
+    };
+})();
 
 module.exports = LibDevice;

@@ -1,9 +1,11 @@
 class ModulesStatesManagerController {
+
     constructor() {
         this.singleton = true;
 
         this._configStates;
         this._currentState;
+        this._forceNextStateKey = null;
         this._started = false;
         this._paused = false;
         this._pauseNeedResume = false;
@@ -42,6 +44,14 @@ class ModulesStatesManagerController {
         }
     }
 
+    setForceNextState(stateKey) {
+        if (!this._configStates[stateKey]) {
+            Urso.logger.error('ModulesStatesManagerController: setForceNextState name error', stateKey);
+        }
+
+        this._forceNextStateKey = stateKey
+    }
+
     _iteratorConstructor() {
         let nextIndex = 0;
 
@@ -58,6 +68,14 @@ class ModulesStatesManagerController {
         return {
             next: (() => {
                 let statesArray = Object.keys(this._configStates);
+
+                //force next state
+                if (this._forceNextStateKey) {
+                    const forceNextStateKey = this._forceNextStateKey;
+                    this._forceNextStateKey = null;
+                    nextIndex = statesArray.indexOf(forceNextStateKey) + 1;
+                    return forceNextStateKey;
+                }
 
                 //nextState
                 if (this._currentState) {
@@ -158,7 +176,9 @@ class ModulesStatesManagerController {
     }
 
     checkStateGuard = (key) => {
-        return this.statesGuards.checkGuard(key);
+        const guardResult = this.statesGuards.checkGuard(key);
+        log('%c State guard ' + key + ' is ' + guardResult, 'background: #DA55C4; color: #000')
+        return guardResult;
     }
 
     removeStateGuard = (key, guard) => {

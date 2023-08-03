@@ -168,6 +168,7 @@ class LibHelper {
 
     /**
      * recursive set value to object by key
+     * (*) you can use '.' as objects keys splitter
      * @param {String} key 
      * @param {Mixed} value 
      * @param {Object} object 
@@ -200,6 +201,7 @@ class LibHelper {
 
     /**
      * recursive get value from object by key
+     * (*) you can use '.' as objects keys splitter
      * @param {String} key 
      * @param {Object} object 
      * @returns {Mixed}
@@ -222,6 +224,7 @@ class LibHelper {
 
     /**
      * recursive delete value from object by key
+     * (*) you can use '.' as objects keys splitter
      * @param {String} key 
      * @param {Object} object 
      * @returns {Boolean}
@@ -578,6 +581,84 @@ class LibHelper {
         }
 
         return results;
+    }
+
+    /**
+     * apply params to string
+     * @param {String} string 
+     * @param {Object} params 
+     * @returns {String}
+     * 
+     *  @example interpolate('Bet ${bet} with Multi ${multi}', {bet:12,multi:13})
+     *  returns 'Bet 12 with Multi 13'
+     */
+    interpolate(string, params) {
+        for (const [key, value] of Object.entries(params)) {
+            string = Urso.helper.stringReplace('${' + key + '}', value, string);
+        }
+
+        return string
+    }
+
+    /**
+     * Converts color number to object that contents RGB values
+     * @param { Number } color - color number
+     * @returns { Object }
+     */
+    getRGB(color) {
+        return  {
+            alpha: 16777215 < color ? color >>> 24 : 255,
+            red: color >> 16 & 255,
+            green: color >> 8 & 255,
+            blue: 255 & color
+        };
+    }
+
+    /**
+     * Converts RGB values to 32 bit
+     * @param { Number } alpha 
+     * @param { Number } red 
+     * @param { Number } green 
+     * @param { Number } blue 
+     * @returns { Number }
+     */
+    getColor32(alpha, red, green, blue) {
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    /**
+     * Returns color interpolation depends on step value
+     * @param { Number } startColor 
+     * @param { Number } targetColor 
+     * @param { Number } step - intermediate value from 0 to 1
+     * @returns { Number }
+     */
+    interpolateColor32(startColor, targetColor, step) {
+        if(startColor === targetColor)
+            return startColor;
+
+        const startColorRGB = this.getRGB(startColor);
+        const targetColorRGB = this.getRGB(targetColor);
+        const nextColorRGB = this.interpolateColorRGB(startColorRGB, targetColorRGB, step);
+        const color32 = this.getColor32(255, nextColorRGB.red, nextColorRGB.green, nextColorRGB.blue);
+        return 16777215 + color32;
+    }
+
+    /**
+     * Returns color interpolation as RGB object depends on step value
+     * @param { Object } startColorRGB - object that contents start values for red, green and blue
+     * @param { Object } targetColorRGB - object that contents target values for red, green and blue
+     * @param { Number } step - intermediate value from 0 to 1
+     * @returns { Object }
+     */
+    interpolateColorRGB(startColorRGB, targetColorRGB, step) {
+        const nextRGB = {};
+
+        Object.keys(startColorRGB).forEach(color => {
+            nextRGB[color] = (targetColorRGB[color] - startColorRGB[color]) * step + startColorRGB[color];
+        });
+
+        return nextRGB;
     }
 }
 
