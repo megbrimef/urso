@@ -68,7 +68,7 @@ class ModulesScenesService {
         const result = Urso.objects.create(objectToCreate, parent, doNotRefreshStylesFlag);
 
         //components create
-        if (newTemplatePart.components) {
+        if (newTemplatePart.components && newTemplatePart.components.length > 0) {
             newTemplatePart.components.forEach(component => component.create());
             this._currentSceneTemplate.components = Urso.helper.mergeArrays(this._currentSceneTemplate.components, newTemplatePart.components);
         }
