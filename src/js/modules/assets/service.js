@@ -256,6 +256,7 @@ class ModulesAssetsService {
         const savedFont = PIXI.BitmapFont.available[fontData.bitmapFont.font];
 
         if (savedFont) {
+            Urso.logger.warn(`bitmapFont ${fontData.bitmapFont.font} was rewritten with key ${fontName}`);
             PIXI.BitmapFont.available[fontName] = savedFont;
             delete PIXI.BitmapFont.available[fontData.bitmapFont.font];
         }
