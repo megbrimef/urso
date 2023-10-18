@@ -182,11 +182,11 @@ class ModulesStatesManagerController {
 
     checkStateGuard = (key) => {
         //auto guard will check callLimit and return false, if limit is reached
-        const callLimit = this._configStates[this._currentState].callLimit;
+        const callLimit = this._configStates[key].callLimit;
 
         if (
             callLimit &&
-            callLimit >= (this._statesCallStatistic[this._currentState] || 0)
+            callLimit >= (this._statesCallStatistic[key] || 0)
         ) { return false; }
 
         const guardResult = this.statesGuards.checkGuard(key);
