@@ -186,7 +186,7 @@ class ModulesStatesManagerController {
 
         if (
             callLimit &&
-            callLimit >= (this._statesCallStatistic[key] || 0)
+            callLimit <= (this._statesCallStatistic[key] || 0)
         ) { return false; }
 
         const guardResult = this.statesGuards.checkGuard(key);
