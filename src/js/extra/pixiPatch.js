@@ -39,7 +39,7 @@ PIXI.Text.prototype.drawLetterSpacing = function (text, x, y, isStroke) {
         }
         return;
     }
-    
+
     var currentPosition = x;
 
     var textIndexOffset = this.text.indexOf(text); //colors patch block
@@ -145,7 +145,7 @@ PIXI.Container.prototype.renderAdvanced = function (renderer) {
         renderer.mask.pop(this);
     }
 
-    if(excludedFromMaskChildsIndexes.length > 0) {
+    if (excludedFromMaskChildsIndexes.length > 0) {
         excludedFromMaskChildsIndexes.forEach(index => this.children[index].render(renderer));
         renderer.batch.flush();
     }
@@ -154,3 +154,18 @@ PIXI.Container.prototype.renderAdvanced = function (renderer) {
         renderer.filter.pop();
     }
 }
+
+//MeshMaterial for spine with initial(setup) sequence fix
+Object.defineProperty(PIXI.MeshMaterial.prototype, "texture", {
+    get: function () {
+        return this.uniforms.uSampler
+    },
+    set: function (value) {
+        if (this.uniforms.uSampler !== value) {
+            this.uniforms.uSampler = value;
+            this.uvMatrix.texture = value;
+        }
+    },
+    enumerable: !1,
+    configurable: !0
+});
