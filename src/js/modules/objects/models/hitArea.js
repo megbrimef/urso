@@ -1,4 +1,6 @@
-class ModulesObjectsModelsHitArea extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
         this._isDisabled = false;

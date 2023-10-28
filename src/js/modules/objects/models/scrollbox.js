@@ -1,4 +1,6 @@
-class ModulesObjectsModelsScrollbox extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsScrollbox extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 

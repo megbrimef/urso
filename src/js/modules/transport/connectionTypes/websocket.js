@@ -1,5 +1,7 @@
-class ModulesTransportConnectionTypesWebsocket extends Urso.Core.Modules.Transport.BaseConnectionType {
-    constructor(params){
+const ModulesTransportBaseConnectionType = require('../baseConnectionType');
+
+class ModulesTransportConnectionTypesWebsocket extends ModulesTransportBaseConnectionType {
+    constructor(params) {
         super(params);
 
         this._reconnectTimeout = null;
@@ -7,17 +9,17 @@ class ModulesTransportConnectionTypesWebsocket extends Urso.Core.Modules.Transpo
         this._createSocket();
     }
 
-    close(){
+    close() {
         this._socket.close();
         log('[SOCKET]: CLOSED')
     };
 
-    reconnect(delay){
+    reconnect(delay) {
         log('[SOCKET]: RECONNECTING in ', delay)
-        
-        if(this._ready)
+
+        if (this._ready)
             this.close();
-        
+
 
         // TODO: REPLACE TO ENGINE TIMEOUT LOGIC
         this._reconnectTimeout = setTimeout(() => {
@@ -27,18 +29,18 @@ class ModulesTransportConnectionTypesWebsocket extends Urso.Core.Modules.Transpo
         }, delay);
     };
 
-    send(message){
+    send(message) {
         const preparedMessage = JSON.stringify(message);
         this._socket.send(preparedMessage);
         log('[SOCKET]: SEND:', preparedMessage)
     };
 
-    _clearTimeout(){
+    _clearTimeout() {
         clearTimeout(this._reconnectTimeout);
         this._reconnectTimeout = null;
     }
 
-    _createSocket(){
+    _createSocket() {
         this._socket = new WebSocket(this._host);
         this._socket.onopen = this._onOpen.bind(this);
         this._socket.onmessage = this._onMessage.bind(this);
@@ -47,25 +49,25 @@ class ModulesTransportConnectionTypesWebsocket extends Urso.Core.Modules.Transpo
         log('[SOCKET]: CREATED')
     };
 
-    _onOpen(){
+    _onOpen() {
         this._ready = true;
         this._runCallback('ready');
         log('[SOCKET]: READY')
     };
 
-    _onMessage(message){
+    _onMessage(message) {
         // const res = JSON.parse(message.data);
         log('[SOCKET]: RECEIVED ', message.data)
         this._runCallback('response', message.data);
     };
 
-    _onClose(){
+    _onClose() {
         this._ready = false;
         this._socket = null;
         this._runCallback('close');
     };
 
-    _onError(){
+    _onError() {
         this._ready = false;
         this._runCallback('error');
         log('[SOCKET]: ERROR')

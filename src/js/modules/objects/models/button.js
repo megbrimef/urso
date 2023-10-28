@@ -8,7 +8,10 @@
     }
 }*/
 
-class ModulesObjectsModelsButton extends Urso.Core.Modules.Objects.BaseModel {
+
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 

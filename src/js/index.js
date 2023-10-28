@@ -1,8 +1,7 @@
-window.Urso = { Core: {} };
-
 require('./config/load.js');
-Urso.config = require('./config/main.js');
-Urso.Core.App = require('./app.js');
+
+//main config
+Urso.config = Urso.Core.Config.Main;
 
 //function to run game with engine
 Urso.runGame = (new Urso.Core.App()).setup;

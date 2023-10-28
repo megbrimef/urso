@@ -1,4 +1,6 @@
-class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 
@@ -8,7 +10,7 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
         this.update = this.update.bind(this);
 
         this._addBaseObject();
-        this._createBundle();   
+        this._createBundle();
     }
 
     /**
@@ -55,15 +57,15 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
      * Stops emitter. If new emitter wasn't inited before particles disappears - clears this._emitter to stop bundle update.
      */
     stop() {
-        if(!this._emitter)
+        if (!this._emitter)
             return;
 
         this._emitter.stop();
         this._emitter.on.completed.add(() => {
-            if(!this._isActive)
+            if (!this._isActive)
                 this._emitter = null;
         });
-        
+
         this._isActive = false;
     }
 
@@ -75,7 +77,7 @@ class ModulesObjectsModelsEmitterFx extends Urso.Core.Modules.Objects.BaseModel 
         this._bundle = new PIXI.particlesFx.FX();
         let fx_settings_data = Urso.cache.getJson(this.cfg).data;
 
-        if(this.spritesheetFilter)
+        if (this.spritesheetFilter)
             fx_settings_data.spritesheetFilter = this.spritesheetFilter;
 
         this._defaultEmitterName = fx_settings_data.emitters[0].name;

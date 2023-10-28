@@ -1,4 +1,6 @@
-class ModulesObjectsModelsEmitter extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsEmitter extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 

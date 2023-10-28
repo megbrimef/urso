@@ -1,4 +1,6 @@
-class ModulesAssetsModelsFont extends Urso.Core.Modules.Assets.BaseModel {
+const ModulesAssetsBaseModel = require('./../baseModel');
+
+class ModulesAssetsModelsFont extends ModulesAssetsBaseModel {
     constructor(params) {
         super(params);
 

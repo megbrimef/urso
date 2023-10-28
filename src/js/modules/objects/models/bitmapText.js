@@ -1,4 +1,6 @@
-class ModulesObjectsModelsBitmapText extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsBitmapText extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 

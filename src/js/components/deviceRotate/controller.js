@@ -1,4 +1,4 @@
-ComponentsBaseController = require('./../base/controller.js');
+const ComponentsBaseController = require('./../base/controller');
 
 class ComponentsDeviceRotateController extends ComponentsBaseController {
   constructor(params) {
@@ -67,7 +67,7 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   _updateVisibility() {
-      this._isVisible = this._needShow;
+    this._isVisible = this._needShow;
   }
 
   _resizeHandler() {

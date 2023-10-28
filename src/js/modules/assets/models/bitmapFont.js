@@ -1,4 +1,6 @@
-class ModulesAssetsModelsBitmapFont extends Urso.Core.Modules.Assets.BaseModel {
+const ModulesAssetsBaseModel = require('./../baseModel');
+
+class ModulesAssetsModelsBitmapFont extends ModulesAssetsBaseModel {
     constructor(params) {
         super(params);
 

@@ -1,4 +1,6 @@
-class ModulesObjectsModelsImage extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsImage extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 

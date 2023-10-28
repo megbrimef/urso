@@ -1,4 +1,6 @@
-class ModulesAssetsModelsContainer extends Urso.Core.Modules.Assets.BaseModel {
+const ModulesAssetsBaseModel = require('./../baseModel');
+
+class ModulesAssetsModelsContainer extends ModulesAssetsBaseModel {
     constructor(params) {
         super(params);
 

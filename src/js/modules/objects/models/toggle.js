@@ -1,4 +1,3 @@
-
 const UrsoCoreModulesObjectsModelsButton = require('./button');
 
 class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
@@ -17,8 +16,8 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
     setupParams(params) {
         super.setupParams(params);
 
-        this.action = Urso.helper.recursiveGet('action', params, () => { 
-            this.emit(Urso.events.MODULES_OBJECTS_TOGGLE_PRESS, { name: this.name, status: this.status, class: this.class }) 
+        this.action = Urso.helper.recursiveGet('action', params, () => {
+            this.emit(Urso.events.MODULES_OBJECTS_TOGGLE_PRESS, { name: this.name, status: this.status, class: this.class })
         });
 
         this.buttonFrames = {
@@ -38,9 +37,9 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
 
         if (this._isOver)
             this._changeTexture(`${this.status}Over`);
-        else if(this._isDown)
+        else if (this._isDown)
             this._changeTexture(`${this.status}Down`);
-        else if(this._isDisabled)
+        else if (this._isDisabled)
             this._changeTexture(`${this.status}Disabled`);
         else
             this._changeTexture(`${this.status}Out`);
@@ -152,7 +151,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
 
     switchStatus() {
         this.status = this.status === 'pressed' ? 'unpressed' : 'pressed';
-        
+
         if (this._isOver)
             this._changeTexture(`${this.status}Over`);
         else

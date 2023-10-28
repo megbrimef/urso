@@ -1,4 +1,6 @@
-class ModulesAssetsModelsSpine extends Urso.Core.Modules.Assets.BaseModel {
+const ModulesAssetsBaseModel = require('./../baseModel');
+
+class ModulesAssetsModelsSpine extends ModulesAssetsBaseModel {
     constructor(params) {
         super(params);
 
