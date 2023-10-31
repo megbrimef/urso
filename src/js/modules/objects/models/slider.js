@@ -1,4 +1,6 @@
-class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsSlider extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 
@@ -19,7 +21,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         const anchorType = this.sizeKey === 'width' ? 'anchorX' : 'anchorY';
         const anchor = this._sliderHandle[anchorType];
         const handleSize = this._sliderHandle[this.sizeKey];
-        return this._sliderBg._baseObject[this.sizeKey] - handleSize + handleSize * anchor * 2; 
+        return this._sliderBg._baseObject[this.sizeKey] - handleSize + handleSize * anchor * 2;
     }
 
     setupParams(params) {
@@ -47,7 +49,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
         position[this.positionKey] = targetPosition;
 
         const { coord, value } = this._calculateClosestPoint(position);
-        this._setNewValue( coord, value);
+        this._setNewValue(coord, value);
     }
 
     /**
@@ -174,7 +176,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
      */
     _addBaseObject() {
         this._baseObject = new PIXI.Container();
-        
+
         this._setPoints();
         this._setVariables();
         this._createSliderTextures();
@@ -262,7 +264,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
      * Sets given default value or 0. 
      */
     _setDefaultValue() {
-        if(!this.defaultValue)
+        if (!this.defaultValue)
             this.defaultValue = this._points[0];
 
         if (!this._points.includes(this.defaultValue))
@@ -310,7 +312,7 @@ class ModulesObjectsModelsSlider extends Urso.Core.Modules.Objects.BaseModel {
                 }
             }
         }
-        
+
         return { coord, value };
     }
 

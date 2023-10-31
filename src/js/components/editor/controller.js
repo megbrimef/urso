@@ -1,4 +1,4 @@
-ComponentsBaseController = require('./../base/controller.js');
+const ComponentsBaseController = require('./../base/controller');
 
 class ComponentsEditorController extends ComponentsBaseController {
     constructor(params) {

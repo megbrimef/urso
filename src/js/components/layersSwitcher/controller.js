@@ -1,4 +1,6 @@
-class ComponentsLayersSwitcherController extends Urso.Core.Components.Base.Controller {
+const ComponentsBaseController = require('./../base/controller');
+
+class ComponentsLayersSwitcherController extends ComponentsBaseController {
 
     constructor(...args) {
         super(...args);

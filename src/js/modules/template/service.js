@@ -3,11 +3,11 @@ class ModulesTemplateService {
         this.singleton = true;
 
         this._currentTemplate = this.getInstance('Model');
-        this._actualTemplate;
+        this._actualFullTemplate = this.getInstance('Model');
     };
 
     getTemplate() {
-        return this._actualTemplate;
+        return this._actualFullTemplate;
     }
 
     getSceneOrGroup(name, namespace) {
@@ -25,12 +25,12 @@ class ModulesTemplateService {
         this._parseObjects(this._currentTemplate.objects, template._templatePath);
 
         if (additionalTemplateFlag) {
-            this._actualTemplate.assets = Urso.helper.mergeArrays(this._actualTemplate.assets, this._currentTemplate.assets);
-            this._actualTemplate.components = Urso.helper.mergeArrays(this._actualTemplate.components, this._currentTemplate.components);
-            this._actualTemplate.objects = Urso.helper.mergeArrays(this._actualTemplate.objects, this._currentTemplate.objects);
-            Urso.helper.mergeObjectsRecursive(this._actualTemplate.styles, this._currentTemplate.styles);
+            this._actualFullTemplate.assets = Urso.helper.mergeArrays(this._actualFullTemplate.assets, this._currentTemplate.assets);
+            this._actualFullTemplate.components = Urso.helper.mergeArrays(this._actualFullTemplate.components, this._currentTemplate.components);
+            this._actualFullTemplate.objects = Urso.helper.mergeArrays(this._actualFullTemplate.objects, this._currentTemplate.objects);
+            Urso.helper.mergeObjectsRecursive(this._actualFullTemplate.styles, this._currentTemplate.styles);
         } else {
-            this._actualTemplate = this._currentTemplate;
+            this._actualFullTemplate = this._currentTemplate;
         }
 
         return this._currentTemplate;

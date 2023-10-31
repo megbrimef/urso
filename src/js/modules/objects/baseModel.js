@@ -198,7 +198,7 @@ class ModulesObjectsBaseModel {
 
     // sorts children by zIndex
     sortChildren() {
-        if(this._baseObject.children?.length > 0)
+        if (this._baseObject.children?.length > 0)
             this._baseObject.sortChildren();
     }
 }

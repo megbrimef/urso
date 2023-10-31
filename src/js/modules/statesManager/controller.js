@@ -18,6 +18,7 @@ class ModulesStatesManagerController {
 
         this._iterator; //will be defined after start
         this._nextState = this._nextState.bind(this);
+        this._statesCallStatistic = {};
     }
 
     start() {
@@ -117,6 +118,10 @@ class ModulesStatesManagerController {
 
         this._currentState = this._iterator.next();
 
+        //fill states call statistic
+        if (!this._statesCallStatistic[this._currentState]) this._statesCallStatistic[this._currentState] = 0;
+        this._statesCallStatistic[this._currentState]++;
+
         this.emit(Urso.events.MODULES_STATES_MANAGER_STATE_CHANGE, this._currentState);
 
         log('%c State ' + this._currentState, 'background: #bada55; color: #000')
@@ -176,6 +181,14 @@ class ModulesStatesManagerController {
     }
 
     checkStateGuard = (key) => {
+        //auto guard will check callLimit and return false, if limit is reached
+        const callLimit = this._configStates[key].callLimit;
+
+        if (
+            callLimit &&
+            callLimit <= (this._statesCallStatistic[key] || 0)
+        ) { return false; }
+
         const guardResult = this.statesGuards.checkGuard(key);
         log('%c State guard ' + key + ' is ' + guardResult, 'background: #DA55C4; color: #000')
         return guardResult;

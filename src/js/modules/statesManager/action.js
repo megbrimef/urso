@@ -17,7 +17,24 @@ class ModulesStatesManagerAction {
         return !this._running && this.getInstance('Controller').checkActionGuard(this.name);
     }
 
+    /**
+     * run action
+     * @param {Function} onFinishCallback
+     */
     run(onFinishCallback) {
+        this._preRunUpdateAction(onFinishCallback);
+        Urso.statesManager.runAction(this.name, this._onFinish);
+
+        //TODO remove temp for debug
+        //let timeout = Math.floor(Math.random() * 2000);
+        //Urso.statesManager.runAction(this.name, () => setTimeout(() => { this._onFinish(); }, timeout));
+    }
+
+    /**
+     * pre run update action
+     * @param {Function} onFinishCallback
+     */
+    _preRunUpdateAction(onFinishCallback) {
         this._running = true;
         this._startTime = Urso.time.get();
         log(`%c action run ---> ${this.name}`, 'color: blue');
@@ -26,12 +43,6 @@ class ModulesStatesManagerAction {
 
         this.finished = false;
         this._onFinishCallback = onFinishCallback;
-
-        Urso.statesManager.runAction(this.name, this._onFinish);
-
-        //TODO remove temp for debug
-        //let timeout = Math.floor(Math.random() * 2000);
-        //Urso.statesManager.runAction(this.name, () => setTimeout(() => { this._onFinish(); }, timeout));
     }
 
     terminate() {

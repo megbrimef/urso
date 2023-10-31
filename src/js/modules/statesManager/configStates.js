@@ -3,6 +3,12 @@ class ModulesStatesManagerConfigStates {
         this.singleton = true;
 
         this.contents = {
+            START_GAME: {
+                action: 'gameInit',
+                nextState: ["IDLE"], //next state to go after finish this state
+                callLimit: 1 //auto guard will return false, if limit is reached
+            },
+
             IDLE: { action: 'startSpin' },
 
             SPIN_START: {

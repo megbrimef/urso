@@ -1,4 +1,6 @@
-class ModulesObjectsModelsNineSlicePlane extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsNineSlicePlane extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 

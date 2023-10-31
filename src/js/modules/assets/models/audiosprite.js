@@ -1,6 +1,7 @@
 const { Howler } = require("howler");
+const ModulesAssetsBaseModel = require('./../baseModel');
 
-class ModulesAssetsModelsAudiosprite extends Urso.Core.Modules.Assets.BaseModel {
+class ModulesAssetsModelsAudiosprite extends ModulesAssetsBaseModel {
     constructor(params) {
         super(params);
 

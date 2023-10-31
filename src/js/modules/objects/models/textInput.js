@@ -1,4 +1,6 @@
-class ModulesObjectsModelsTextInput extends Urso.Core.Modules.Objects.BaseModel {
+const ModulesObjectsBaseModel = require('./../baseModel');
+
+class ModulesObjectsModelsTextInput extends ModulesObjectsBaseModel {
     constructor(params) {
         super(params);
 
@@ -23,12 +25,12 @@ class ModulesObjectsModelsTextInput extends Urso.Core.Modules.Objects.BaseModel 
         this._baseObject.restrict = allowedSymbols;
     }
 
-    disable(){
-        this._baseObject.disabled = true 
+    disable() {
+        this._baseObject.disabled = true
     }
 
-    enable(){
-        this._baseObject.disabled = false 
+    enable() {
+        this._baseObject.disabled = false
     }
 
     _setRestrictedSymbosl() {
@@ -40,14 +42,14 @@ class ModulesObjectsModelsTextInput extends Urso.Core.Modules.Objects.BaseModel 
         }
     }
 
-    _onBlur(){
-        const data = {name: this.name, class: this.class, id: this.id, text: this.text};
+    _onBlur() {
+        const data = { name: this.name, class: this.class, id: this.id, text: this.text };
         this.emit(Urso.events.MODULES_OBJECTS_TEXTINPUT_BLUR, data);
     }
 
     _onInput() {
         this.text = this._baseObject.text;
-        const data = {name: this.name, class: this.class, id: this.id, text: this.text};
+        const data = { name: this.name, class: this.class, id: this.id, text: this.text };
         this.emit(Urso.events.MODULES_OBJECTS_TEXTINPUT_INPUT, data);
     }
 
@@ -55,7 +57,7 @@ class ModulesObjectsModelsTextInput extends Urso.Core.Modules.Objects.BaseModel 
         this._baseObject = new PIXI.TextInput({ input: this.input, box: this.box });
         //this._baseObject.substituteText = this.substituteText;  //todo remove this string
 
-        if(this.maxLength)
+        if (this.maxLength)
             this._baseObject.maxLength = this.maxLength
 
         this._baseObject.on('blur', this._onBlur.bind(this))
