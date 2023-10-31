@@ -242,6 +242,15 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
     }
 
     /**
+     * returns IK constraint
+     * @param {string} name 
+     * @returns {Bone}
+     */
+    findIkConstraint(name) {
+        return this._baseObject.skeleton.findIkConstraint(name)
+    }
+
+    /**
      * returns animation from spineData by it's name
      * @param {string} name 
      * @returns {Animation}
