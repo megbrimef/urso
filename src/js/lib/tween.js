@@ -1,4 +1,9 @@
+/**
+ * @deprecated
+ * tween interface over gsap timeline
+ */
 class LibTween {
+
     constructor() {
         this.singleton = true;
 
