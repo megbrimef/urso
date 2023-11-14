@@ -115,7 +115,10 @@ class SoundSprite {
 
     setAllVolume(volume) {
         this._totalVolume = volume;
-        this._player._volume = volume;
+
+        if (this._player) {
+            this._player._volume = volume;
+        }
 
         if (this.canPlayCheck()) {
             this._updateVolume();
