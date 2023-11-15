@@ -94,7 +94,6 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
         this._finishCallbacks[actionKey] = finish;
     }
 
-    
     _subscribeOnce() {
         //do not forget use super._subscribeOnce() , if you will use _subscribeOnce in the component
         this._processStates();
