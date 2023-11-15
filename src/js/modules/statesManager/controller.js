@@ -5,6 +5,7 @@ class ModulesStatesManagerController {
 
         this._configStates;
         this._currentState;
+        this._currentAction;
         this._forceNextStateKey = null;
         this._started = false;
         this._paused = false;
@@ -30,6 +31,22 @@ class ModulesStatesManagerController {
         this._started = true;
         this._configStates = this.getInstance('ConfigStates').get();
         this._nextState();
+    }
+
+    restart() {
+        this.stop();
+
+        this._started = false;
+        this._paused = false;
+        
+        this.start();
+    }
+
+    stop() {
+        this.pause();
+        this._currentAction.destroy();
+        this._currentAction = null;
+        this.emit('asd.asd.asd');
     }
 
     pause() {
@@ -128,11 +145,11 @@ class ModulesStatesManagerController {
 
         let config = this._configStates[this._currentState];
         let classInstance = this.getInstance('Helper').getActionByConfig(config);
-
         //actions instances guard
         if (!classInstance.guard())
-            return this._nextState();
-
+        return this._nextState();
+    
+        this._currentAction = classInstance;
         classInstance.run(this._nextState);
     }
 

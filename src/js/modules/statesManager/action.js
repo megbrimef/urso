@@ -66,6 +66,11 @@ class ModulesStatesManagerAction {
             Urso.logger.error('ModulesStatesManagerAction: action alredy finished', this.name);
             return;
         }
+        
+        if(this._destroying) {
+            log(`%c action destroyed <--- ${this.name}`, 'color: #F39986');
+            return;
+        }
 
         this._running = false;
         this._terminating = false;
@@ -76,6 +81,14 @@ class ModulesStatesManagerAction {
 
         log(`%c action finish <--- ${this.name} (${elapsedTime}ms)`, 'color: blue');
         this._onFinishCallback();
+    }
+
+    destroy() {
+        if(this._destroying || !this._running)
+            return;
+        
+        this._destroying = true;
+        this._onFinish();
     }
 }
 

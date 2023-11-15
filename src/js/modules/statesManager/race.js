@@ -70,7 +70,17 @@ class ModulesStatesManagerRace extends Action {
         this.finished = true;
         const elapsedTime = Urso.time.get() - this._startTime;
         log(`%c action finish <--- ${this.name}  (${elapsedTime}ms)`, 'color: orange');
-        this._onFinishCallback();
+        !this._destroying && this._onFinishCallback();
+    }
+
+    destroy() {
+        this._destroying = true;
+
+        for (let action of this._actions)
+            if (!action.finished)
+                action.destroy();
+
+        this._onFinish();
     }
 }
 
