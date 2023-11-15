@@ -46,7 +46,7 @@ class ModulesStatesManagerController {
         this.pause();
         this._currentAction.destroy();
         this._currentAction = null;
-        this.emit('asd.asd.asd');
+        this.emit(Urso.events.MODULES_STATES_MANAGER_STOP);
     }
 
     pause() {
