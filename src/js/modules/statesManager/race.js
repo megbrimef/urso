@@ -54,7 +54,7 @@ class ModulesStatesManagerRace extends Action {
     }
 
     terminate() {
-        if (this._terminating)
+        if (this._terminating || this._forceDestroying)
             return;
 
         log(`%c action terminate X ${this.name}`, 'color: orange');
@@ -67,15 +67,18 @@ class ModulesStatesManagerRace extends Action {
     }
 
     _onFinish() {
+        if(this._forceDestroying)
+            return;
+
         this.finished = true;
         const elapsedTime = Urso.time.get() - this._startTime;
         log(`%c action finish <--- ${this.name}  (${elapsedTime}ms)`, 'color: orange');
-        !this._destroying && this._onFinishCallback();
+        this._onFinishCallback();
     }
 
     // Interrupts currently active actions on states manager stop
     forceDestroy() {
-        this._destroying = true;
+        this._forceDestroying = true;
 
         for (let action of this._actions)
             if (!action.finished)

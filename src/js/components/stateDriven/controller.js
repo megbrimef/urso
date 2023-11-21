@@ -100,14 +100,14 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
         this._processActions();
         this.addListener(Urso.events.MODULES_STATES_MANAGER_STOP, this._onStatesManagerStop.bind(this), true);
     }
-    
+
     destroy() {
         this._removeCallback(Urso.statesManager.removeStateGuard, this._callbacksCache.stateGuards);
         this._removeCallback(Urso.statesManager.removeActionGuard, this._callbacksCache.actionGuards);
         this._removeCallback(Urso.statesManager.removeActionTerminate, this._callbacksCache.actionTerminates);
         this._removeCallback(Urso.statesManager.removeActionRun, this._callbacksCache.actionRuns);
     }
-    
+
     _removeCallback(remover, cacheObject) {
         for (let cacheKey in cacheObject) {
             remover(cacheKey, cacheObject[cacheKey]);

@@ -43,7 +43,7 @@ class ModulesStatesManagerController {
     }
 
     stop() {
-        this._currentAction && this._currentAction.destroy();
+        this._currentAction && this._currentAction.forceDestroy();
         this._currentAction = null;
         this.emit(Urso.events.MODULES_STATES_MANAGER_STOP);
     }
@@ -71,7 +71,6 @@ class ModulesStatesManagerController {
 
     _iteratorConstructor() {
         let nextIndex = 0;
-
 
         const getNextStateByOrder = () => {
             let statesArray = Object.keys(this._configStates);
@@ -146,7 +145,7 @@ class ModulesStatesManagerController {
         let classInstance = this.getInstance('Helper').getActionByConfig(config);
         //actions instances guard
         if (!classInstance.guard())
-        return this._nextState();
+            return this._nextState();
     
         this._currentAction = classInstance;
         classInstance.run(this._nextState);

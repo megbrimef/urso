@@ -32,7 +32,7 @@ class ModulesStatesManagerSequence extends All {
     }
 
     terminate() {
-        if (this._terminating)
+        if (this._terminating || this._forceDestroying)
             return;
 
         log(`%c action terminate X ${this.name}`, 'color: orange');
