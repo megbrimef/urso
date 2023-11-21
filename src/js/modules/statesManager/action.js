@@ -83,7 +83,8 @@ class ModulesStatesManagerAction {
         this._onFinishCallback();
     }
 
-    destroy() {
+    // Interrupts currently active actions on states manager stop
+    forceDestroy() {
         if(this._destroying || !this._running)
             return;
         

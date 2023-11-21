@@ -73,12 +73,13 @@ class ModulesStatesManagerRace extends Action {
         !this._destroying && this._onFinishCallback();
     }
 
-    destroy() {
+    // Interrupts currently active actions on states manager stop
+    forceDestroy() {
         this._destroying = true;
 
         for (let action of this._actions)
             if (!action.finished)
-                action.destroy();
+                action.forceDestroy();
 
         this._onFinish();
     }
