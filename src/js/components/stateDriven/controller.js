@@ -98,6 +98,7 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
         //do not forget use super._subscribeOnce() , if you will use _subscribeOnce in the component
         this._processStates();
         this._processActions();
+        this.addListener(Urso.events.MODULES_STATES_MANAGER_STOP, this._onStatesManagerStop.bind(this), true);
     }
 
     destroy() {
@@ -111,6 +112,10 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
         for (let cacheKey in cacheObject) {
             remover(cacheKey, cacheObject[cacheKey]);
         }
+    }
+
+    _onStatesManagerStop() {
+        this._finishCallbacks = {};
     }
 
 }
