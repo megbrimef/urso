@@ -143,7 +143,7 @@ class ModulesStatesManagerController {
 
         let config = this._configStates[this._currentState];
         let classInstance = this.getInstance('Helper').getActionByConfig(config);
-        
+
         //actions instances guard
         if (!classInstance.guard())
             return this._nextState();
