@@ -48,7 +48,7 @@ class ModulesStatesManagerAction {
     terminate() {
         if(this._forceDestroying)
             return;
-        
+
         if (!this._running) {
             Urso.logger.warn('ModulesStatesManagerAction: action run from terminating', this.name);
             this.run(() => { });
@@ -72,7 +72,7 @@ class ModulesStatesManagerAction {
             Urso.logger.error('ModulesStatesManagerAction: action alredy finished', this.name);
             return;
         }
-        
+
         this._running = false;
         this._terminating = false;
         this.finished = true;
@@ -90,7 +90,7 @@ class ModulesStatesManagerAction {
             return;
         
         this._forceDestroying = true;
-        log(`%c action destroyed <--- ${this.name}`, 'color: #F39986');
+        log(`%c action forceDestroyed <--- ${this.name}`, 'color: #F39986');
     }
 }
 

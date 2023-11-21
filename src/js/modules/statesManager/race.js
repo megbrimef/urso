@@ -84,7 +84,7 @@ class ModulesStatesManagerRace extends Action {
             if (!action.finished)
                 action.forceDestroy();
 
-        this._onFinish();
+        log(`%c action forceDestroyed <--- ${this.name}`, 'color: #F39986');
     }
 }
 
