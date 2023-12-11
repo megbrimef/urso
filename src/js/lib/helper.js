@@ -521,8 +521,11 @@ class LibHelper {
         const b = this.getLengthBy2Points(point2, point3);
 
         if (a !== 0 && b !== 0) {
-            const cornerRcos = (a * a + b * b - c * c) / (2 * a * b);
-            Urso.math.intMakeBetween(cornerRcos, -1, 1);
+            const cornerRcos = Urso.math.intMakeBetween(
+                (a * a + b * b - c * c) / (2 * a * b),
+                -1, 1
+            );
+
             angle = Math.acos(cornerRcos);
         }
 
