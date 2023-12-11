@@ -522,6 +522,7 @@ class LibHelper {
 
         if (a !== 0 && b !== 0) {
             const cornerRcos = (a * a + b * b - c * c) / (2 * a * b);
+            Urso.math.intMakeBetween(cornerRcos, -1, 1);
             angle = Math.acos(cornerRcos);
         }
 
@@ -606,7 +607,7 @@ class LibHelper {
      * @returns { Object }
      */
     getRGB(color) {
-        return  {
+        return {
             alpha: 16777215 < color ? color >>> 24 : 255,
             red: color >> 16 & 255,
             green: color >> 8 & 255,
@@ -634,7 +635,7 @@ class LibHelper {
      * @returns { Number }
      */
     interpolateColor32(startColor, targetColor, step) {
-        if(startColor === targetColor)
+        if (startColor === targetColor)
             return startColor;
 
         const startColorRGB = this.getRGB(startColor);
