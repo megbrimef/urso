@@ -1,9 +1,11 @@
 const ComponentsBaseController = require('./../base/controller');
 
 class ComponentsDeviceRotateController extends ComponentsBaseController {
+
   constructor(params) {
     super(params);
 
+    this._created = false;
     this._div = null;
     this._orientation = null;
     this._resolutionsConfig = null;
@@ -18,6 +20,7 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
     this._createDom();
     this._updateOrientation();
     this._updateVisibility();
+    this._created = true;
   }
 
   _createDom() {
@@ -71,6 +74,9 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   _resizeHandler() {
+    if (!this._created)
+      return;
+
     this._updateOrientation();
     this._updateVisibility();
   }
