@@ -25,7 +25,7 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
 
   _createDom() {
     this._div = document.createElement('div');
-    this._div.className = 'fullscreen';
+    this._div.className = 'fullscreen device-rotate';
     this._div.style.touchAction = 'none';
     this._div.style.visibility = 'hidden';
 
