@@ -34,9 +34,8 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
     const infoDiv = document.createElement('div');
     infoDiv.className = 'fullscreen-info';
     this._div.appendChild(infoDiv);
-
     const image = document.createElement('img');
-    image.src = '/assets/images/fullscreen/rotate.png';
+    image.src = `${Urso.config.gamePath}assets/images/fullscreen/rotate.png`;
     const span = document.createElement('span');
     span.innerText = 'Please rotate device';
 

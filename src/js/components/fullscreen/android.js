@@ -23,7 +23,7 @@ class ComponentsFullscreenAndroid {
     this._div.appendChild(infoDiv);
 
     const image = document.createElement('img');
-    image.src = '/assets/images/fullscreen/hand.png'
+    image.src = `${Urso.config.gamePath}assets/images/fullscreen/hand.png`;
     const span = document.createElement('span');
     span.innerText = 'Tap to enter fullscreen';
 
