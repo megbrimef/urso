@@ -45,10 +45,14 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   get _showOnLandscape() {
+    if (!this._resolutionsConfig) return false;
+
     return !this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
+    if (!this._resolutionsConfig) return false;
+
     return !this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
