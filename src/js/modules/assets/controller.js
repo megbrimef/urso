@@ -33,9 +33,9 @@ class ModulesAssetsController {
      * @param {Mixed} assets - asset or array of assets
      * @param {Function} callback
      */
-    preload(assets, callback) {
+    preload(assets, callback, updateCallback = () => { }) {
         const assetsSpace = this.getInstance('Service').sortAssets(assets);
-        this.getInstance('Service').startLoad(assetsSpace, callback);
+        this.getInstance('Service').startLoad(assetsSpace, callback, updateCallback);
     }
 
     /**
@@ -43,8 +43,8 @@ class ModulesAssetsController {
      * @param {String} name
      * @param {Function} callback
      */
-    loadGroup(name, callback) {
-        this.getInstance('Service').loadGroup(null, name, callback);
+    loadGroup(name, callback, updateCallback = () => { }) {
+        this.getInstance('Service').loadGroup(null, name, callback, updateCallback);
     }
 
     /**
