@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.6.16-dev",
+  "version": "0.6.19-dev",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",
@@ -29,10 +29,10 @@
     "pixi-particles": "^4.3.0",
     "pixi-projection": "0.3.15",
     "pixi-scrollbox": "^2.3.1",
-    "pixi-spine": "^3.0.13",
+    "pixi-spine": "3.0.1",
     "pixi-text-input": "^1.0.6",
     "pixi-viewport": "^4.34.0",
-    "pixi.js-legacy": "6.5.8"
+    "pixi.js-legacy": "6.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
