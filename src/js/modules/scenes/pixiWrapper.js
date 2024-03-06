@@ -300,9 +300,14 @@ class ModulesScenesPixiWrapper {
     };
 
     _getMouseCoords() {
+        /*const globalCoords = Urso.helper.mobileAndTabletCheck() ?
+            this.interaction?.eventData?.data?.global || { x: 0, y: 0 } :
+            this.interaction.mouse.global;*/
+        const globalCoords = this.interaction?.eventData?.data?.global || { x: 0, y: 0 };
+
         const coords = {
-            x: ~~(this.interaction.mouse.global.x / this.world.scale.x),
-            y: ~~(this.interaction.mouse.global.y / this.world.scale.y)
+            x: ~~(globalCoords.x / this.world.scale.x),
+            y: ~~(globalCoords.y / this.world.scale.y)
         };
 
         coords.x = this._validateCoordinate(coords.x);
