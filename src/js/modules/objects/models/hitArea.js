@@ -56,6 +56,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this._baseObject
             .on('pointerdown', this._onPressDown.bind(this))
             .on('pointerup', this._onPressUp.bind(this))
+            .on('pointerupoutside', this._onPressUp.bind(this))
             .on('pointerover', this._onOver.bind(this))
             .on('pointerout', this._onOut.bind(this))
             .on('touchmove', this._onTouchmove.bind(this));
