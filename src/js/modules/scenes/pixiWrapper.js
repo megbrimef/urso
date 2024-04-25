@@ -324,7 +324,9 @@ class ModulesScenesPixiWrapper {
      * reserve loop, when browser tab is inactive
      * @param {Boolean} isVisible
      */
-    _visibilityChangeHandler(isVisible) {
+    _visibilityChangeHandler(state) {
+        const isVisible = state === 'visible';
+
         if (isVisible) {
             if (this.passiveCallIntervalId) {
                 clearInterval(this.passiveCallIntervalId);
