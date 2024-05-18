@@ -15,7 +15,7 @@ class ModulesTransportService {
     };
 
     send(message) {
-        if (!this._checkCommunicator() || !this._checkCommunicatorReady())
+        if (!this._checkCommunicatorReady())
             return false;
 
         const decoratedMessage = this.getInstance('Decorator', { callbacks: this._callbacks }).toServer(message);
@@ -36,7 +36,7 @@ class ModulesTransportService {
     };
 
     reconnect() {
-        if (!this._checkCommunicator())
+        if (!this._checkCommunicatorReady())
             return false;
 
         this._communicator.reconnect(this._getAutoReconnetionDelay());
@@ -45,7 +45,7 @@ class ModulesTransportService {
     };
 
     close() {
-        if (!this._checkCommunicator())
+        if (!this._checkCommunicatorReady())
             return false;
 
         this._communicator.close();
@@ -62,14 +62,11 @@ class ModulesTransportService {
         return result;
     };
 
-    _checkCommunicator() {
-        if (!this._communicator)
-            Urso.logger.error('Communicator was not created!');
-
-        return true;
-    }
-
     _checkCommunicatorReady() {
+        if (!this._communicator) {
+            Urso.logger.error('Communicator was not created!');
+            return false;
+        }
         return this._communicator.readyCheck();
     };
 
