@@ -411,7 +411,7 @@ class ModulesAssetsService {
         if (!groupName)
             Urso.logger.error('ModulesAssetsService lazy loading groupName error');
 
-        this.loadGroup(groupName, () => { this._continueLazyLoad(step + 1); })
+        this.loadGroup(null, groupName, () => { this._continueLazyLoad(step + 1); })
     }
 
     /**
