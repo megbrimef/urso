@@ -296,7 +296,7 @@ class ModulesAssetsService {
                 type: Urso.types.objects.IMAGE,
                 assetKey: assetKey,
                 x: -10000, y: -10000
-            }, false, true);
+            }, false, true, true);
 
             setTimeout(() => { tempOblect.destroy() }, 1)
         }

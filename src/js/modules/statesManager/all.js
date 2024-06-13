@@ -1,4 +1,4 @@
-Race = require('./race.js');
+const Race = require('./race.js');
 
 class ModulesStatesManagerAll extends Race {
     constructor(params) {

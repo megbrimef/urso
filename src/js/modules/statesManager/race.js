@@ -1,4 +1,4 @@
-Action = require('./action.js');
+const Action = require('./action.js');
 
 class ModulesStatesManagerRace extends Action {
     constructor(params) {
@@ -67,7 +67,7 @@ class ModulesStatesManagerRace extends Action {
     }
 
     _onFinish() {
-        if(this._forceDestroying)
+        if (this._forceDestroying)
             return;
 
         this.finished = true;

@@ -1,4 +1,4 @@
-All = require('./all.js');
+const All = require('./all.js');
 
 class ModulesStatesManagerSequence extends All {
     constructor(params) {
