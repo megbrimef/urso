@@ -74,7 +74,7 @@ class ModulesAssetsService {
      * @param {Function} callback
      * @returns
      */
-    loadGroup(assetsSpace, group, callback = () => { }, updateCallback) {
+    loadGroup(assetsSpace, group, callback = () => { }, updateCallback = () => { }) {
         if (!assetsSpace) //global space
             assetsSpace = this.assets;
 
@@ -411,7 +411,7 @@ class ModulesAssetsService {
         if (!groupName)
             Urso.logger.error('ModulesAssetsService lazy loading groupName error');
 
-        this.loadGroup(groupName, () => { this._continueLazyLoad(step + 1); })
+        this.loadGroup(null, groupName, () => { this._continueLazyLoad(step + 1); })
     }
 
     /**
