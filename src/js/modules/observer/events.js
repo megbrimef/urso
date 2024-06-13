@@ -38,6 +38,7 @@ class ModulesObserverConfig {
         MODULES_STATES_MANAGER_STATE_CHANGE: 'modules.statesManager.stateChange',
         MODULES_STATES_MANAGER_ACTION_START: 'modules.statesManager.actionStart',
         MODULES_STATES_MANAGER_ACTION_FINISH: 'modules.statesManager.actionFinish',
+        MODULES_STATES_MANAGER_STOP: 'modules.statesManager.stop',
         MODULES_SCENES_ORIENTATION_CHANGE: 'modules.scenes.orientation.change',
         MODULES_SCENES_NEW_RESOLUTION: 'modules.scenes.newResolution',
         MODULES_SCENES_NEW_SCENE_INIT: 'modules.scenes.newSceneInit',

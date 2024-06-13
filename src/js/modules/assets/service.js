@@ -58,20 +58,13 @@ class ModulesAssetsService {
      * @param {Object} assetsSpace
      * @param {Function} callback
      */
-    startLoad(assetsSpace, callback) {
+    startLoad(assetsSpace, callback, updateCallback) {
         this.loadGroup(
             assetsSpace,
             this.getInstance('Config').loadingGroups.initial,
-            (() => { callback(); this._startLazyLoad(); }).bind(this)
+            (() => { callback(); this._startLazyLoad(); }).bind(this),
+            updateCallback
         )
-    }
-
-    /**
-     * load update handler. Setup to pixi loader
-     * @param {Number} param
-     */
-    loadUpdate(param) {
-        Urso.scenes.loadUpdate(Math.floor(param.progress));
     }
 
     /**
@@ -81,7 +74,7 @@ class ModulesAssetsService {
      * @param {Function} callback
      * @returns
      */
-    loadGroup(assetsSpace, group, callback = () => { }) {
+    loadGroup(assetsSpace, group, callback = () => { }, updateCallback) {
         if (!assetsSpace) //global space
             assetsSpace = this.assets;
 
@@ -89,7 +82,7 @@ class ModulesAssetsService {
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
         //we need load and parse atlases at first (!)
-        this._loadGroupAtlases(assetsSpace, group, () => { this._loadGroupRestAssets(assetsSpace, group, callback) });
+        this._loadGroupAtlases(assetsSpace, group, () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback) });
     }
 
     /**
@@ -128,9 +121,10 @@ class ModulesAssetsService {
      * @param {String} group
      * @param {Function} callback
      */
-    _loadGroupRestAssets(assetsSpace, group, callback) {
+    _loadGroupRestAssets(assetsSpace, group, callback, updateCallback) {
         let loader = Urso.getInstance('Lib.Loader');
-        loader.setOnLoadUpdate(this.loadUpdate.bind(this));
+        //load update callback
+        loader.setOnLoadUpdate((params) => { updateCallback(Math.floor(params.progress)); });
         const noAtlasSpines = [];
 
         for (let assetModel of assetsSpace[group])
@@ -302,7 +296,7 @@ class ModulesAssetsService {
                 type: Urso.types.objects.IMAGE,
                 assetKey: assetKey,
                 x: -10000, y: -10000
-            }, false, true);
+            }, false, true, true);
 
             setTimeout(() => { tempOblect.destroy() }, 1)
         }

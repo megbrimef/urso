@@ -1,4 +1,4 @@
-LibDevice = function () {
+let LibDevice = function () {
 
     /**
     * The time the device became ready.

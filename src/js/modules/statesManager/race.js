@@ -1,4 +1,4 @@
-Action = require('./action.js');
+const Action = require('./action.js');
 
 class ModulesStatesManagerRace extends Action {
     constructor(params) {
@@ -54,7 +54,7 @@ class ModulesStatesManagerRace extends Action {
     }
 
     terminate() {
-        if (this._terminating)
+        if (this._terminating || this._forceDestroying)
             return;
 
         log(`%c action terminate X ${this.name}`, 'color: orange');
@@ -67,10 +67,24 @@ class ModulesStatesManagerRace extends Action {
     }
 
     _onFinish() {
+        if (this._forceDestroying)
+            return;
+
         this.finished = true;
         const elapsedTime = Urso.time.get() - this._startTime;
         log(`%c action finish <--- ${this.name}  (${elapsedTime}ms)`, 'color: orange');
         this._onFinishCallback();
+    }
+
+    // Interrupts currently active actions on states manager stop
+    forceDestroy() {
+        this._forceDestroying = true;
+
+        for (let action of this._actions)
+            if (!action.finished)
+                action.forceDestroy();
+
+        log(`%c action forceDestroyed <--- ${this.name}`, 'color: #F39986');
     }
 }
 

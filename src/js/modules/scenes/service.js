@@ -14,6 +14,7 @@ class ModulesScenesService {
         this.init();
 
         this._assetsLoadedHandler = this._assetsLoadedHandler.bind(this);
+        this.loadUpdate = this.loadUpdate.bind(this);
     }
 
     init() {
@@ -117,7 +118,7 @@ class ModulesScenesService {
         this.getInstance('PixiWrapper').setNewScene(this._sceneModel);
         this.emit(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, name);
 
-        Urso.assets.preload(this._currentSceneTemplate.assets, this._assetsLoadedHandler);
+        Urso.assets.preload(this._currentSceneTemplate.assets, this._assetsLoadedHandler, this.loadUpdate);
     }
 
     loadUpdate(loadProgress) {

@@ -5,6 +5,7 @@ class ModulesStatesManagerController {
 
         this._configStates;
         this._currentState;
+        this._currentAction;
         this._forceNextStateKey = null;
         this._started = false;
         this._paused = false;
@@ -32,6 +33,21 @@ class ModulesStatesManagerController {
         this._nextState();
     }
 
+    restart() {
+        this.stop();
+
+        this._started = false;
+        this._paused = false;
+        
+        this.start();
+    }
+
+    stop() {
+        this._currentAction && this._currentAction.forceDestroy();
+        this._currentAction = null;
+        this.emit(Urso.events.MODULES_STATES_MANAGER_STOP);
+    }
+
     pause() {
         this._paused = true;
     }
@@ -55,7 +71,6 @@ class ModulesStatesManagerController {
 
     _iteratorConstructor() {
         let nextIndex = 0;
-
 
         const getNextStateByOrder = () => {
             let statesArray = Object.keys(this._configStates);
@@ -132,7 +147,8 @@ class ModulesStatesManagerController {
         //actions instances guard
         if (!classInstance.guard())
             return this._nextState();
-
+    
+        this._currentAction = classInstance;
         classInstance.run(this._nextState);
     }
 

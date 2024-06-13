@@ -1,9 +1,11 @@
 const ComponentsBaseController = require('./../base/controller');
 
 class ComponentsDeviceRotateController extends ComponentsBaseController {
+
   constructor(params) {
     super(params);
 
+    this._created = false;
     this._div = null;
     this._orientation = null;
     this._resolutionsConfig = null;
@@ -18,11 +20,12 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
     this._createDom();
     this._updateOrientation();
     this._updateVisibility();
+    this._created = true;
   }
 
   _createDom() {
     this._div = document.createElement('div');
-    this._div.className = 'fullscreen';
+    this._div.className = 'fullscreen device-rotate';
     this._div.style.touchAction = 'none';
     this._div.style.visibility = 'hidden';
 
@@ -31,9 +34,8 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
     const infoDiv = document.createElement('div');
     infoDiv.className = 'fullscreen-info';
     this._div.appendChild(infoDiv);
-
     const image = document.createElement('img');
-    image.src = '/assets/images/fullscreen/rotate.png';
+    image.src = `${Urso.config.gamePath}assets/images/fullscreen/rotate.png`;
     const span = document.createElement('span');
     span.innerText = 'Please rotate device';
 
@@ -42,10 +44,14 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   get _showOnLandscape() {
+    if (!this._resolutionsConfig) return false;
+
     return !this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.LANDSCAPE);
   }
 
   get _showOnPortrait() {
+    if (!this._resolutionsConfig) return false;
+
     return !this._resolutionsConfig.find(resolution => resolution.orientation === Urso.device.ScreenOrientation.PORTRAIT);
   }
 
@@ -71,6 +77,9 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 
   _resizeHandler() {
+    if (!this._created)
+      return;
+
     this._updateOrientation();
     this._updateVisibility();
   }

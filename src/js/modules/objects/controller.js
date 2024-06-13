@@ -11,17 +11,25 @@ class ModulesObjectsController {
         this._applyClassesToWorld = this._applyClassesToWorld.bind(this);
     };
 
-    create(objects, parent, doNotRefreshStylesFlag) {
+    /**
+     * 
+     * @param {Array|ModulesObjectsBaseModel} objects - array of objects or single object model
+     * @param {Object} parent - parent object
+     * @param {boolean} doNotRefreshStylesFlag - create without refresh styles
+     * @param {boolean} _system - system create, do not use this in your code
+     * @returns 
+     */
+    create(objects, parent, doNotRefreshStylesFlag, _system = false) {
         let result;
 
         if (Array.isArray(objects)) {
             result = [];
 
             for (const object of objects) {
-                result.push(this._createSingleObject(object, parent, doNotRefreshStylesFlag));
+                result.push(this._createSingleObject(object, parent, doNotRefreshStylesFlag, _system));
             }
         } else
-            result = this._createSingleObject(objects, parent, doNotRefreshStylesFlag);
+            result = this._createSingleObject(objects, parent, doNotRefreshStylesFlag, _system);
 
         if (!doNotRefreshStylesFlag)
             this.refreshStyles(parent);
@@ -29,9 +37,9 @@ class ModulesObjectsController {
         return result;
     }
 
-    _createSingleObject(object, parent, doNotRefreshStylesFlag) {
+    _createSingleObject(object, parent, doNotRefreshStylesFlag, _system) {
         //parse template for assets and objects (groups, components)  Urso.types.objects.COMPONENT  Urso.types.objects.GROUP
-        if (!object._parsed) { //todo only for objects, contains components && groups in future
+        if (!object._parsed && !_system) { //todo only for objects, contains components && groups in future
             return Urso.scenes.addObject(object, parent, doNotRefreshStylesFlag);
         }
 

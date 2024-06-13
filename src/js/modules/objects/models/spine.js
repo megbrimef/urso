@@ -242,6 +242,15 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
     }
 
     /**
+     * returns IK constraint
+     * @param {string} name 
+     * @returns {Bone}
+     */
+    findIkConstraint(name) {
+        return this._baseObject.skeleton.findIkConstraint(name)
+    }
+
+    /**
      * returns animation from spineData by it's name
      * @param {string} name 
      * @returns {Animation}
@@ -293,6 +302,11 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
     }
 
     _addToSlot(slotName, object, replaceSlotContents) {
+        if (!object?._baseObject) {
+            Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: invalid object ' + object);
+            return;
+        }
+
         const spine = this._baseObject;
         const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
         const currentSlot = spine.slotContainers[slotIndex];

@@ -21,7 +21,7 @@ class ComponentsFullscreenIos {
     this._div.appendChild(infoDiv);
 
     const image = document.createElement('img');
-    image.src = '/assets/images/fullscreen/scroll.png';
+    image.src = `${Urso.config.gamePath}assets/images/fullscreen/scroll.png`;
     const span = document.createElement('span');
     span.innerText = 'Swipe up to enter fullscreen';
 
