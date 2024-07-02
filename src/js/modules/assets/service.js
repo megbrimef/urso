@@ -85,6 +85,25 @@ class ModulesAssetsService {
         this._loadGroupAtlases(assetsSpace, group, () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback) });
     }
 
+    preloadAllImagesInGPU() {
+        const world = Urso.findOne('^WORLD')._baseObject;
+
+        Urso.cache.globalAtlas.pages.forEach(({ baseTexture }) => {
+            const texture = new PIXI.Texture(baseTexture);
+            const sprite = new PIXI.Sprite(texture);
+
+            sprite.x = -10000;
+            sprite.y = -10000;
+
+            world.addChild(sprite);
+
+            setTimeout(() => {
+                world.removeChild(sprite);
+                sprite.destroy()
+            }, 1);
+        });
+    }
+
     /**
      * create new assets space for loading
      * @returns {Object}
@@ -173,6 +192,7 @@ class ModulesAssetsService {
      */
     _processLoadedAtlases(assetsSpace, group) {
         const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+        const { addFolderPathInAtlasTextureKey } = this.getInstance('Config');
 
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
@@ -183,7 +203,7 @@ class ModulesAssetsService {
                 let texture = imageData.textures[name];
                 let newFilename = name;
 
-                if (!name.includes('/'))
+                if (addFolderPathInAtlasTextureKey && !name.includes('/'))
                     newFilename = folderPath + '/' + name;
 
                 Urso.cache.addFile(newFilename, texture);

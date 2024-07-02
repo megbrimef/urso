@@ -3,6 +3,7 @@ class ModulesAssetsConfig {
         this.singleton = true;
 
         this.defaultQualityFactor = 1;
+        this.addFolderPathInAtlasTextureKey = true; //or false for simple textures names
 
         /**
          * quality settings for resource loading selection
@@ -10,7 +11,7 @@ class ModulesAssetsConfig {
         this.qualityFactors = {
             medium: 0.5,
             hd: 0.75,
-            high: 1 
+            high: 1
         };
 
 
