@@ -62,7 +62,12 @@ class ModulesObjectsService {
         return this._world;
     }
 
-    add(object, parent) {
+    add(object, parent, _ignorePool = false) {
+        const { objectsToCache } = this.getInstance('Config');
+
+        if (!_ignorePool && objectsToCache.includes(object.type))
+            return this.getInstance('Pool').getElement(object, parent);
+
         const world = this._checkWorld();
 
         if (!parent)
@@ -94,7 +99,7 @@ class ModulesObjectsService {
                 break;
             case Urso.types.objects.EMITTERFX:
                 model = this.getInstance('Models.EmitterFx', object);
-                break;  
+                break;
             case Urso.types.objects.HITAREA:
                 model = this.getInstance('Models.HitArea', object);
                 break;
@@ -181,6 +186,11 @@ class ModulesObjectsService {
     }
 
     destroy(object, doNotRefreshStylesFlag) {
+        const { objectsToCache } = this.getInstance('Config');
+
+        if (objectsToCache.includes(object.type))
+            return this.getInstance('Pool').putElement(object, doNotRefreshStylesFlag);
+
         if (object.parent)
             this.removeChild(object.parent, object, true);
 
@@ -191,7 +201,7 @@ class ModulesObjectsService {
                 this.destroy(object.contents[0], true);
 
         object._customDestroy();
-        object._baseObject && object._baseObject.destroy({children: true});
+        object._baseObject && object._baseObject.destroy({ children: true });
         this._removeFromCache(object);
         this.getInstance('Styles').removeFromCache(object);
 

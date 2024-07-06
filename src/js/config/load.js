@@ -100,8 +100,10 @@ window.Urso = {
             Objects: {
                 BaseModel: require('../modules/objects/baseModel'),
                 Cache: require('../modules/objects/cache'),
+                Config: require('../modules/objects/config'),
                 Controller: require('../modules/objects/controller'),
                 Find: require('../modules/objects/find'),
+                Pool: require('../modules/objects/pool'),
                 PropertyAdapter: require('../modules/objects/propertyAdapter'),
                 Proxy: require('../modules/objects/proxy'),
                 Selector: require('../modules/objects/selector'),
