@@ -1,15 +1,16 @@
 class LibCache {
     constructor() {
         this.assetsList = {
-            image: {},
             atlas: {},
-            json: {},
             binary: {},
-            spine: {},
             bitmapFont: {},
+            file: {},
+            image: {},
+            json: {},
+            jsonAtlas: {},
             sound: {},
-            texture: {},
-            file: {}
+            spine: {},
+            texture: {}
         };
 
         this.globalAtlas = new PIXI.spine.TextureAtlas();
@@ -48,6 +49,10 @@ class LibCache {
 
     addJson(key, someData) {
         this._setDataToAssetsList('json', key, someData);
+    };
+
+    addJsonAtlas(key, someData) {
+        this._setDataToAssetsList('jsonAtlas', key, someData);
     };
 
     addSound(key, someData) {
@@ -89,6 +94,14 @@ class LibCache {
 
     getJson(key) {
         return this.assetsList.json[key];
+    };
+
+    getJsonAtlas(key) {
+        return this.assetsList.jsonAtlas[key];
+    };
+
+    getJsonAtlases() {
+        return this.assetsList.jsonAtlas;
     };
 
     getSound(key) {

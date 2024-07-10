@@ -75,6 +75,9 @@ class LibLoader {
             case Urso.types.assets.JSON:
                 Urso.cache.addJson(asset.key, resource);
                 break;
+            case Urso.types.assets.JSONATLAS:
+                Urso.cache.addJsonAtlas(asset.key, resource);
+                break;
             case Urso.types.assets.SOUND:
                 Urso.cache.addSound(asset.key, resource);
                 break;
@@ -120,11 +123,28 @@ class LibLoader {
 
             let params = asset.params || false; // TODO: Set params field in base mode
 
-            if (asset.type === Urso.types.assets.SPINE && asset.noAtlas) {
+            if (asset.type === Urso.types.assets.JSON) { // check json in JSONATLAS
+                const jsonData = this._getJsonDataFromJsonAtlases(asset.key);
+
+                if (jsonData) {
+                    Urso.cache.addJson(asset.key, { data: jsonData });
+                    return;
+                }
+            }
+
+            if (asset.type === Urso.types.assets.SPINE && asset.noAtlas) { // check SPINE in JSONATLAS
                 if (!params)
                     params = {};
 
                 params.metadata = { spineAtlas: Urso.cache.getGlobalAtlas() };
+
+                //check for json in JSONATLAS
+                const jsonData = this._getJsonDataFromJsonAtlases(asset.key);
+
+                if (jsonData) {
+                    this._loadSpineFromExistingResourses(asset, jsonData, params);
+                    return;
+                }
             }
 
             const loadPath = this._getLoadPath(asset);
@@ -145,6 +165,27 @@ class LibLoader {
             callback();
         }.bind(this));
     };
+
+    _getJsonDataFromJsonAtlases(key) {
+        const jsonAtlases = Urso.cache.getJsonAtlases();
+
+        for (let jsonAtlasKey in jsonAtlases) {
+            if (jsonAtlases[jsonAtlasKey].data.hasOwnProperty(key)) {
+                return jsonAtlases[jsonAtlasKey].data[key];
+            }
+        }
+
+        return null;
+    }
+
+    _loadSpineFromExistingResourses(asset, jsonData, params) {
+        //params.metadata.spineAtlas
+
+        const spineAtlasLoader = new PIXI.spine.AtlasAttachmentLoader(params.metadata.spineAtlas);
+        const spineJsonParser = new PIXI.spine.SkeletonJson(spineAtlasLoader);
+        const spineData = spineJsonParser.readSkeletonData(jsonData);
+        Urso.cache.addSpine(asset.key, {spineData});
+    }
 
     _onError(error) {
         Urso.logger.warn('LibLoader file load error: ', error);

@@ -121,7 +121,7 @@ class ModulesAssetsService {
      * @param {Function} callback
      */
     _loadGroupAtlases(assetsSpace, group, callback) {
-        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS || assetModel.type === Urso.types.assets.JSONATLAS);
 
         if (!atlases.length)
             return callback();
@@ -365,6 +365,9 @@ class ModulesAssetsService {
                 break;
             case Urso.types.assets.JSON:
                 model = this.getInstance('Models.Json', asset)
+                break;
+            case Urso.types.assets.JSONATLAS:
+                model = this.getInstance('Models.JsonAtlas', asset)
                 break;
             case Urso.types.assets.SOUND:
                 model = this.getInstance('Models.Sound', asset)

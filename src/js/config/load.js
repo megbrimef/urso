@@ -78,6 +78,7 @@ window.Urso = {
                     Html: require('../modules/assets/models/html'),
                     Image: require('../modules/assets/models/image'),
                     Json: require('../modules/assets/models/json'),
+                    JsonAtlas: require('../modules/assets/models/jsonAtlas'),
                     Sound: require('../modules/assets/models/sound'),
                     Spine: require('../modules/assets/models/spine')
                 }
