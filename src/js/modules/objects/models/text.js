@@ -37,6 +37,10 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
         this.textAlign = Urso.helper.recursiveGet('textAlign', params, 'left');
     }
 
+    updateSize() {
+        Urso.objects.checkObjectMaxSize(this);
+    }
+
     _addBaseObject() {
         if (this.localeId)
             this._originalModel.text = this.text = Urso.i18n.get(this.localeId, this.localeVariables);
@@ -51,6 +55,7 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
 
     _newLocaleHandler() {
         this.text = this._baseObject.text = Urso.i18n.get(this.localeId, this.localeVariables);
+        this.updateSize();
     }
 
     _subscribeOnce() {

@@ -69,8 +69,21 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
         this._isActive = false;
     }
 
+    update() {
+        if (this._emitter) {
+            this._bundle.update(1);
+        }
+    }
+    
     _addBaseObject() {
-        this._baseObject = new PIXI.Container();
+        this._baseObject = new PIXI.ParticleContainer();
+        this._baseObject.setProperties({
+            scale: true,
+            position: true,
+            rotation: true,
+            uvs: true,
+            alpha: true,
+        });
     };
 
     _createBundle() {

@@ -45,6 +45,11 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
         this.pixelPerfectOver = Urso.helper.recursiveGet('pixelPerfectOver', params, true);
         this.pixelPerfectClick = Urso.helper.recursiveGet('pixelPerfectClick', params, true);
+        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
+    }
+
+    _checkIsDesktop() {
+        return Urso.device.desktop && !Urso.isIpadOS();
     }
 
     setButtonFrame(key, assetKey) {

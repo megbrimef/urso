@@ -81,6 +81,9 @@ class SoundManagerController {
     _visibilityChange(state) {
         this._systemVolume = ~~(state === 'visible');
         this._updateSoundVolume();
+        
+        for (const key in this._sounds)
+            this._sounds[key].playDummy();
     }
 
     _updateSoundVolume() {

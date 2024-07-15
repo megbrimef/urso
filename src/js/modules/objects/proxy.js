@@ -93,7 +93,7 @@ class ModulesObjectsProxy {
             target._baseObject.updateText(true);
         }
 
-        this._checkMaxSize(target);
+        this.checkMaxSize(target);
 
         //setup dirty to recalc params
         if (typeof target._baseObject.dirty !== 'undefined')
@@ -102,7 +102,7 @@ class ModulesObjectsProxy {
         return true;
     };
 
-    _checkMaxSize(target) {
+    checkMaxSize(target) {
         if (!target.maxWidth && !target.maxHeight)
             return;
 
@@ -110,6 +110,8 @@ class ModulesObjectsProxy {
 
         const baseObject = target._baseObject;
 
+        baseObject.updateTransform();
+        
         //Pixi texts have _texture.orig.width. When we call baseObject.width, Pixi runs update text. Its too slow operation.
         if (baseObject._texture && (!baseObject._texture.orig.width || !baseObject._texture.orig.height)) {
             baseObject.updateText(true);

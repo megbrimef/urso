@@ -192,19 +192,14 @@ class ModulesAssetsService {
      */
     _processLoadedAtlases(assetsSpace, group) {
         const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
-        const { addFolderPathInAtlasTextureKey } = this.getInstance('Config');
 
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
             let imageData = Urso.cache.getAtlas(assetKey);
-            const folderPath = imageData.url.split('/').slice(0, -1).join('/');
 
             for (const name of Object.keys(imageData.spritesheet._frames)) {
                 let texture = imageData.textures[name];
                 let newFilename = name;
-
-                if (addFolderPathInAtlasTextureKey && !name.includes('/'))
-                    newFilename = folderPath + '/' + name;
 
                 Urso.cache.addFile(newFilename, texture);
 
@@ -215,7 +210,7 @@ class ModulesAssetsService {
             }
         }
     }
-
+    
     /**
      * process loaded assets
      * @param {Object} assetsSpace
