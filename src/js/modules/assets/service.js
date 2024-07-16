@@ -215,7 +215,7 @@ class ModulesAssetsService {
             }
         }
     }
-    
+
     /**
      * process loaded assets
      * @param {Object} assetsSpace

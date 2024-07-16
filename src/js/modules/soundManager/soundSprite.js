@@ -1,3 +1,4 @@
+const DUMMY_SOUND_DELAY = 500; // ms
 class SoundSprite {
     constructor({ name, sprite, audiosprite }) {
         this._player = null;
@@ -257,7 +258,6 @@ class SoundSprite {
     };
 
     playDummy() {
-
         if (this._timeout) {
             clearTimeout(this._timeout);
             this._timeout = null;
@@ -279,7 +279,7 @@ class SoundSprite {
             });
 
             this._dummy.play();
-        }, 500);
+        }, DUMMY_SOUND_DELAY);
     }
 };
 
