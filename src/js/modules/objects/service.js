@@ -194,6 +194,8 @@ class ModulesObjectsService {
         if (object.parent)
             this.removeChild(object.parent, object, true);
 
+        object.proxyObject = null;
+        
         //children
         if (object.contents)
             //for (const child of object.contents)

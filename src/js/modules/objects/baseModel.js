@@ -5,6 +5,7 @@ class ModulesObjectsBaseModel {
         this.setupParams(params);
 
         this.parent = false;
+        this.proxyObject = null;
         this.destroyed = false;
 
         //system

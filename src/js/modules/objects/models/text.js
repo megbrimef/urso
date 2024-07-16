@@ -50,7 +50,15 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
     };
 
     _newLocaleHandler() {
-        this.text = this._baseObject.text = Urso.i18n.get(this.localeId, this.localeVariables);
+        if(!this.proxyObject)
+            return;
+
+        this.proxyObject.text = Urso.i18n.get(this.localeId, this.localeVariables);
+    }
+
+    _customDestroy() {
+        if (this.localeId)
+            this.removeListener(Urso.events.MODULES_I18N_NEW_LOCALE_WAS_SET, this._newLocaleHandler.bind(this));
     }
 
     _subscribeOnce() {
