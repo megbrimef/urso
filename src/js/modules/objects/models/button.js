@@ -34,7 +34,7 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
-        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, Urso.device.desktop ? true : false);
+        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
 
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
@@ -45,7 +45,6 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
         this.pixelPerfectOver = Urso.helper.recursiveGet('pixelPerfectOver', params, true);
         this.pixelPerfectClick = Urso.helper.recursiveGet('pixelPerfectClick', params, true);
-        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
     }
 
     _checkIsDesktop() {

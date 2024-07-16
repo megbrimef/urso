@@ -71,7 +71,7 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
 
     update() {
         if (this._emitter) {
-            this._bundle.update(1);
+            this._bundle.update();
         }
     }
     

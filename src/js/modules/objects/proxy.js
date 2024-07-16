@@ -25,7 +25,8 @@ class ModulesObjectsProxy {
                 return rv;
             }
         });
-
+        
+        model.proxyObject = proxy;
         return proxy;
     }
 

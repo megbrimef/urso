@@ -37,10 +37,6 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
         this.textAlign = Urso.helper.recursiveGet('textAlign', params, 'left');
     }
 
-    updateSize() {
-        Urso.objects.checkObjectMaxSize(this);
-    }
-
     _addBaseObject() {
         if (this.localeId)
             this._originalModel.text = this.text = Urso.i18n.get(this.localeId, this.localeVariables);
@@ -54,8 +50,15 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
     };
 
     _newLocaleHandler() {
-        this.text = this._baseObject.text = Urso.i18n.get(this.localeId, this.localeVariables);
-        this.updateSize();
+        if(!this.proxyObject)
+            return;
+
+        this.proxyObject.text = Urso.i18n.get(this.localeId, this.localeVariables);
+    }
+
+    _customDestroy() {
+        if (this.localeId)
+            this.removeListener(Urso.events.MODULES_I18N_NEW_LOCALE_WAS_SET, this._newLocaleHandler.bind(this));
     }
 
     _subscribeOnce() {
