@@ -129,10 +129,6 @@ class ModulesObjectsController {
         this.getInstance('Service').applyClassesToWorld();
     }
 
-    checkObjectMaxSize(target) {
-        this.getInstance('Proxy').checkMaxSize(target);
-    }
-
     _subscribeOnce() {
         this.addListener(Urso.events.MODULES_SCENES_NEW_RESOLUTION, this._newResolutionHandler, true);
         this.addListener(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, this._resetWorld, true);
