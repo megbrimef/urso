@@ -94,7 +94,7 @@ class ModulesObjectsProxy {
             target._baseObject.updateText(true);
         }
 
-        this.checkMaxSize(target);
+        this._checkMaxSize(target);
 
         //setup dirty to recalc params
         if (typeof target._baseObject.dirty !== 'undefined')
@@ -103,7 +103,7 @@ class ModulesObjectsProxy {
         return true;
     };
 
-    checkMaxSize(target) {
+    _checkMaxSize(target) {
         if (!target.maxWidth && !target.maxHeight)
             return;
 
