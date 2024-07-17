@@ -448,6 +448,15 @@ class LibHelper {
     }
 
     /**
+     * check for Ipad OS
+     */
+    isIpadOS = () => {
+        return navigator.maxTouchPoints &&
+            navigator.maxTouchPoints > 2 &&
+            /MacIntel/.test(navigator.platform);
+    }
+
+    /**
      * make objects property reactive
      * @param {Object} targetObject 
      * @param {String} key 

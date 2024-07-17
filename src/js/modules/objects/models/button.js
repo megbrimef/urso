@@ -48,7 +48,7 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
     }
 
     _checkIsDesktop() {
-        return Urso.device.desktop && !Urso.isIpadOS();
+        return Urso.device.desktop && !Urso.helper.isIpadOS();
     }
 
     setButtonFrame(key, assetKey) {
