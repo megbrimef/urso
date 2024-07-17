@@ -444,7 +444,7 @@ class LibHelper {
                 check = true;
         })(navigator.userAgent || navigator.vendor || window.opera);
 
-        return check;
+        return check || Urso.helper.isIpadOS();
     }
 
     /**
