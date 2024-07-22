@@ -29,13 +29,14 @@ class ModulesScenesPixiWrapper {
         this._lastTimeCheckFPS = 0;
     }
 
-    init() {
+    async init() {
         this._setPixiSettings();
 
         //define renderer
-        PIXI.utils.skipHello();
-        this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
-        document.body.appendChild(this._renderer.view);
+        //PIXI.utils.skipHello();
+        this._renderer = await PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
+        const parent = document.querySelector(Urso.config.gameContainerSelector) || document.body;
+        parent.appendChild(this._renderer.view.canvas);
 
         //root and world
         this._root = new PIXI.Container();
@@ -187,11 +188,11 @@ class ModulesScenesPixiWrapper {
     }
 
     _setPixiSettings() {
-        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+        /*PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         PIXI.settings.TEXT_RESOLUTION = 1;
 
         if (Urso.device.iOS || Urso.device.macOS)
-            PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH;
+            PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH;*/
     }
 
     _createWorld() {

@@ -156,7 +156,7 @@ PIXI.Container.prototype.renderAdvanced = function (renderer) {
 }
 
 //MeshMaterial for spine with initial(setup) sequence fix
-Object.defineProperty(PIXI.MeshMaterial.prototype, "texture", {
+/*Object.defineProperty(PIXI.MeshMaterial.prototype, "texture", {
     get: function () {
         return this.uniforms.uSampler
     },
@@ -168,4 +168,4 @@ Object.defineProperty(PIXI.MeshMaterial.prototype, "texture", {
     },
     enumerable: !1,
     configurable: !0
-});
+});*/

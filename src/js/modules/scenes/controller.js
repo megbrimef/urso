@@ -9,8 +9,9 @@ class ModulesScenesController {
     /**
      * init scenes mahager
      */
-    init() {
+    async init() {
         this._service = this.getInstance('Service');
+        await this._service.init();
     }
 
     /**

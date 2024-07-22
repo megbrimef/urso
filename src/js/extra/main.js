@@ -5,6 +5,7 @@ window.PIXI.particles = require('pixi-particles');
 window.PIXI.particlesFx = require('@urso/revolt-fx');
 
 import { DropShadowFilter } from '@pixi/filter-drop-shadow';
+if (!PIXI.filtes) PIXI.filters = {}; //legacy
 PIXI.filters['DropShadowFilter'] = DropShadowFilter;
 
 
@@ -14,7 +15,7 @@ import { AtlasAttachmentLoader, SkeletonJson } from "@pixi-spine/runtime-3.8";
 window.PIXI.spine.AtlasAttachmentLoader = AtlasAttachmentLoader;
 window.PIXI.spine.SkeletonJson = SkeletonJson;
 
-require("pixi-projection");
+//require("pixi-projection");
 require("pixi-text-input");
 
 import { gsap } from 'gsap';

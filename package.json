@@ -32,7 +32,7 @@
     "pixi-spine": "^3.1.2",
     "pixi-text-input": "^1.0.6",
     "pixi-viewport": "^4.34.0",
-    "pixi.js": "^6.2.0"
+    "pixi.js": "^8.2.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

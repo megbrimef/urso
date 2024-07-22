@@ -9,7 +9,7 @@ class App {
     /**
      * global init
      */
-    setup() {
+    async setup() {
         this.sayHello();
 
         //helper must be first
@@ -54,6 +54,7 @@ class App {
         Urso.logic = Urso.getInstance('Modules.Logic.Controller');
         Urso.objects = Urso.getInstance('Modules.Objects.Controller');
         Urso.scenes = Urso.getInstance('Modules.Scenes.Controller');
+        await Urso.scenes.init();
         Urso.soundManager = Urso.getInstance('Modules.SoundManager.Controller');
         Urso.statesManager = Urso.getInstance('Modules.StatesManager.Controller');
         Urso.template = Urso.getInstance('Modules.Template.Controller');
