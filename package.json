@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.7.89",
+  "version": "0.7.90",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",
@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/megbrimef/urso#readme",
   "dependencies": {
-    "@pixi/filter-drop-shadow": "^3.2.0",
     "@urso/revolt-fx": "^0.1.0",
     "gsap": "^3.1.1",
     "howler": "^2.2.1",
@@ -30,7 +29,6 @@
     "pixi-projection": "0.3.15",
     "pixi-scrollbox": "^2.3.1",
     "pixi-spine": "^3.1.2",
-    "pixi-text-input": "^1.0.6",
     "pixi-viewport": "^4.34.0",
     "pixi.js": "^6.2.0"
   },
@@ -45,8 +43,8 @@
     "source-map-loader": "^1.0.0",
     "string-replace-loader": "^3.0.3",
     "style-loader": "^0.23.1",
-    "webpack": "^5.11.0",
-    "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4"
   }
 }
