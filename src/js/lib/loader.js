@@ -125,7 +125,7 @@ class LibLoader {
 
             if (asset.type === Urso.types.assets.JSON || asset.type === Urso.types.assets.ATLAS) { // check json in JSONATLAS
                 const jsonData = this._getJsonDataFromJsonAtlases(asset.key);
-alert(123)
+
                 if (jsonData) {
                     switch (asset.type) {
                         case Urso.types.assets.JSON:
