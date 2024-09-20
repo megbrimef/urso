@@ -323,9 +323,9 @@ class PropertyAdapter {
             case 'left':
                 return 0;
             case 'right':
-                return object.parent ? this._getWidthAsNumber(object.parent) : 0; //parentWidth
+                return object.parent ? this._getWidthAsNumber(object.parent) - this._getWidthAsNumber(object) : 0; //parentWidth-objectWidth
             case 'center':
-                const parentWidth = object.parent ? this._getWidthAsNumber(object.parent) : 0;
+                const parentWidth = object.parent ? this._getWidthAsNumber(object.parent) - this._getWidthAsNumber(object) : 0;
                 return parentWidth / 2;
             default:
                 Urso.logger.error('AlignX string is not valid!');
@@ -347,9 +347,9 @@ class PropertyAdapter {
             case 'top':
                 return 0;
             case 'bottom':
-                return object.parent ? this._getHeightAsNumber(object.parent) : 0; //parentHeight
+                return object.parent ? this._getHeightAsNumber(object.parent) - this._getHeightAsNumber(object) : 0; //parentHeight
             case 'center':
-                const parentHeight = object.parent ? this._getHeightAsNumber(object.parent) : 0;
+                const parentHeight = object.parent ? this._getHeightAsNumber(object.parent) - this._getHeightAsNumber(object) : 0;
                 return parentHeight / 2;
             default:
                 Urso.logger.error('AlignY string is not valid!');
@@ -458,7 +458,10 @@ class PropertyAdapter {
                 return this._getRoundedPercentageOfNumber(object[propertyName], parentValue);
 
             case 'boolean':
-                return this._getPropertyAsNumber(object.parent, propertyName, parentPropertyName)
+                if (this._canBeParent(object))
+                    return this._getPropertyAsNumber(object.parent, propertyName, parentPropertyName);
+                else
+                    return object._baseObject[propertyName];
 
             default:
                 Urso.logger.error('Property value not number or string!', object, propertyName);
