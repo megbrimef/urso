@@ -20,6 +20,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.action = Urso.helper.recursiveGet(
             'action', params, (position) => { this.emit(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, { position, name: this.name, class: this.class }) }
         );
+        this.disableRightClick = Urso.helper.recursiveGet('disableRightClick', params, false);
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
@@ -73,6 +74,9 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         if (this._isDisabled)
             return false;
 
+        if (this.disableRightClick && event.data.button !== 0)
+            return;
+
         if (this.keyDownAction) {
             const position = this._getEventLocalPosition(event);
             this.keyDownAction(position);
@@ -82,6 +86,9 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
     _onPressUp(event) {
         if (this._isDisabled)
             return false;
+
+        if (this.disableRightClick && event.data.button !== 0)
+            return;
 
         if (this.action) {
             const position = this._getEventLocalPosition(event);

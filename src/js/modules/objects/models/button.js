@@ -31,6 +31,7 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         super.setupParams(params);
 
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_BUTTON_PRESS, { name: this.name, class: this.class }) });
+        this.disableRightClick = Urso.helper.recursiveGet('disableRightClick', params, false);
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
@@ -110,9 +111,12 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
     };
 
-    _onButtonDown() {
+    _onButtonDown(event) {
         if (this._isDisabled)
             return false;
+
+        if (this.disableRightClick && event.data.button !== 0)
+            return;
 
         this._isDown = true;
 
@@ -125,9 +129,12 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this._changeTexture('pressed');
     }
 
-    _onButtonUp() {
+    _onButtonUp(event) {
         if (this._isDisabled || !this._isDown)
             return false;
+
+        if (this.disableRightClick && event.data.button !== 0)
+            return;
 
         this._isDown = false;
 
