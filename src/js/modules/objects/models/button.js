@@ -36,6 +36,7 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
         this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
+        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
 
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
@@ -105,9 +106,12 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this._baseObject
             .on('pointerdown', this._onButtonDown.bind(this))
             .on('pointerup', this._onButtonUp.bind(this))
-            .on('pointerupoutside', this._onButtonUp.bind(this))
             .on('pointerover', this._onButtonOver.bind(this))
             .on('pointerout', this._onButtonOut.bind(this));
+
+        if (this.handlePointerupoutside) {
+            this._baseObject.on('pointerupoutside', this._onButtonUp.bind(this))
+        }
 
     };
 

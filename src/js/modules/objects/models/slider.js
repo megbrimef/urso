@@ -36,6 +36,7 @@ class ModulesObjectsModelsSlider extends ModulesObjectsBaseModel {
         this.maxValueTextModel = Urso.helper.recursiveGet('maxValueTextModel', params, false);
         this.currentValueTextModel = Urso.helper.recursiveGet('currentValueTextModel', params, false);
         this.isVertical = Urso.helper.recursiveGet('isVertical', params, false);
+        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
     }
 
     /**
@@ -145,6 +146,10 @@ class ModulesObjectsModelsSlider extends ModulesObjectsBaseModel {
             .on('pointerup', this._onPointerUp.bind(this))
             .on('pointerupoutside', this._onPointerUp.bind(this))
             .on('touchmove', this._onTouchmove.bind(this));
+
+        if (this.handlePointerupoutside) {
+            this._baseObject.on('pointerupoutside', this._onPointerUp.bind(this))
+        }
     };
 
     /**

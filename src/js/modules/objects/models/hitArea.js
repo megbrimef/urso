@@ -25,6 +25,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
+        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
     }
 
     enable() {
@@ -57,10 +58,13 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this._baseObject
             .on('pointerdown', this._onPressDown.bind(this))
             .on('pointerup', this._onPressUp.bind(this))
-            .on('pointerupoutside', this._onPressUp.bind(this))
             .on('pointerover', this._onOver.bind(this))
             .on('pointerout', this._onOut.bind(this))
             .on('touchmove', this._onTouchmove.bind(this));
+
+        if (this.handlePointerupoutside) {
+            this._baseObject.on('pointerupoutside', this._onPressUp.bind(this))
+        }
     };
 
     _onTouchmove(event) {

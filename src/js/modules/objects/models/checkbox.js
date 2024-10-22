@@ -21,13 +21,14 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
 
         this.contents = [];
 
-        this.action = Urso.helper.recursiveGet('action', params, () => { 
-            this.emit(Urso.events.MODULES_OBJECTS_CHECKBOX_PRESS, { name: this.name, status: this.status, class: this.class }) 
+        this.action = Urso.helper.recursiveGet('action', params, () => {
+            this.emit(Urso.events.MODULES_OBJECTS_CHECKBOX_PRESS, { name: this.name, status: this.status, class: this.class })
         });
 
         this.lable = Urso.helper.recursiveGet('lable', params, false);
 
         this.defaultStatus = Urso.helper.recursiveGet('defaultStatus', params, 'unpressed'); //pressed or unpressed
+        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
     }
 
     _createCheckbox() {
@@ -48,9 +49,12 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
         object._baseObject
             .on('pointerdown', this._onButtonDown.bind(this))
             .on('pointerup', this._onButtonUp.bind(this))
-            .on('pointerupoutside', this._onButtonUp.bind(this))
             .on('pointerover', this._onButtonOver.bind(this))
             .on('pointerout', this._onButtonOut.bind(this));
+
+        if (this.handlePointerupoutside) {
+            this._baseObject.on('pointerupoutside', this._onButtonUp.bind(this))
+        }
 
         return object;
     }
@@ -85,7 +89,7 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
             this._changeTexture(`${this.status}Out`); // load default texture for this key
             return false;
         }
-        
+
         if (this.buttonFrames[key].type === Urso.types.objects.GRAPHICS)
             this._drawGraphics(this.buttonFrames[key].figure);
         else
