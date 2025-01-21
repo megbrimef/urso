@@ -1,9 +1,11 @@
 const ModulesObjectsBaseModel = require('./../baseModel');
 
 class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
+
     constructor(params) {
         super(params);
         this._isDisabled = false;
+        this._isDown = false;
 
         this.type = Urso.types.objects.HITAREA;
 
@@ -24,6 +26,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
+        this.hitArea = Urso.helper.recursiveGet('hitArea', params, null); // hit area object ex: { "type": "circle", "params": [0, 0, 100] }
     }
 
     enable() {
@@ -56,11 +59,14 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this._baseObject
             .on('pointerdown', this._onPressDown.bind(this))
             .on('pointerup', this._onPressUp.bind(this))
-            .on('pointerupoutside', this._onPressUp.bind(this))
+            .on('pointerupoutside', this._onPressUpOutside.bind(this))
             .on('pointerover', this._onOver.bind(this))
             .on('pointerout', this._onOut.bind(this))
             .on('touchmove', this._onTouchmove.bind(this));
-    };
+
+        if (this.hitArea)
+            this._baseObject.hitArea = this._getHitAreaObject(this.hitArea);
+    }
 
     _onTouchmove(event) {
         const position = this._getEventLocalPosition(event);
@@ -73,6 +79,11 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         if (this._isDisabled)
             return false;
 
+        if (this._isDown)
+            return false;
+
+        this._isDown = true;
+
         if (this.keyDownAction) {
             const position = this._getEventLocalPosition(event);
             this.keyDownAction(position);
@@ -83,10 +94,22 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         if (this._isDisabled)
             return false;
 
+        if (!this._isDown)
+            return false;
+
+        this._isDown = false;
+
         if (this.action) {
             const position = this._getEventLocalPosition(event);
             this.action(position);
         }
+    }
+
+    _onPressUpOutside() {
+        if (this._isDisabled)
+            return false;
+
+        this._isDown = false;
     }
 
     _onOver() {
@@ -113,6 +136,24 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         const y = event.data.global.y / worldScale.y;
 
         return { x, y };
+    }
+
+    _getHitAreaObject({ type, params }) {
+        if (!type) {
+            return null;
+        }
+
+        const objects = {
+            'rectangle': PIXI.Rectangle,
+            'circle': PIXI.Circle,
+            'polygon': PIXI.Polygon
+        }
+
+        if (!objects[type]) {
+            return null;
+        }
+
+        return new objects[type](...params);
     }
 }
 
