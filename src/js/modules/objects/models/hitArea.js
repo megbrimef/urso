@@ -26,7 +26,17 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
-        this.customInteractionArea = Urso.helper.recursiveGet('customInteractionArea', params, null); // hit area object ex: { "type": "circle", "params": [0, 0, 100] }
+
+        /**
+         * customInteractionArea object ex:
+         * Circle: { "type": "circle", "params": [0, 0, 100] }
+         * Rectangle: { "type": "rectangle", "params": [0, 0, 100, 100] }
+         * Polygon: {
+         *   "type": "polygon",
+         *   "params":  [ 0, 0, 100, 0, 100, 100, 50, 150, 0, 100 ];
+         * }
+         * */
+        this.customInteractionArea = Urso.helper.recursiveGet('customInteractionArea', params, null);
     }
 
     enable() {
