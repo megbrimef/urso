@@ -26,7 +26,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
         this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
-        this.hitArea = Urso.helper.recursiveGet('hitArea', params, null); // hit area object ex: { "type": "circle", "params": [0, 0, 100] }
+        this.customInteractionArea = Urso.helper.recursiveGet('customInteractionArea', params, null); // hit area object ex: { "type": "circle", "params": [0, 0, 100] }
     }
 
     enable() {
@@ -64,8 +64,8 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
             .on('pointerout', this._onOut.bind(this))
             .on('touchmove', this._onTouchmove.bind(this));
 
-        if (this.hitArea)
-            this._baseObject.hitArea = this._getHitAreaObject(this.hitArea);
+        if (this.customInteractionArea)
+            this._baseObject.hitArea = this._getHitAreaObject(this.customInteractionArea);
     }
 
     _onTouchmove(event) {
