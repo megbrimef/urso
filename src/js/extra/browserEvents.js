@@ -4,6 +4,7 @@ class ExtraBrowserEvents {
 
         this.RESIZE_DELAY = 250; //delay for resize event (browser will refresh his own params)
 
+        this._keyPressHandler = this._keyPressHandler.bind(this);
         this.resizeHandler = this.resizeHandler.bind(this);
         this.visibilitychangeHandler = this.visibilitychangeHandler.bind(this);
         this._pointerEventsHandler = this._pointerEventsHandler.bind(this);
@@ -14,6 +15,7 @@ class ExtraBrowserEvents {
     }
 
     init() {
+        window.addEventListener('keydown', this._keyPressHandler);
         document.addEventListener("visibilitychange", this.visibilitychangeHandler);
 
         window.addEventListener('resize', this.resizeHandler);
@@ -45,6 +47,10 @@ class ExtraBrowserEvents {
 
     _pointerEventsHandler(event) {
         this.emit(Urso.events.EXTRA_BROWSEREVENTS_POINTER_EVENT, event);
+    }
+
+    _keyPressHandler(event) {
+        this.emit(Urso.events.EXTRA_BROWSEREVENTS_KEYPRESS_EVENT, event);
     }
 }
 

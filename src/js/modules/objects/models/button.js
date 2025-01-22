@@ -31,10 +31,12 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         super.setupParams(params);
 
         this.action = Urso.helper.recursiveGet('action', params, () => { this.emit(Urso.events.MODULES_OBJECTS_BUTTON_PRESS, { name: this.name, class: this.class }) });
+        this.disableRightClick = Urso.helper.recursiveGet('disableRightClick', params, false);
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
-        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, Urso.device.desktop ? true : false);
+        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
+        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
 
         this.buttonFrames = {
             over: Urso.helper.recursiveGet('buttonFrames.over', params, false),
@@ -45,6 +47,10 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
         this.pixelPerfectOver = Urso.helper.recursiveGet('pixelPerfectOver', params, true);
         this.pixelPerfectClick = Urso.helper.recursiveGet('pixelPerfectClick', params, true);
+    }
+
+    _checkIsDesktop() {
+        return Urso.device.desktop && !Urso.helper.isIpadOS();
     }
 
     setButtonFrame(key, assetKey) {
@@ -100,15 +106,21 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this._baseObject
             .on('pointerdown', this._onButtonDown.bind(this))
             .on('pointerup', this._onButtonUp.bind(this))
-            .on('pointerupoutside', this._onButtonUp.bind(this))
             .on('pointerover', this._onButtonOver.bind(this))
             .on('pointerout', this._onButtonOut.bind(this));
 
+        if (this.handlePointerupoutside) {
+            this._baseObject.on('pointerupoutside', this._onButtonUp.bind(this))
+        }
+
     };
 
-    _onButtonDown() {
+    _onButtonDown(event) {
         if (this._isDisabled)
             return false;
+
+        if (this.disableRightClick && event.data.button !== 0)
+            return;
 
         this._isDown = true;
 
@@ -121,9 +133,12 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this._changeTexture('pressed');
     }
 
-    _onButtonUp() {
+    _onButtonUp(event) {
         if (this._isDisabled || !this._isDown)
             return false;
+
+        if (this.disableRightClick && event.data.button !== 0)
+            return;
 
         this._isDown = false;
 

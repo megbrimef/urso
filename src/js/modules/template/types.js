@@ -9,8 +9,9 @@ class ModulesTemplateTypes {
                 FONT: 5,
                 IMAGE: 6,
                 JSON: 7,
-                SOUND: 8,
-                SPINE: 9,
+                JSONATLAS: 8,
+                SOUND: 9,
+                SPINE: 10,
                 HTML: 100
             },
 

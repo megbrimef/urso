@@ -444,7 +444,16 @@ class LibHelper {
                 check = true;
         })(navigator.userAgent || navigator.vendor || window.opera);
 
-        return check;
+        return check || Urso.helper.isIpadOS();
+    }
+
+    /**
+     * check for Ipad OS
+     */
+    isIpadOS = () => {
+        return navigator.maxTouchPoints &&
+            navigator.maxTouchPoints > 2 &&
+            /MacIntel/.test(navigator.platform);
     }
 
     /**

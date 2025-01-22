@@ -78,6 +78,7 @@ window.Urso = {
                     Html: require('../modules/assets/models/html'),
                     Image: require('../modules/assets/models/image'),
                     Json: require('../modules/assets/models/json'),
+                    JsonAtlas: require('../modules/assets/models/jsonAtlas'),
                     Sound: require('../modules/assets/models/sound'),
                     Spine: require('../modules/assets/models/spine')
                 }
@@ -100,8 +101,10 @@ window.Urso = {
             Objects: {
                 BaseModel: require('../modules/objects/baseModel'),
                 Cache: require('../modules/objects/cache'),
+                Config: require('../modules/objects/config'),
                 Controller: require('../modules/objects/controller'),
                 Find: require('../modules/objects/find'),
+                Pool: require('../modules/objects/pool'),
                 PropertyAdapter: require('../modules/objects/propertyAdapter'),
                 Proxy: require('../modules/objects/proxy'),
                 Selector: require('../modules/objects/selector'),

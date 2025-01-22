@@ -8,6 +8,7 @@ class ModulesObserverConfig {
         COMPONENTS_FULLSCREEN_CHANGE: 'components.fullscreen.change',
         COMPONENTS_FULLSCREEN_SWITCH: 'components.fullscreen.switch',
         COMPONENTS_LAYERS_SWITCHER_SWITCH: 'components.layersSwitcher.switch',
+        EXTRA_BROWSEREVENTS_KEYPRESS_EVENT: 'extra.browserEvents.window.keypress.event',
         EXTRA_BROWSEREVENTS_POINTER_EVENT: 'extra.browserEvents.window.pointer.event',
         EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',
         EXTRA_BROWSEREVENTS_WINDOW_RESIZE: 'extra.browserEvents.window.resize',

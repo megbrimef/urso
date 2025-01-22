@@ -82,7 +82,32 @@ class ModulesAssetsService {
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
         //we need load and parse atlases at first (!)
-        this._loadGroupAtlases(assetsSpace, group, () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback) });
+        const loadRestAssetsCallback = () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback) };
+
+        const loadAtlasesCallback = () => {
+            this._loadGroupAtlases(assetsSpace, group, loadRestAssetsCallback, Urso.types.assets.ATLAS);
+        }
+
+        this._loadGroupAtlases(assetsSpace, group, loadAtlasesCallback, Urso.types.assets.JSONATLAS);
+    }
+
+    preloadAllImagesInGPU() {
+        const world = Urso.findOne('^WORLD')._baseObject;
+
+        Urso.cache.globalAtlas.pages.forEach(({ baseTexture }) => {
+            const texture = new PIXI.Texture(baseTexture);
+            const sprite = new PIXI.Sprite(texture);
+
+            sprite.x = -10000;
+            sprite.y = -10000;
+
+            world.addChild(sprite);
+
+            setTimeout(() => {
+                world.removeChild(sprite);
+                sprite.destroy()
+            }, 1);
+        });
     }
 
     /**
@@ -101,8 +126,8 @@ class ModulesAssetsService {
      * @param {String} group
      * @param {Function} callback
      */
-    _loadGroupAtlases(assetsSpace, group, callback) {
-        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+    _loadGroupAtlases(assetsSpace, group, callback, atlasType) {
+        const atlases = assetsSpace[group].filter(assetModel => assetModel.type === atlasType);
 
         if (!atlases.length)
             return callback();
@@ -112,7 +137,12 @@ class ModulesAssetsService {
         for (let assetModel of atlases)
             this._addAssetToLoader(assetModel, loader);
 
-        loader.start(() => { this._processLoadedAtlases(assetsSpace, group); callback(); });
+        loader.start(() => {
+            if (atlasType === Urso.types.assets.ATLAS)
+                this._processLoadedAtlases(assetsSpace, group);
+
+            callback();
+        });
     }
 
     /**
@@ -128,7 +158,7 @@ class ModulesAssetsService {
         const noAtlasSpines = [];
 
         for (let assetModel of assetsSpace[group])
-            if (assetModel.type !== Urso.types.assets.ATLAS)
+            if (assetModel.type !== Urso.types.assets.ATLAS && assetModel.type !== Urso.types.assets.JSONATLAS)
                 if (!Urso.cache.getFile(assetModel.path)) {
                     //filter noAtlas Spine files
                     if (assetModel.type === Urso.types.assets.SPINE && assetModel.noAtlas) {
@@ -173,6 +203,7 @@ class ModulesAssetsService {
      */
     _processLoadedAtlases(assetsSpace, group) {
         const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
+        const { addFolderPathInAtlasTextureKey } = this.getInstance('Config');
 
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
@@ -183,7 +214,7 @@ class ModulesAssetsService {
                 let texture = imageData.textures[name];
                 let newFilename = name;
 
-                if (!name.includes('/'))
+                if (addFolderPathInAtlasTextureKey && !name.includes('/'))
                     newFilename = folderPath + '/' + name;
 
                 Urso.cache.addFile(newFilename, texture);
@@ -345,6 +376,9 @@ class ModulesAssetsService {
                 break;
             case Urso.types.assets.JSON:
                 model = this.getInstance('Models.Json', asset)
+                break;
+            case Urso.types.assets.JSONATLAS:
+                model = this.getInstance('Models.JsonAtlas', asset)
                 break;
             case Urso.types.assets.SOUND:
                 model = this.getInstance('Models.Sound', asset)

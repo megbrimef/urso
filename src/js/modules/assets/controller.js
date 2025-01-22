@@ -53,6 +53,13 @@ class ModulesAssetsController {
     checkWebPSupport() {
         this.getInstance('Service').checkWebPSupport();
     }
+
+    /**
+     * preload all images in global atlas into GPU
+     */
+    preloadAllImagesInGPU() {
+        this.getInstance('Service').preloadAllImagesInGPU();
+    }
 }
 
 module.exports = ModulesAssetsController;
