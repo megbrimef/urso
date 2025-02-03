@@ -1,7 +1,8 @@
 const DUMMY_SOUND_DELAY = 500; // ms
 class SoundSprite {
-    constructor({ name, sprite, audiosprite }) {
+    constructor({ name, sprite, audiosprite, codec }) {
         this._player = null;
+        this._codec = codec;
         this._totalVolume = 0;
         this._makePlayer(sprite, audiosprite);
 
@@ -39,11 +40,12 @@ class SoundSprite {
 
     _makePlayer(sprite, audiosprite) {
         var reader = new FileReader();
-        reader.readAsDataURL(audiosprite);
+        var blob = new Blob([audiosprite], { type: `audio/${this._codec}` });
+        reader.readAsDataURL(blob);
         reader.onloadend = () => {
-            var base64data = reader.result;
+            var { result: src } = reader;
             this._player = new Howl({
-                src: base64data,
+                src,
                 sprite
             });
             this._subscribePlayerEvents();
