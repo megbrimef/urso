@@ -16,7 +16,6 @@ import { gsap } from 'gsap';
 window.gsap = gsap;
 
 import { Howler, Howl } from 'howler';
-window.Howler = Howler;
 
 window.UrsoUtils = {
     Howler: Howler,

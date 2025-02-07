@@ -1,4 +1,3 @@
-const { Howler } = require("howler");
 const ModulesAssetsBaseModel = require('./../baseModel');
 
 class ModulesAssetsModelsAudiosprite extends ModulesAssetsBaseModel {
@@ -8,7 +7,7 @@ class ModulesAssetsModelsAudiosprite extends ModulesAssetsBaseModel {
         this.type = Urso.types.assets.AUDIOSPRITE;
         this.codecs = ['ogg', 'm4a', 'mp3', 'wav'];
 
-        const codec = this.codecs.filter(codec => Howler.codecs(codec))[0];
+        const codec = this.codecs.filter(codec => UrsoUtils.Howler.codecs(codec))[0];
 
         this.contents = Urso.helper.recursiveGet('contents', params, [
             { type: Urso.types.assets.JSON, key: `${this.key}_audiospriteJson`, path: `${this.path}.json` },
