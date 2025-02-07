@@ -15,11 +15,12 @@ require("pixi-projection");
 import { gsap } from 'gsap';
 window.gsap = gsap;
 
-import { Howler } from 'howler';
+import { Howler, Howl } from 'howler';
 window.Howler = Howler;
 
 window.UrsoUtils = {
     Howler: Howler,
+    Howl: Howl,
     gsap: gsap,
     PIXI: PIXI
 };
