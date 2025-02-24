@@ -27,7 +27,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
-        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
+        this.handlePointerUpOutside = Urso.helper.recursiveGet('handlePointerUpOutside', params, true);
         /**
          * customInteractionArea object ex:
          * Circle: { "type": "circle", "params": [0, 0, 100] }
@@ -123,7 +123,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
     }
 
     _onPressUpOutside() {
-        if (this.handlePointerupoutside) {
+        if (this.handlePointerUpOutside) {
             this._onPressUp();
             return;
         }
