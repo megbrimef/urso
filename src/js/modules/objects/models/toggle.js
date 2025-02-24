@@ -31,7 +31,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
             unpressedDisabled: Urso.helper.recursiveGet('buttonFrames.unpressedDisabled', params, false),
         }
 
-        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
+        this.handlePointerUpOutside = Urso.helper.recursiveGet('handlePointerUpOutside', params, true);
     }
 
     setButtonFrame(key, assetKey) {
@@ -90,7 +90,7 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
             .on('pointerover', this._onButtonOver.bind(this))
             .on('pointerout', this._onButtonOut.bind(this));
 
-        if (this.handlePointerupoutside) {
+        if (this.handlePointerUpOutside) {
             this._baseObject.on('pointerupoutside', this._onButtonUp.bind(this))
         }
     };

@@ -28,7 +28,7 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
         this.lable = Urso.helper.recursiveGet('lable', params, false);
 
         this.defaultStatus = Urso.helper.recursiveGet('defaultStatus', params, 'unpressed'); //pressed or unpressed
-        this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
+        this.handlePointerUpOutside = Urso.helper.recursiveGet('handlePointerUpOutside', params, true);
     }
 
     _createCheckbox() {
@@ -52,7 +52,7 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
             .on('pointerover', this._onButtonOver.bind(this))
             .on('pointerout', this._onButtonOut.bind(this));
 
-        if (this.handlePointerupoutside) {
+        if (this.handlePointerUpOutside) {
             this._baseObject.on('pointerupoutside', this._onButtonUp.bind(this))
         }
 
