@@ -24,8 +24,9 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         );
         this.disableRightClick = Urso.helper.recursiveGet('disableRightClick', params, false);
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
-        this.onOverCallback = Urso.helper.recursiveGet('onOverCallback', params, false);
-        this.onOutCallback = Urso.helper.recursiveGet('onOutCallback', params, false);
+        this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
+        this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
+        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
         this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
         /**
@@ -38,6 +39,10 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
          * }
          * */
         this.customInteractionArea = Urso.helper.recursiveGet('customInteractionArea', params, null);
+    }
+
+    _checkIsDesktop() {
+        return Urso.device.desktop && !Urso.helper.isIpadOS();
     }
 
     enable() {
