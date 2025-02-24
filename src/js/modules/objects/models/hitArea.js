@@ -40,10 +40,6 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.customInteractionArea = Urso.helper.recursiveGet('customInteractionArea', params, null);
     }
 
-    _checkIsDesktop() {
-        return Urso.device.desktop && !Urso.helper.isIpadOS();
-    }
-
     enable() {
         if (!this._isDisabled)
             return false;
