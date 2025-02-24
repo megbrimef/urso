@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.8.3",
+  "version": "0.8.13",
   "description": "HTML5 game engine",
   "main": "build/js/index.js",
   "author": "Megbrimef",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@urso/revolt-fx": "^0.1.0",
     "gsap": "^3.1.1",
-    "howler": "^2.2.1",
+    "howler": "^2.2.4",
     "pixi-particles": "^4.3.0",
     "pixi-projection": "0.3.15",
     "pixi-scrollbox": "^2.3.1",

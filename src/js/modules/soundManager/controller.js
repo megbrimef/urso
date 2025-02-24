@@ -3,7 +3,6 @@ class SoundManagerController {
         this._systemVolume = 1;
         this._globalVolume = 0;
 
-        this._howler = null;
         this._codecsToCheck = ['ogg', 'm4a', 'mp3', 'wav'];
         this._selectedCodec = null;
         this._sounds = {};
@@ -16,7 +15,7 @@ class SoundManagerController {
 
     _setCodec() {
         for (const codec of this._codecsToCheck) {
-            if (Howler.Howler.codecs(codec)) {
+            if (UrsoUtils.Howler.codecs(codec)) {
                 this._selectedCodec = codec;
                 return;
             }
@@ -36,7 +35,8 @@ class SoundManagerController {
             const soundSptite = this.getInstance('SoundSprite', {
                 sprite: json.sprite,
                 name: soundKey,
-                audiosprite
+                audiosprite,
+                codec: this._selectedCodec
             });
 
             this._sounds[soundKey] = soundSptite;
