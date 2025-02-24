@@ -26,7 +26,6 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this.keyDownAction = Urso.helper.recursiveGet('keyDownAction', params, false);
         this.mouseOverAction = Urso.helper.recursiveGet('mouseOverAction', params, false);
         this.mouseOutAction = Urso.helper.recursiveGet('mouseOutAction', params, false);
-        this.noActionOnMouseOut = Urso.helper.recursiveGet('noActionOnMouseOut', params, this._checkIsDesktop());
         this.onTouchMoveCallback = Urso.helper.recursiveGet('onTouchMoveCallback', params, false);
         this.handlePointerupoutside = Urso.helper.recursiveGet('handlePointerupoutside', params, true);
         /**
@@ -143,16 +142,16 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         if (this._isDisabled)
             return false;
 
-        if (this.onOverCallback)
-            this.onOverCallback();
+        if (this.mouseOverAction)
+            this.mouseOverAction();
     }
 
     _onOut() {
         if (this._isDisabled)
             return false;
 
-        if (this.onOutCallback)
-            this.onOutCallback();
+        if (this.mouseOutAction)
+            this.mouseOutAction();
     }
 
     _getEventLocalPosition(event) {
