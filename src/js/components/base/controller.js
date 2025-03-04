@@ -44,12 +44,12 @@ class ComponentsBaseController {
     }
 
     assetsMount() {
-        let template = this.getInstance(this._templateName);
+        let template = this.getInstance(this._templateName, this.options);
         return { styles: template.styles, assets: template.assets };
     }
 
     objectsMount() {
-        let template = this.getInstance(this._templateName);
+        let template = this.getInstance(this._templateName, this.options);
         return template.objects;
     }
 
