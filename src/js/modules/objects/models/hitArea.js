@@ -45,6 +45,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
             return false;
 
         this._isDisabled = false;
+        this._baseObject.interactive = true;
     }
 
     disable() {
@@ -52,6 +53,7 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
             return false;
 
         this._isDisabled = true;
+        this._baseObject.interactive = false;
     }
 
     _addBaseObject() {
@@ -80,6 +82,9 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
     }
 
     _onTouchmove(event) {
+        if (this._isDisabled)
+            return false;
+
         const position = this._getEventLocalPosition(event);
 
         if (this.onTouchMoveCallback)
