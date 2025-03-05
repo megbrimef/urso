@@ -127,9 +127,9 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         }
     }
 
-    _onPressUpOutside() {
+    _onPressUpOutside(event) {
         if (this.handlePointerUpOutside) {
-            this._onPressUp();
+            this._onPressUp(event);
             return;
         }
 
