@@ -264,7 +264,7 @@ class ModulesInstancesController {
      */
     _getClassByPath(path, noModes) {
         let pathArr = path.split('.');
-        let entitiesArray = Urso.helper.mergeArrays(['Urso', 'Game'], pathArr);
+        let entitiesArray = ['Urso', 'Game'].concat(pathArr);
         return this._checkPathExist(entitiesArray, noModes);
     }
 
