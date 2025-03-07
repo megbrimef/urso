@@ -77,6 +77,7 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
         this._isDisabled = false;
         this._baseObject.buttonMode = true;
+        this._baseObject.interactive = true;
     }
 
     disable() {
@@ -86,6 +87,7 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
         this._changeTexture('disabled');
         this._isDisabled = true;
         this._baseObject.buttonMode = false;
+        this._baseObject.interactive = false;
     }
 
     _addBaseObject() {
