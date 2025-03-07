@@ -10,7 +10,7 @@ import { AtlasAttachmentLoader, SkeletonJson } from "@pixi-spine/runtime-3.8";
 window.PIXI.spine.AtlasAttachmentLoader = AtlasAttachmentLoader;
 window.PIXI.spine.SkeletonJson = SkeletonJson;
 
-require("pixi-projection");
+window.PIXI.projection = require("pixi-projection");
 
 import { gsap } from 'gsap';
 window.gsap = gsap;
