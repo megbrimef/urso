@@ -11,15 +11,13 @@ class ModulesScenesService {
 
         this._pixiWrapper;
 
-        this.init();
-
         this._assetsLoadedHandler = this._assetsLoadedHandler.bind(this);
         this.loadUpdate = this.loadUpdate.bind(this);
     }
 
-    init() {
+    async init() {
         this._pixiWrapper = this.getInstance('PixiWrapper');
-        this._pixiWrapper.init();
+        await this._pixiWrapper.init();
     }
 
     /**

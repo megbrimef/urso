@@ -54,7 +54,7 @@ class LibLoader {
         if (resource.error) {
             return Urso.logger.warn('LibLoader error: ', resource.error, asset);
         }
-
+    
         switch (asset.type) {
             case Urso.types.assets.ATLAS:
                 Urso.cache.addAtlas(asset.key, resource);
@@ -70,7 +70,7 @@ class LibLoader {
                 Urso.cache.addFile(asset.key, resource);
                 break;
             case Urso.types.assets.IMAGE:
-                Urso.cache.addImage(asset.key, resource);
+                Urso.cache.addTexture(asset.key, resource);
                 break;
             case Urso.types.assets.JSON:
                 Urso.cache.addJson(asset.key, resource);
@@ -83,6 +83,9 @@ class LibLoader {
                 break;
             case Urso.types.assets.SPINE:
                 Urso.cache.addSpine(asset.key, resource);
+                break;
+            case Urso.types.assets.SPINEATLAS:
+                Urso.cache.addSpineAtlas(asset.key, resource);
                 break;
             default:
                 break;
@@ -102,27 +105,31 @@ class LibLoader {
      * start loading assets from assets query
      * @param {Function} callback 
      */
-    start(callback) {
+    async start(callback) {
         if (this._isRunning)
             return false;
+
+        if (this._assetsQuery.length === 0) {
+            return await callback();
+        }
 
         this._isRunning = true;
         this._lastLoadFailed = false;
         this._iterationNumber++;
         const currentIteration = this._iterationNumber;
         this._completeCallback = callback;
-        this._loader = new PIXI.Loader();
+        this._loader = PIXI.Assets // new PIXI.Loader();
         const appVersion = Urso.config.appVersion;
 
         if (appVersion) {
-            this._loader.defaultQueryString = `appVersion=${appVersion}`;
+            // this._loader.defaultQueryString = `appVersion=${appVersion}`; //FIXME
         }
-
-        this._assetsQuery.forEach(asset => {
+        
+        const assetsLoading = this._assetsQuery.map(async asset => {
+            
             // TODO: check to load
-
             let params = asset.params || false; // TODO: Set params field in base mode
-
+            
             if (asset.type === Urso.types.assets.JSON || asset.type === Urso.types.assets.ATLAS) { // check json in JSONATLAS
                 const jsonData = this._getJsonDataFromJsonAtlases(asset.key);
 
@@ -132,7 +139,8 @@ class LibLoader {
                             Urso.cache.addJson(asset.key, { data: jsonData });
                             break;
                         case Urso.types.assets.ATLAS:
-                            this._loader.add(asset.key, jsonData, params, (resource) => this._storeAsset(asset, resource));
+                            //FIXME
+                            // this._loader.add(asset.key, jsonData, params, (resource) => this._storeAsset(asset, resource));
                             break;
                     }
 
@@ -140,38 +148,43 @@ class LibLoader {
                 }
             }
 
-            if (asset.type === Urso.types.assets.SPINE && asset.noAtlas) { // check SPINE in JSONATLAS
-                if (!params)
-                    params = {};
+            //FIXME
+            // if (asset.type === Urso.types.assets.SPINE && asset.noAtlas) { // check SPINE in JSONATLAS
+                // if (!params)
+                //     params = {};
 
-                params.metadata = { spineAtlas: Urso.cache.getGlobalAtlas() };
+                // params.metadata = { spineAtlas: Urso.cache.getGlobalAtlas() };
 
-                //check for json in JSONATLAS
-                const jsonData = this._getJsonDataFromJsonAtlases(asset.key);
+                // //check for json in JSONATLAS
+                // const jsonData = this._getJsonDataFromJsonAtlases(asset.key);
 
-                if (jsonData) {
-                    this._loadSpineFromExistingResourses(asset, jsonData, params);
-                    return;
-                }
-            }
+            // }
 
             const loadPath = this._getLoadPath(asset);
-            this._loader.add(asset.key, loadPath, params, (resource) => this._storeAsset(asset, resource));  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
+            // this._loader.add(asset.key, loadPath, params, (resource) => this._storeAsset(asset, resource));  //TODO set assets resolution instead _processLoadedImage baseTexture resolution
+
+            const resource = await this._loader.load({ alias: asset.key, src: loadPath });  //TODO set assets resolution instead _processLoadedImage baseTexture resolution      
+
+            this._storeAsset(asset, resource)
         });
 
-        this._onLoadUpdate({ progress: 0 });
-        this._loader.onProgress.add(this._onLoadUpdate);
-        this._loader.onError.add(this._onError);
+        await Promise.all(assetsLoading);
 
-        this._loader.load(function (loader, resources) {
-            if (currentIteration !== this._iterationNumber || this._lastLoadFailed)
-                return;
+        await callback();
+        // FIXME
+        // this._onLoadUpdate({ progress: 0 });
+        // this._loader.onProgress.add(this._onLoadUpdate);
+        // this._loader.onError.add(this._onError);
+   
+        // this._loader.load(function (loader, resources) {
+        //     if (currentIteration !== this._iterationNumber || this._lastLoadFailed)
+        //         return;
 
-            this._onLoadUpdate({ progress: 100 });
-            this._assetsQuery = [];
-            this._isRunning = false;
-            callback();
-        }.bind(this));
+        //     this._onLoadUpdate({ progress: 100 });
+        //     this._assetsQuery = [];
+        //     this._isRunning = false;
+        //     
+        // }.bind(this));
     };
 
     _getJsonDataFromJsonAtlases(key) {
@@ -186,14 +199,6 @@ class LibLoader {
         return null;
     }
 
-    _loadSpineFromExistingResourses(asset, jsonData, params) {
-        //params.metadata.spineAtlas
-
-        const spineAtlasLoader = new PIXI.spine.AtlasAttachmentLoader(params.metadata.spineAtlas);
-        const spineJsonParser = new PIXI.spine.SkeletonJson(spineAtlasLoader);
-        const spineData = spineJsonParser.readSkeletonData(jsonData);
-        Urso.cache.addSpine(asset.key, { spineData });
-    }
 
     _onError(error) {
         Urso.logger.warn('LibLoader file load error: ', error);

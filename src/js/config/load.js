@@ -48,7 +48,7 @@ window.Urso = {
         Extra: {
             BrowserEvents: require('../extra/browserEvents'),
             Main: require('../extra/main'),
-            PixiPatch: require('../extra/pixiPatch')
+            // PixiPatch: require('../extra/pixiPatch') //FIXME
         },
         Lib: {
             Cache: require('../lib/cache'),
@@ -80,7 +80,8 @@ window.Urso = {
                     Json: require('../modules/assets/models/json'),
                     JsonAtlas: require('../modules/assets/models/jsonAtlas'),
                     Sound: require('../modules/assets/models/sound'),
-                    Spine: require('../modules/assets/models/spine')
+                    Spine: require('../modules/assets/models/spine'),
+                    SpineAtlas: require('../modules/assets/models/spineAtlas'),
                 }
             },
             I18n: {
@@ -111,7 +112,7 @@ window.Urso = {
                 Service: require('../modules/objects/service'),
                 Styles: require('../modules/objects/styles'),
                 Models: {
-                    AtlasImage: require('../modules/objects/models/atlasImage'),
+                    // AtlasImage: require('../modules/objects/models/atlasImage'),
                     BitmapText: require('../modules/objects/models/bitmapText'),
                     Button: require('../modules/objects/models/button'),
                     ButtonComposite: require('../modules/objects/models/buttonComposite'),
@@ -119,8 +120,8 @@ window.Urso = {
                     Collection: require('../modules/objects/models/collection'),
                     Component: require('../modules/objects/models/component'),
                     Container: require('../modules/objects/models/container'),
-                    DragContainer: require('../modules/objects/models/dragContainer'),
-                    Emitter: require('../modules/objects/models/emitter'),
+                    // DragContainer: require('../modules/objects/models/dragContainer'),
+                    // Emitter: require('../modules/objects/models/emitter'),
                     EmitterFx: require('../modules/objects/models/emitterFx'),
                     Graphics: require('../modules/objects/models/graphics'),
                     Group: require('../modules/objects/models/group'),
@@ -129,11 +130,11 @@ window.Urso = {
                     ImagesAnimation: require('../modules/objects/models/imagesAnimation'),
                     Mask: require('../modules/objects/models/mask'),
                     NineSlicePlane: require('../modules/objects/models/nineSlicePlane'),
-                    Scrollbox: require('../modules/objects/models/scrollbox'),
+                    // Scrollbox: require('../modules/objects/models/scrollbox'), //FIXME
                     Slider: require('../modules/objects/models/slider'),
                     Spine: require('../modules/objects/models/spine'),
                     Text: require('../modules/objects/models/text'),
-                    TextInput: require('../modules/objects/models/textInput'),
+                    // TextInput: require('../modules/objects/models/textInput'),
                     Toggle: require('../modules/objects/models/toggle'),
                     World: require('../modules/objects/models/world')
                 }

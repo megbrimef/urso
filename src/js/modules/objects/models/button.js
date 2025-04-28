@@ -76,8 +76,8 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
             this._changeTexture('out');
 
         this._isDisabled = false;
-        this._baseObject.buttonMode = true;
-        this._baseObject.interactive = true;
+        this._baseObject.eventMode = 'static';
+        this._baseObject.cursor = 'pointer';
     }
 
     disable() {
@@ -86,16 +86,16 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
         this._changeTexture('disabled');
         this._isDisabled = true;
-        this._baseObject.buttonMode = false;
-        this._baseObject.interactive = false;
+        this._baseObject.eventMode = 'passive';
+        delete this._baseObject.cursor;
     }
 
     _addBaseObject() {
         this._baseObject = new PIXI.Sprite();
         this._changeTexture('out');
 
-        this._baseObject.interactive = true;
-        this._baseObject.buttonMode = true;
+        this._baseObject.eventMode = 'static';
+        this._baseObject.cursor = 'pointer';
 
         if (this.pixelPerfectOver) {
             //todo

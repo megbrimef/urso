@@ -12,11 +12,12 @@ class ModulesTemplateTypes {
                 JSONATLAS: 8,
                 SOUND: 9,
                 SPINE: 10,
+                SPINEATLAS: 11,
                 HTML: 100
             },
 
             objects: {
-                ATLASIMAGE: 1,
+                // ATLASIMAGE: 1,
                 BITMAPTEXT: 2,
                 BUTTON: 3,
                 BUTTONCOMPOSITE: 4,

@@ -29,20 +29,23 @@ class ModulesScenesPixiWrapper {
         this._lastTimeCheckFPS = 0;
     }
 
-    init() {
-        this._setPixiSettings();
+    async init() {
+        //FIXME
+        // this._setPixiSettings();
 
         //define renderer
-        PIXI.utils.skipHello();
-        this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
-        document.body.appendChild(this._renderer.view);
+        // PIXI.utils.skipHello();
+        // this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 }); //FIXME
+        this._renderer = await PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 })
+        document.body.appendChild(this._renderer.view.canvas);
 
         //root and world
         this._root = new PIXI.Container();
         this._createWorld();
 
         // setup interaction
-        this.interaction = Urso.helper.recursiveGet('plugins.interaction', this._renderer) || new PIXI.InteractionManager(this._renderer);
+        // this.interaction = Urso.helper.recursiveGet('plugins.interaction', this._renderer) //FIXME
+            // || new PIXI.InteractionManager(this._renderer); //FIXME
 
         this._loaderScene = this.getInstance('Model');
         this._requestAnimFrame(this._loop);
@@ -89,14 +92,14 @@ class ModulesScenesPixiWrapper {
      * hide canvas
      */
     hideCanvas() {
-        this._renderer.view.style.display = 'none';
+        this._renderer.view.canvas.style.display = 'none';
     }
 
     /**
      * show canvas
      */
     showCanvas() {
-        this._renderer.view.style.display = '';
+        this._renderer.view.canvas.style.display = '';
     }
 
     /**
@@ -114,7 +117,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasWidth(val) {
-        this._renderer.view.style.width = val + 'px';
+        this._renderer.view.canvas.style.width = val + 'px';
     };
 
     /**
@@ -122,7 +125,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasHeight(val) {
-        this._renderer.view.style.height = val + 'px';
+        this._renderer.view.canvas.style.height = val + 'px';
     };
 
     /**
@@ -279,7 +282,7 @@ class ModulesScenesPixiWrapper {
 
         let deltaTime = this._getDeltaTime();
         let deltaFrame = this._getDeltaFrame(deltaTime);
-        this.interaction.update(deltaFrame);
+        //this.interaction.update(deltaFrame); //FIXME
 
         this._checkMouse();
         this.emit(Urso.events.MODULES_SCENES_UPDATE, deltaTime);

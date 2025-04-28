@@ -2,15 +2,14 @@ class ModulesScenesController {
     constructor() {
         this.singleton = true;
         this._service;
-
-        this.init();
     }
 
     /**
      * init scenes mahager
      */
-    init() {
+    async init() {
         this._service = this.getInstance('Service');
+        await this._service.init();
     }
 
     /**

@@ -88,9 +88,10 @@ class ModulesObjectsService {
 
         switch (object.type) {
             //exceptions with camelCase namings
-            case Urso.types.objects.ATLASIMAGE:
-                model = this.getInstance('Models.AtlasImage', object);
-                break;
+            //FIXME
+            // case Urso.types.objects.ATLASIMAGE:
+            //     model = this.getInstance('Models.AtlasImage', object);
+            //     break;
             case Urso.types.objects.BITMAPTEXT:
                 model = this.getInstance('Models.BitmapText', object);
                 break;

@@ -273,15 +273,29 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
      * add object to pixi tree
      */
     _addBaseObject() {
-        let spineAsset = Urso.cache.getSpine(this.assetKey);
+        const spineAsset = Urso.cache.getSpine(this.assetKey);
+        const spineAtlas = Urso.cache.getGlobalAtlas();
 
-        if (!spineAsset)
-            Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine object ' + this.assetKey);
+        if (!spineAsset || !spineAtlas)
+            Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine or atlas object ' + this.assetKey);
 
-        if (!spineAsset.spineData)
-            Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine correct object (no spineData) for key ' + this.assetKey);
+        //FIXME
+        // if (!spineAsset.spineData)
+        //     Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine correct object (no spineData) for key ' + this.assetKey);
+        
+        const attachmentLoader = new PIXI.spine.AtlasAttachmentLoader(spineAtlas);
+        
+        const parser = spineAsset instanceof Uint8Array ?
+            new PIXI.spine.SkeletonBinary(attachmentLoader) :
+            new PIXI.spine.SkeletonJson(attachmentLoader);
+    
+    	parser.scale = 1;
+		const skeletonData = parser.readSkeletonData(spineAsset);
 
-        this._baseObject = new PIXI.spine.Spine(spineAsset.spineData);
+        this._baseObject = new PIXI.spine.Spine({ 
+            skeletonData,
+            autoUpdate: true
+        });
         //this._baseObject.state.timeScale = this.animation.timeScale;
         Object.defineProperty(this._baseObject.state, 'timeScale', { get: this.getTimeScale.bind(this) });
 

@@ -10,6 +10,7 @@ class ModulesAssetsModelsSpine extends ModulesAssetsBaseModel {
     setupParams(params) {
         super.setupParams(params);
 
+        this.key = Urso.helper.recursiveGet('key', params, false);
         this.noAtlas = Urso.helper.recursiveGet('noAtlas', params, false);
     }
 }

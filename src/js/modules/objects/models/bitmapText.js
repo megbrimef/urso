@@ -25,7 +25,14 @@ class ModulesObjectsModelsBitmapText extends ModulesObjectsBaseModel {
         if (this.localeId)
             this._originalModel.text = this.text = Urso.i18n.get(this.localeId, this.localeVariables);
 
-        this._baseObject = new PIXI.BitmapText(this.text, { fontName: this.fontName, fontSize: this.fontSize });
+        this._baseObject = new PIXI.BitmapText({
+            text: this.text,
+            style: {
+                fontFamily: this.fontName,
+                fontSize: this.fontSize,
+                letterSpacing: this.letterSpacing,
+            },
+        });
     };
 
     _newLocaleHandler() {

@@ -33,9 +33,9 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
         this.spritesheetFilter = Urso.helper.recursiveGet('spritesheetFilter', params, false);
     }
 
-    update(deltaTime) {
+    update() {
         if (this._emitter) {
-            this._bundle.update(deltaTime * PIXI.settings.TARGET_FPMS);
+            this._bundle.update();
         }
     }
 
@@ -50,6 +50,7 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
 
         this._emitter = this._bundle.getParticleEmitter(emitterName);
         this._emitter.init(this._baseObject, true, 1);
+        this._emitter.start();
     }
 
     /**
@@ -69,30 +70,17 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
         this._isActive = false;
     }
 
-    update() {
-        if (this._emitter) {
-            this._bundle.update();
-        }
-    }
-    
     _addBaseObject() {
-        this._baseObject = new PIXI.ParticleContainer();
-        this._baseObject.setProperties({
-            scale: true,
-            position: true,
-            rotation: true,
-            uvs: true,
-            alpha: true,
-        });
+        this._baseObject = new PIXI.Container();
     };
 
     _createBundle() {
         this._bundle = new PIXI.particlesFx.FX();
-        let fx_settings_data = Urso.cache.getJson(this.cfg).data;
+        let fx_settings_data = Urso.cache.getJson(this.cfg);
 
         if (this.spritesheetFilter)
             fx_settings_data.spritesheetFilter = this.spritesheetFilter;
-
+        
         this._defaultEmitterName = fx_settings_data.emitters[0].name;
 
         this._bundle.initBundle(fx_settings_data);
@@ -100,7 +88,7 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
     }
 
     _subscribeOnce() {
-        this.addListener(Urso.events.MODULES_SCENES_UPDATE, this.update);
+        this.addListener(Urso.events.MODULES_SCENES_UPDATE, this.update, true);
     }
 
     _customDestroy() {

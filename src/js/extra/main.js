@@ -1,16 +1,11 @@
 import * as PIXI from 'pixi.js';
 window.PIXI = PIXI;
-window.PIXI.particles = require('pixi-particles');
 
-window.PIXI.particlesFx = require('@urso/revolt-fx');
+import * as spine from '@esotericsoftware/spine-pixi-v8';
+window.PIXI.spine = spine;
 
-window.PIXI.spine = require("pixi-spine");
-
-import { AtlasAttachmentLoader, SkeletonJson } from "@pixi-spine/runtime-3.8";
-window.PIXI.spine.AtlasAttachmentLoader = AtlasAttachmentLoader;
-window.PIXI.spine.SkeletonJson = SkeletonJson;
-
-window.PIXI.projection = require("pixi-projection");
+import * as particlesFx from 'revolt-fx';
+window.PIXI.particlesFx = particlesFx;
 
 import { gsap } from 'gsap';
 window.gsap = gsap;

@@ -87,27 +87,28 @@ class ModulesAssetsService {
         const loadAtlasesCallback = () => {
             this._loadGroupAtlases(assetsSpace, group, loadRestAssetsCallback, Urso.types.assets.ATLAS);
         }
-
+        
         this._loadGroupAtlases(assetsSpace, group, loadAtlasesCallback, Urso.types.assets.JSONATLAS);
     }
 
     preloadAllImagesInGPU() {
-        const world = Urso.findOne('^WORLD')._baseObject;
+        //FIXME
+        // const world = Urso.findOne('^WORLD')._baseObject;
 
-        Urso.cache.globalAtlas.pages.forEach(({ baseTexture }) => {
-            const texture = new PIXI.Texture(baseTexture);
-            const sprite = new PIXI.Sprite(texture);
+        // Urso.cache.globalAtlas.pages.forEach(({ baseTexture }) => {
+        //     const texture = new PIXI.Texture(baseTexture);
+        //     const sprite = new PIXI.Sprite(texture);
 
-            sprite.x = -10000;
-            sprite.y = -10000;
+        //     sprite.x = -10000;
+        //     sprite.y = -10000;
 
-            world.addChild(sprite);
+        //     world.addChild(sprite);
 
-            setTimeout(() => {
-                world.removeChild(sprite);
-                sprite.destroy()
-            }, 1);
-        });
+        //     setTimeout(() => {
+        //         world.removeChild(sprite);
+        //         sprite.destroy()
+        //     }, 1);
+        // });
     }
 
     /**
@@ -156,11 +157,13 @@ class ModulesAssetsService {
         //load update callback
         loader.setOnLoadUpdate((params) => { updateCallback(Math.floor(params.progress)); });
         const noAtlasSpines = [];
-
+        
         for (let assetModel of assetsSpace[group])
             if (assetModel.type !== Urso.types.assets.ATLAS && assetModel.type !== Urso.types.assets.JSONATLAS)
                 if (!Urso.cache.getFile(assetModel.path)) {
                     //filter noAtlas Spine files
+
+                    //FIXME remove noAtlasSpine
                     if (assetModel.type === Urso.types.assets.SPINE && assetModel.noAtlas) {
                         noAtlasSpines.push(assetModel);
                     } else
@@ -168,8 +171,8 @@ class ModulesAssetsService {
                 }
 
         loader.start(
-            () => {
-                this._processLoadedAssets(assetsSpace, group);
+            async () => {
+                await this._processLoadedAssets(assetsSpace, group);
                 this._loadNoAtlasSpines(noAtlasSpines, () => {
                     this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group);
                     callback();
@@ -208,22 +211,24 @@ class ModulesAssetsService {
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
             let imageData = Urso.cache.getAtlas(assetKey);
-            const folderPath = imageData.url.split('/').slice(0, -1).join('/');
-
-            for (const name of Object.keys(imageData.spritesheet._frames)) {
-                let texture = imageData.textures[name];
-                let newFilename = name;
-
-                if (addFolderPathInAtlasTextureKey && !name.includes('/'))
-                    newFilename = folderPath + '/' + name;
-
-                Urso.cache.addFile(newFilename, texture);
-
-                if (assetModel.cacheTextures) {
-                    const textureKey = newFilename.split('.')[0];
-                    Urso.cache.addTexture(textureKey, texture);
-                }
+            //FIXME
+            if(!assetModel.cacheTextures) return;
+    
+            for (let [key, val] of Object.entries(imageData.textures)) {
+                Urso.cache.addTexture(key, val);
             }
+
+            // for (const name of Object.keys(imageData.texture)) {
+            //     let texture = imageData.textures[name];
+            //     let newFilename = name;
+
+            //     if (addFolderPathInAtlasTextureKey && !name.includes('/'))
+            //         newFilename = folderPath + '/' + name;
+
+            //     Urso.cache.addFile(newFilename, texture);
+
+
+            // }
         }
     }
 
@@ -232,31 +237,48 @@ class ModulesAssetsService {
      * @param {Object} assetsSpace
      * @param {String} group
      */
-    _processLoadedAssets(assetsSpace, group) {
+    async _processLoadedAssets(assetsSpace, group) {
+        //FIXME
         for (let assetModel of assetsSpace[group]) {
-            if (assetModel.type === Urso.types.assets.IMAGE)
-                this._processLoadedImage(assetModel);
+            //FIXME
+            // if (assetModel.type === Urso.types.assets.IMAGE)
+            //     this._processLoadedImage(assetModel);
 
-            if (assetModel.type === Urso.types.assets.BITMAPFONT)
-                this._processLoadedBitmapFont(assetModel);
+            //FIXME
+            // if (assetModel.type === Urso.types.assets.BITMAPFONT)
+            //     this._processLoadedBitmapFont(assetModel);
 
-            if (assetModel.type === Urso.types.assets.FONT)
-                this._processLoadedFont(assetModel);
+            //FIXME
+            // if (assetModel.type === Urso.types.assets.FONT)
+            //     await this._processLoadedFont(assetModel);
+
+            if(assetModel.type === Urso.types.assets.SPINEATLAS) {
+                this._processLoadedSpineAtlas(assetModel);
+            }
         }
 
         delete assetsSpace[group];
+    }
+
+    _processLoadedSpineAtlas(assetModel) {
+        const spineAtlas = Urso.cache.getSpineAtlas(assetModel.key);
+
+        if (!spineAtlas)
+            return Urso.logger.error('ModulesAssetsService process Loaded Spine Atlas error: no image ', assetModel);
+
+        spineAtlas.regions.forEach(({ name, texture: {texture}}) => {
+            Urso.cache.addTexture(name, texture);
+        });
     }
 
     /**
      * process loaded font
      * @param {Object} source
      */
-    _processLoadedFont(source) {
+    async _processLoadedFont(source) {
         const data = Urso.cache.getFile(source.key);
-        const font = new FontFace(source.key, data.data);
-        font.load().then(() => {
-            document.fonts.add(font);
-        });
+        const font = new FontFace(source.key, data);
+        await font.load();
     }
 
     /**
@@ -317,9 +339,7 @@ class ModulesAssetsService {
             Urso.cache.addTexture(assetKey, texture); //TODO change resolution of base texture
         } else {
             //regular image
-            const baseTexture = new PIXI.BaseTexture(imageData.data, { resolution });
-            const texture = new PIXI.Texture(baseTexture);
-            Urso.cache.addTexture(assetKey, texture);
+            Urso.cache.addTexture(assetKey, imageData);
         }
 
         if (assetModel.preloadGPU) {
@@ -385,6 +405,9 @@ class ModulesAssetsService {
                 break;
             case Urso.types.assets.SPINE:
                 model = this.getInstance('Models.Spine', asset)
+                break;
+            case Urso.types.assets.SPINEATLAS:
+                model = this.getInstance('Models.SpineAtlas', asset)
                 break;
             default:
                 Urso.logger.error('ModulesAssetsService asset type error', asset);

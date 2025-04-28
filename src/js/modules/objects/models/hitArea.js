@@ -66,8 +66,8 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
         this._baseObject.alpha = 0;
         this._baseObject.cacheAsBitmap = true;
 
-        this._baseObject.interactive = true;
-        this._baseObject.buttonMode = true;
+        this._baseObject.eventMode = 'static';
+        this._baseObject.cursor = 'pointer';
 
         this._baseObject
             .on('pointerdown', this._onPressDown.bind(this))
