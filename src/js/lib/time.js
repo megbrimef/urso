@@ -16,4 +16,4 @@ class LibTime {
     }
 }
 
-module.exports = LibTime;
+export default LibTime;

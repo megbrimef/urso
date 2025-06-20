@@ -5,4 +5,4 @@ class ModulesLogicMain {
     };
 }
 
-module.exports = ModulesLogicMain;
+export default ModulesLogicMain;

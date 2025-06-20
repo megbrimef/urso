@@ -1,4 +1,4 @@
-const ModulesTransportBaseConnectionType = require('../baseConnectionType');
+import ModulesTransportBaseConnectionType from '../baseConnectionType';
 
 class ModulesTransportConnectionTypesXhr extends ModulesTransportBaseConnectionType {
     constructor(params) {
@@ -44,4 +44,4 @@ class ModulesTransportConnectionTypesXhr extends ModulesTransportBaseConnectionT
     };
 }
 
-module.exports = ModulesTransportConnectionTypesXhr;
+export default ModulesTransportConnectionTypesXhr;

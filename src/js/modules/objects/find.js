@@ -55,4 +55,4 @@ class ModulesObjectsFind {
     };
 }
 
-module.exports = ModulesObjectsFind;
+export default ModulesObjectsFind;

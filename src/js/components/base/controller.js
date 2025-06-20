@@ -1,4 +1,4 @@
-class ComponentsBaseController {
+export default class ComponentsBaseController {
 
     constructor(options) {
         this._templateName = 'Template';
@@ -74,5 +74,3 @@ class ComponentsBaseController {
     }
 
 }
-
-module.exports = ComponentsBaseController;

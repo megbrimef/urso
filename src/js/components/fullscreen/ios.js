@@ -112,4 +112,4 @@ class ComponentsFullscreenIos {
   }
 }
 
-module.exports = ComponentsFullscreenIos;
+export default ComponentsFullscreenIos;

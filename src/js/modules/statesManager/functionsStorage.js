@@ -80,4 +80,4 @@ class ModulesStatesManagerFunctionsStorage {
     }
 }
 
-module.exports = ModulesStatesManagerFunctionsStorage;
+export default ModulesStatesManagerFunctionsStorage;

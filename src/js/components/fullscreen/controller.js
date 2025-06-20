@@ -1,4 +1,4 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from './../base/controller';
 
 class ComponentsFullscreenController extends ComponentsBaseController {
 
@@ -73,4 +73,4 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 }
 
-module.exports = ComponentsFullscreenController;
+export default ComponentsFullscreenController;

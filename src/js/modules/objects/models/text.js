@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -19,8 +19,9 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
         this.lineHeight = Urso.helper.recursiveGet('lineHeight', params, 0);
         this.fontFamily = Urso.helper.recursiveGet('fontFamily', params, 'Arial');
         this.fontSize = Urso.helper.recursiveGet('fontSize', params, false);
-        this.fontStyle = Urso.helper.recursiveGet('fontStyle', params, false); //'italic'
-        this.fontWeight = Urso.helper.recursiveGet('fontWeight', params, false); // 'bold'
+        //FIXME 'normal'
+        this.fontStyle = Urso.helper.recursiveGet('fontStyle', params, 'normal'); //'italic'
+        this.fontWeight = Urso.helper.recursiveGet('fontWeight', params, 'normal'); // 'bold'
         this.fill = Urso.helper.recursiveGet('fill', params, '#000000'); // gradient  ['#ffffff', '#00ff99']
         this.fillCustomColors = Urso.helper.recursiveGet('fillCustomColors', params, false); //or array [{position:12,color:'#000000'},...]
         this.stroke = Urso.helper.recursiveGet('stroke', params, 'black');
@@ -67,4 +68,4 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsText;
+export default ModulesObjectsModelsText;

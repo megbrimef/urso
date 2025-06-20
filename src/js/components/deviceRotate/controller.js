@@ -1,4 +1,4 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from './../base/controller';
 
 class ComponentsDeviceRotateController extends ComponentsBaseController {
 
@@ -92,4 +92,4 @@ class ComponentsDeviceRotateController extends ComponentsBaseController {
   }
 }
 
-module.exports = ComponentsDeviceRotateController;
+export default ComponentsDeviceRotateController;

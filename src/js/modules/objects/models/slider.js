@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsSlider extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -354,4 +354,4 @@ class ModulesObjectsModelsSlider extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsSlider;
+export default ModulesObjectsModelsSlider;

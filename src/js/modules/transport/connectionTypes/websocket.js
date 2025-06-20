@@ -1,4 +1,4 @@
-const ModulesTransportBaseConnectionType = require('../baseConnectionType');
+import ModulesTransportBaseConnectionType from '../baseConnectionType';
 
 class ModulesTransportConnectionTypesWebsocket extends ModulesTransportBaseConnectionType {
     constructor(params) {
@@ -74,4 +74,4 @@ class ModulesTransportConnectionTypesWebsocket extends ModulesTransportBaseConne
     };
 }
 
-module.exports = ModulesTransportConnectionTypesWebsocket;
+export default ModulesTransportConnectionTypesWebsocket;

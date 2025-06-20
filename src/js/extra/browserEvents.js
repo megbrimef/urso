@@ -54,4 +54,4 @@ class ExtraBrowserEvents {
     }
 }
 
-module.exports = ExtraBrowserEvents;
+export default ExtraBrowserEvents;

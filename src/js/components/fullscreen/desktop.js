@@ -46,4 +46,4 @@ class ComponentsFullscreenDesktop {
   }
 }
 
-module.exports = ComponentsFullscreenDesktop;
+export default ComponentsFullscreenDesktop;

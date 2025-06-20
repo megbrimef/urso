@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js';
 window.PIXI = PIXI;
 
-import * as spine from '@esotericsoftware/spine-pixi-v8';
-window.PIXI.spine = spine;
+// import * as spine from '@esotericsoftware/spine-pixi-v8';
+// window.PIXI.spine = spine;
 
-import * as particlesFx from 'revolt-fx';
-window.PIXI.particlesFx = particlesFx;
+// import * as particlesFx from 'revolt-fx';
+// window.PIXI.particlesFx = particlesFx;
 
 import { gsap } from 'gsap';
 window.gsap = gsap;
@@ -18,3 +18,6 @@ window.UrsoUtils = {
     gsap: gsap,
     PIXI: PIXI
 };
+
+
+export default {}

@@ -13,5 +13,5 @@ class ModulesI18nConfig {
     }
 };
 
-module.exports = ModulesI18nConfig;
+export default ModulesI18nConfig;
 

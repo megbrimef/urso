@@ -10,4 +10,4 @@ class ModulesTransportConfig {
         }
 }
 
-module.exports = ModulesTransportConfig;
+export default ModulesTransportConfig;

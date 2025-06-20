@@ -47,4 +47,4 @@ class ModulesTemplateTypes {
     }
 };
 
-module.exports = ModulesTemplateTypes;
+export default ModulesTemplateTypes;

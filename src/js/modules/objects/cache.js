@@ -96,4 +96,4 @@ class ModulesObjectsCache {
     }
 }
 
-module.exports = ModulesObjectsCache;
+export default ModulesObjectsCache;

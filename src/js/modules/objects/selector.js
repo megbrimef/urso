@@ -133,4 +133,4 @@ class ModulesObjectsSelector {
     };
 }
 
-module.exports = ModulesObjectsSelector;
+export default ModulesObjectsSelector;

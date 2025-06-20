@@ -1,4 +1,4 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from './../base/controller';
 
 class ComponentsLayersSwitcherController extends ComponentsBaseController {
 
@@ -33,4 +33,4 @@ class ComponentsLayersSwitcherController extends ComponentsBaseController {
     }
 }
 
-module.exports = ComponentsLayersSwitcherController;
+export default ComponentsLayersSwitcherController;

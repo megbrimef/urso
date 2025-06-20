@@ -33,4 +33,4 @@ class ComponentsDebugFps {
 
 }
 
-module.exports = ComponentsDebugFps;
+export default ComponentsDebugFps;

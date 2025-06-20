@@ -1,4 +1,4 @@
-const UrsoCoreModulesObjectsModelsButton = require('./button');
+import UrsoCoreModulesObjectsModelsButton from './button';
 
 class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
     constructor(params) {
@@ -183,4 +183,4 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
     }
 }
 
-module.exports = ModulesObjectsModelsToggle;
+export default ModulesObjectsModelsToggle;

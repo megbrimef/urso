@@ -100,4 +100,4 @@ class SoundManagerController {
     };
 };
 
-module.exports = SoundManagerController;
+export default SoundManagerController;

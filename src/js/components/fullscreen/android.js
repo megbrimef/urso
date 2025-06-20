@@ -101,4 +101,4 @@ class ComponentsFullscreenAndroid {
   }
 }
 
-module.exports = ComponentsFullscreenAndroid;
+export default ComponentsFullscreenAndroid;

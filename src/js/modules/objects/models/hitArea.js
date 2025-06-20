@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
 
@@ -184,4 +184,4 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsHitArea;
+export default ModulesObjectsModelsHitArea;

@@ -124,4 +124,4 @@ class ComponentsEditorApi {
     }
 }
 
-module.exports = ComponentsEditorApi;
+export default ComponentsEditorApi;

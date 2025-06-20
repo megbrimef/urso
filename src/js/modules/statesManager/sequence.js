@@ -1,4 +1,4 @@
-const All = require('./all.js');
+import All from './all.js';
 
 class ModulesStatesManagerSequence extends All {
     constructor(params) {
@@ -45,4 +45,4 @@ class ModulesStatesManagerSequence extends All {
     }
 }
 
-module.exports = ModulesStatesManagerSequence;
+export default ModulesStatesManagerSequence;

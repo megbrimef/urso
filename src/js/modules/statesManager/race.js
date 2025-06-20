@@ -1,4 +1,4 @@
-const Action = require('./action.js');
+import Action from './action.js';
 
 class ModulesStatesManagerRace extends Action {
     constructor(params) {
@@ -88,4 +88,4 @@ class ModulesStatesManagerRace extends Action {
     }
 }
 
-module.exports = ModulesStatesManagerRace;
+export default ModulesStatesManagerRace;

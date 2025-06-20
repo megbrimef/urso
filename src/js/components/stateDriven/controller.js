@@ -1,4 +1,4 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from './../base/controller';
 
 class ComponentsStateDrivenController extends ComponentsBaseController {
 
@@ -120,4 +120,4 @@ class ComponentsStateDrivenController extends ComponentsBaseController {
 
 }
 
-module.exports = ComponentsStateDrivenController;
+export default ComponentsStateDrivenController;

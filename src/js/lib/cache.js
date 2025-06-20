@@ -1,3 +1,5 @@
+import * as spine from '@esotericsoftware/spine-pixi-v8';
+
 class LibCache {
     _globalAtlas = null
 
@@ -30,16 +32,16 @@ class LibCache {
     }
 
     _createGlobalAtlas() {
-        const textureAtlas = new PIXI.spine.TextureAtlas('');
+        const textureAtlas = new spine.TextureAtlas('');
         const atlases = Urso.cache.assetsList.atlas;
 
         for (const key in atlases) {
             const atlas = atlases[key];
             
-            const page = new PIXI.spine.TextureAtlasPage(key);
+            const page = new spine.TextureAtlasPage(key);
             const { w, h } = atlas.data.meta.size;
             
-            const baseTexture = new PIXI.spine.SpineTexture(atlas.textureSource);
+            const baseTexture = new spine.SpineTexture(atlas.textureSource);
 
             page.width = w;
             page.height = h;
@@ -49,8 +51,10 @@ class LibCache {
             textureAtlas.pages.push(page);
 
             for (const frameName in atlas._frames) {
+                const nameSplit = frameName.split('.');
+                const name = nameSplit.splice(0, nameSplit.length - 1).join('.')
                 const frame = atlas._frames[frameName];
-                const region = new PIXI.spine.TextureAtlasRegion(page, frameName);
+                const region = new spine.TextureAtlasRegion(page, name);
                 
                 region.width = frame.frame.w;
                 region.height = frame.frame.h;
@@ -194,4 +198,4 @@ class LibCache {
     }
 };
 
-module.exports = LibCache;
+export default LibCache;

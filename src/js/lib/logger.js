@@ -66,4 +66,4 @@ class LibLogger {
     }
 }
 
-module.exports = LibLogger;
+export default LibLogger;

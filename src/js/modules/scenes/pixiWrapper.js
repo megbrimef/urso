@@ -1,5 +1,8 @@
+import * as spine from '@esotericsoftware/spine-pixi-v8';
+
 const NORMAL_FPS_COUNT = 60;
 const LOW_PERFORMANCE_FPS_COUNT = 30;
+
 
 class ModulesScenesPixiWrapper {
     constructor() {
@@ -36,19 +39,22 @@ class ModulesScenesPixiWrapper {
         //define renderer
         // PIXI.utils.skipHello();
         // this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 }); //FIXME
-        this._renderer = await PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 })
-        document.body.appendChild(this._renderer.view.canvas);
-
+        // this._renderer = await PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 })
+        // document.body.appendChild(this._renderer.view.canvas);
+        const app = new PIXI.Application();
         //root and world
         this._root = new PIXI.Container();
         this._createWorld();
-
+        await app.init({ background: "#1099bb", resizeTo: window });
+        document.body.appendChild(app.canvas);
+        app.stage.addChild(this._root)
+        this._app = app
         // setup interaction
         // this.interaction = Urso.helper.recursiveGet('plugins.interaction', this._renderer) //FIXME
             // || new PIXI.InteractionManager(this._renderer); //FIXME
 
         this._loaderScene = this.getInstance('Model');
-        this._requestAnimFrame(this._loop);
+        // this._requestAnimFrame(this._loop);
 
         this.getInstance('Resolutions');
     }
@@ -66,7 +72,8 @@ class ModulesScenesPixiWrapper {
      */
     pause() {
         this._loopPaused = true;
-        PIXI.spine.settings.GLOBAL_AUTO_UPDATE = false;
+        //FIXME
+        // spine.settings.GLOBAL_AUTO_UPDATE = false;
     }
 
     /**
@@ -76,7 +83,8 @@ class ModulesScenesPixiWrapper {
         this._loopLastCall = Date.now();
         this._loopPaused = false;
         this._update();
-        PIXI.spine.settings.GLOBAL_AUTO_UPDATE = true;
+        //FIXME 
+        // spine.settings.GLOBAL_AUTO_UPDATE = true;
     }
 
     /**
@@ -85,21 +93,21 @@ class ModulesScenesPixiWrapper {
      * @param {Number} height
      */
     resize(width, height) {
-        this._renderer.resize(width, height);
+        this._app.resize(width, height);
     };
 
     /**
      * hide canvas
      */
     hideCanvas() {
-        this._renderer.view.canvas.style.display = 'none';
+        this._app.view.style.display = 'none';
     }
 
     /**
      * show canvas
      */
     showCanvas() {
-        this._renderer.view.canvas.style.display = '';
+        this._app.view.style.display = '';
     }
 
     /**
@@ -117,7 +125,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasWidth(val) {
-        this._renderer.view.canvas.style.width = val + 'px';
+        this._app.view.style.width = val + 'px';
     };
 
     /**
@@ -125,7 +133,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasHeight(val) {
-        this._renderer.view.canvas.style.height = val + 'px';
+        this._app.view.style.height = val + 'px';
     };
 
     /**
@@ -133,7 +141,7 @@ class ModulesScenesPixiWrapper {
      * @returns {Object} - PIXI.Renderer
      */
     getRenderer() {
-        return this._renderer;
+        return this._app;
     }
 
     /**
@@ -186,15 +194,17 @@ class ModulesScenesPixiWrapper {
      * @returns {Object} - pixi.Texture
      */
     generateTexture(obj) {
-        return this._renderer.generateTexture(obj);
+        //FIXME
+        // return this._renderer.generateTexture(obj);
     }
 
     _setPixiSettings() {
-        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
-        PIXI.settings.TEXT_RESOLUTION = 1;
+        //FIXME
+        // PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+        // PIXI.settings.TEXT_RESOLUTION = 1;
 
-        if (Urso.device.iOS || Urso.device.macOS)
-            PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH;
+        // if (Urso.device.iOS || Urso.device.macOS)
+        //     PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH;
     }
 
     _createWorld() {
@@ -231,19 +241,20 @@ class ModulesScenesPixiWrapper {
     };
 
     _loop() {
-        if (this._loopStopped)
-            return false;
+        // FIXME
+        // if (this._loopStopped)
+        //     return false;
 
-        this._requestAnimFrame(this._loop);
+        // this._requestAnimFrame(this._loop);
 
-        if (!this._loopPaused) {
-            if (!this._fpsCheckAllowUpdate())
-                return;
+        // if (!this._loopPaused) {
+        //     if (!this._fpsCheckAllowUpdate())
+        //         return;
 
-            this._update();
-        }
+        //     this._update();
+        // }
 
-        return true;
+        // return true;
     };
 
     _fpsCheckAllowUpdate() {
@@ -351,4 +362,4 @@ class ModulesScenesPixiWrapper {
     }
 }
 
-module.exports = ModulesScenesPixiWrapper;
+export default ModulesScenesPixiWrapper;

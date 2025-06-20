@@ -68,4 +68,4 @@ class ModulesI18nController {
     }
 }
 
-module.exports = ModulesI18nController;
+export default ModulesI18nController;

@@ -123,4 +123,4 @@ class ModulesScenesController {
     }
 }
 
-module.exports = ModulesScenesController;
+export default ModulesScenesController;

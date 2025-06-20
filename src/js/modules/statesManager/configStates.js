@@ -74,4 +74,4 @@ class ModulesStatesManagerConfigStates {
 
 }
 
-module.exports = ModulesStatesManagerConfigStates;
+export default ModulesStatesManagerConfigStates;

@@ -20,4 +20,4 @@ class ComponentsDebugCoords {
 
 }
 
-module.exports = ComponentsDebugCoords;
+export default ComponentsDebugCoords;

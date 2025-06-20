@@ -18,7 +18,7 @@ class ModulesObjectsStyles {
 
         let template = Urso.template.get();
         let styles = template.styles;
-
+    
         this._removeInactualStylesAndAddNew(parent, styles);
     }
 
@@ -104,7 +104,8 @@ class ModulesObjectsStyles {
             object._styles[selector] = style;
 
             for (let [key, value] of Object.entries(style))
-                if (typeof object._originalModel[key] === 'undefined')
+                //FIXME
+                // if (typeof object._originalModel[key] === 'undefined')
                     Urso.objects._safeSetValueToTarget(object, key, value);
         }
     }
@@ -207,4 +208,4 @@ class ModulesObjectsStyles {
     }
 }
 
-module.exports = ModulesObjectsStyles;
+export default ModulesObjectsStyles;

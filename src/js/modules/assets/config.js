@@ -35,4 +35,4 @@ class ModulesAssetsConfig {
     }
 }
 
-module.exports = ModulesAssetsConfig;
+export default ModulesAssetsConfig;

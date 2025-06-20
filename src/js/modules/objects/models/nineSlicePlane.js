@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsNineSlicePlane extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -29,4 +29,4 @@ class ModulesObjectsModelsNineSlicePlane extends ModulesObjectsBaseModel {
     };
 }
 
-module.exports = ModulesObjectsModelsNineSlicePlane;
+export default ModulesObjectsModelsNineSlicePlane;

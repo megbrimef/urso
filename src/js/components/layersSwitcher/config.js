@@ -23,4 +23,4 @@ class ComponentsLayersSwitcher {
     }
 }
 
-module.exports = ComponentsLayersSwitcher;
+export default ComponentsLayersSwitcher;

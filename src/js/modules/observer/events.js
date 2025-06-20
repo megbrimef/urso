@@ -48,4 +48,4 @@ class ModulesObserverConfig {
 
 }
 
-module.exports = ModulesObserverConfig;
+export default ModulesObserverConfig;

@@ -675,4 +675,4 @@ class LibHelper {
     }
 }
 
-module.exports = LibHelper;
+export default LibHelper;

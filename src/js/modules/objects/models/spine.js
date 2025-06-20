@@ -1,4 +1,5 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
+import * as spine from '@esotericsoftware/spine-pixi-v8';
 
 class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -283,16 +284,16 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
         // if (!spineAsset.spineData)
         //     Urso.logger.error('ModulesObjectsModelsSpine assets error: no spine correct object (no spineData) for key ' + this.assetKey);
         
-        const attachmentLoader = new PIXI.spine.AtlasAttachmentLoader(spineAtlas);
+        const attachmentLoader = new spine.AtlasAttachmentLoader(spineAtlas);
         
         const parser = spineAsset instanceof Uint8Array ?
-            new PIXI.spine.SkeletonBinary(attachmentLoader) :
-            new PIXI.spine.SkeletonJson(attachmentLoader);
+            new spine.SkeletonBinary(attachmentLoader) :
+            new spine.SkeletonJson(attachmentLoader);
     
     	parser.scale = 1;
 		const skeletonData = parser.readSkeletonData(spineAsset);
 
-        this._baseObject = new PIXI.spine.Spine({ 
+        this._baseObject = new spine.Spine({ 
             skeletonData,
             autoUpdate: true
         });
@@ -350,4 +351,4 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsSpine;
+export default ModulesObjectsModelsSpine;

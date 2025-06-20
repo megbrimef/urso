@@ -1,4 +1,5 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
+// import * as particlesFx from 'revolt-fx';
 
 class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -75,16 +76,16 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
     };
 
     _createBundle() {
-        this._bundle = new PIXI.particlesFx.FX();
-        let fx_settings_data = Urso.cache.getJson(this.cfg);
+        // this._bundle = new particlesFx.FX();
+        // let fx_settings_data = Urso.cache.getJson(this.cfg);
 
-        if (this.spritesheetFilter)
-            fx_settings_data.spritesheetFilter = this.spritesheetFilter;
+        // if (this.spritesheetFilter)
+        //     fx_settings_data.spritesheetFilter = this.spritesheetFilter;
         
-        this._defaultEmitterName = fx_settings_data.emitters[0].name;
+        // this._defaultEmitterName = fx_settings_data.emitters[0].name;
 
-        this._bundle.initBundle(fx_settings_data);
-        this.autostart && this.play();
+        // this._bundle.initBundle(fx_settings_data);
+        // this.autostart && this.play();
     }
 
     _subscribeOnce() {
@@ -99,4 +100,4 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsEmitterFx;
+export default ModulesObjectsModelsEmitterFx;

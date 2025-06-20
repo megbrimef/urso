@@ -100,4 +100,4 @@ class ModulesLogicSounds {
     };
 }
 
-module.exports = ModulesLogicSounds;
+export default ModulesLogicSounds;

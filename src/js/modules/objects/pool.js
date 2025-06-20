@@ -65,4 +65,4 @@ class ModulesObjectsPool {
 
 }
 
-module.exports = ModulesObjectsPool;
+export default ModulesObjectsPool;

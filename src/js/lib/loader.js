@@ -213,4 +213,4 @@ class LibLoader {
 
 };
 
-module.exports = LibLoader;
+export default LibLoader;

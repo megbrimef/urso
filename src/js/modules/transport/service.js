@@ -147,4 +147,4 @@ class ModulesTransportService {
     };
 }
 
-module.exports = ModulesTransportService;
+export default ModulesTransportService;

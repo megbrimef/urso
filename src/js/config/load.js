@@ -1,195 +1,335 @@
+// Import all modules at the top
+import ComponentsBaseController from "../components/base/controller";
+import ComponentsDebugController from "../components/debug/controller";
+import ComponentsDebugCoords from "../components/debug/coords";
+import ComponentsDebugFps from "../components/debug/fps";
+import ComponentsDebugTemplate from "../components/debug/template";
+import ComponentsDebugTimescale from "../components/debug/timescale";
+import ComponentsDeviceRotateController from "../components/deviceRotate/controller";
+import ComponentsEditorController from "../components/editor/controller";
+import ComponentsEditorApi from "../components/editor/api";
+import ComponentsFullscreenAndroid from "../components/fullscreen/android";
+import ComponentsFullscreenController from "../components/fullscreen/controller";
+import ComponentsFullscreenDesktop from "../components/fullscreen/desktop";
+import ComponentsFullscreenIos from "../components/fullscreen/ios";
+import ComponentsLayersSwitcherController from "../components/layersSwitcher/controller";
+import ComponentsLayersSwitcherConfig from "../components/layersSwitcher/config";
+import ComponentsLoaderController from "../components/loader/controller";
+import ComponentsLoaderTemplate from "../components/loader/template";
+import ComponentsSoundInitialPopupController from "../components/soundInitialPopup/controller";
+import ComponentsSoundInitialPopupTemplate from "../components/soundInitialPopup/template";
+import ComponentsStateDrivenController from "../components/stateDriven/controller";
+
+import ConfigMain from "../config/main";
+
+import ExtraBrowserEvents from "../extra/browserEvents";
+import ExtraMain from "../extra/main";
+// import ExtraPixiPatch from '../extra/pixiPatch'; //FIXME
+
+import LibCache from "../lib/cache";
+import LibComposition from "../lib/composition";
+import LibDevice from "../lib/device";
+import LibHelper from "../lib/helper";
+import LibLoader from "../lib/loader";
+import LibLocalData from "../lib/localData";
+import LibLogger from "../lib/logger";
+import LibMath from "../lib/math";
+import LibObjectPool from "../lib/objectPool";
+import LibTime from "../lib/time";
+import LibTween from "../lib/tween";
+
+import ModulesAssetsBaseModel from "../modules/assets/baseModel";
+import ModulesAssetsConfig from "../modules/assets/config";
+import ModulesAssetsController from "../modules/assets/controller";
+import ModulesAssetsService from "../modules/assets/service";
+import ModulesAssetsModelsAtlas from "../modules/assets/models/atlas";
+import ModulesAssetsModelsAudiosprite from "../modules/assets/models/audiosprite";
+import ModulesAssetsModelsBitmapFont from "../modules/assets/models/bitmapFont";
+import ModulesAssetsModelsContainer from "../modules/assets/models/container";
+import ModulesAssetsModelsFont from "../modules/assets/models/font";
+import ModulesAssetsModelsHtml from "../modules/assets/models/html";
+import ModulesAssetsModelsImage from "../modules/assets/models/image";
+import ModulesAssetsModelsJson from "../modules/assets/models/json";
+import ModulesAssetsModelsJsonAtlas from "../modules/assets/models/jsonAtlas";
+import ModulesAssetsModelsSound from "../modules/assets/models/sound";
+import ModulesAssetsModelsSpine from "../modules/assets/models/spine";
+import ModulesAssetsModelsSpineAtlas from "../modules/assets/models/spineAtlas";
+
+import ModulesI18nConfig from "../modules/i18n/config";
+import ModulesI18nController from "../modules/i18n/controller";
+
+import ModulesInstancesController from "../modules/instances/controller";
+
+import ModulesLogicController from "../modules/logic/controller";
+import ModulesLogicMain from "../modules/logic/main";
+import ModulesLogicSounds from "../modules/logic/sounds";
+import ModulesLogicConfigSounds from "../modules/logic/config/sounds";
+
+import ModulesObjectsBaseModel from "../modules/objects/baseModel";
+import ModulesObjectsCache from "../modules/objects/cache";
+import ModulesObjectsConfig from "../modules/objects/config";
+import ModulesObjectsController from "../modules/objects/controller";
+import ModulesObjectsFind from "../modules/objects/find";
+import ModulesObjectsPool from "../modules/objects/pool";
+import ModulesObjectsPropertyAdapter from "../modules/objects/propertyAdapter";
+import ModulesObjectsProxy from "../modules/objects/proxy";
+import ModulesObjectsSelector from "../modules/objects/selector";
+import ModulesObjectsService from "../modules/objects/service";
+import ModulesObjectsStyles from "../modules/objects/styles";
+import ModulesObjectsModelsBitmapText from "../modules/objects/models/bitmapText";
+import ModulesObjectsModelsButton from "../modules/objects/models/button";
+import ModulesObjectsModelsButtonComposite from "../modules/objects/models/buttonComposite";
+import ModulesObjectsModelsCheckbox from "../modules/objects/models/checkbox";
+import ModulesObjectsModelsCollection from "../modules/objects/models/collection";
+import ModulesObjectsModelsComponent from "../modules/objects/models/component";
+import ModulesObjectsModelsContainer from "../modules/objects/models/container";
+import ModulesObjectsModelsEmitterFx from "../modules/objects/models/emitterFx";
+import ModulesObjectsModelsGraphics from "../modules/objects/models/graphics";
+import ModulesObjectsModelsGroup from "../modules/objects/models/group";
+import ModulesObjectsModelsHitArea from "../modules/objects/models/hitArea";
+import ModulesObjectsModelsImage from "../modules/objects/models/image";
+import ModulesObjectsModelsImagesAnimation from "../modules/objects/models/imagesAnimation";
+import ModulesObjectsModelsMask from "../modules/objects/models/mask";
+import ModulesObjectsModelsNineSlicePlane from "../modules/objects/models/nineSlicePlane";
+import ModulesObjectsModelsSlider from "../modules/objects/models/slider";
+import ModulesObjectsModelsSpine from "../modules/objects/models/spine";
+import ModulesObjectsModelsText from "../modules/objects/models/text";
+import ModulesObjectsModelsToggle from "../modules/objects/models/toggle";
+import ModulesObjectsModelsWorld from "../modules/objects/models/world";
+
+import ModulesObserverController from "../modules/observer/controller";
+import ModulesObserverEvents from "../modules/observer/events";
+
+import ModulesScenesController from "../modules/scenes/controller";
+import ModulesScenesModel from "../modules/scenes/model";
+import ModulesScenesPixiWrapper from "../modules/scenes/pixiWrapper";
+import ModulesScenesResolutions from "../modules/scenes/resolutions";
+import ModulesScenesResolutionsConfig from "../modules/scenes/resolutionsConfig";
+import ModulesScenesService from "../modules/scenes/service";
+
+import ModulesSoundManagerController from "../modules/soundManager/controller";
+import ModulesSoundManagerSoundSprite from "../modules/soundManager/soundSprite";
+
+import ModulesStatesManagerAction from "../modules/statesManager/action";
+import ModulesStatesManagerAll from "../modules/statesManager/all";
+import ModulesStatesManagerConfigStates from "../modules/statesManager/configStates";
+import ModulesStatesManagerController from "../modules/statesManager/controller";
+import ModulesStatesManagerFunctionsStorage from "../modules/statesManager/functionsStorage";
+import ModulesStatesManagerHelper from "../modules/statesManager/helper";
+import ModulesStatesManagerRace from "../modules/statesManager/race";
+import ModulesStatesManagerSequence from "../modules/statesManager/sequence";
+
+import ModulesTemplateController from "../modules/template/controller";
+import ModulesTemplateModel from "../modules/template/model";
+import ModulesTemplateService from "../modules/template/service";
+import ModulesTemplateTypes from "../modules/template/types";
+
+import ModulesTransportBaseConnectionType from "../modules/transport/baseConnectionType";
+import ModulesTransportConfig from "../modules/transport/config";
+import ModulesTransportController from "../modules/transport/controller";
+import ModulesTransportDecorator from "../modules/transport/decorator";
+import ModulesTransportService from "../modules/transport/service";
+import ModulesTransportConnectionTypesWebsocket from "../modules/transport/connectionTypes/websocket";
+import ModulesTransportConnectionTypesXhr from "../modules/transport/connectionTypes/xhr";
+
+import App from "../app";
+
 //Urso namespace
 window.Urso = {
-    //Core namespace
-    Core: {
-        Components: {
-            Base: {
-                Controller: require('../components/base/controller')
-            },
-            Debug: {
-                Controller: require('../components/debug/controller'),
-                Coords: require('../components/debug/coords'),
-                Fps: require('../components/debug/fps'),
-                Template: require('../components/debug/template'),
-                Timescale: require('../components/debug/timescale')
-            },
-            DeviceRotate: {
-                Controller: require('../components/deviceRotate/controller')
-            },
-            Editor: {
-                Controller: require('../components/editor/controller'),
-                Api: require('../components/editor/api')
-            },
-            Fullscreen: {
-                Android: require('../components/fullscreen/android'),
-                Controller: require('../components/fullscreen/controller'),
-                Desktop: require('../components/fullscreen/desktop'),
-                Ios: require('../components/fullscreen/ios')
-            },
-            LayersSwitcher: {
-                Controller: require('../components/layersSwitcher/controller'),
-                Config: require('../components/layersSwitcher/config')
-            },
-            Loader: {
-                Controller: require('../components/loader/controller'),
-                Template: require('../components/loader/template')
-            },
-            SoundInitialPopup: {
-                Controller: require('../components/soundInitialPopup/controller'),
-                Template: require('../components/soundInitialPopup/template')
-            },
-            StateDriven: {
-                Controller: require('../components/stateDriven/controller')
-            }
+  Core: {
+    Components: {
+      Base: {
+        Controller: ComponentsBaseController,
+      },
+      Debug: {
+        Controller: ComponentsDebugController,
+        Coords: ComponentsDebugCoords,
+        Fps: ComponentsDebugFps,
+        Template: ComponentsDebugTemplate,
+        Timescale: ComponentsDebugTimescale,
+      },
+      DeviceRotate: {
+        Controller: ComponentsDeviceRotateController,
+      },
+      Editor: {
+        Controller: ComponentsEditorController,
+        Api: ComponentsEditorApi,
+      },
+      Fullscreen: {
+        Android: ComponentsFullscreenAndroid,
+        Controller: ComponentsFullscreenController,
+        Desktop: ComponentsFullscreenDesktop,
+        Ios: ComponentsFullscreenIos,
+      },
+      LayersSwitcher: {
+        Controller: ComponentsLayersSwitcherController,
+        Config: ComponentsLayersSwitcherConfig,
+      },
+      Loader: {
+        Controller: ComponentsLoaderController,
+        Template: ComponentsLoaderTemplate,
+      },
+      SoundInitialPopup: {
+        Controller: ComponentsSoundInitialPopupController,
+        Template: ComponentsSoundInitialPopupTemplate,
+      },
+      StateDriven: {
+        Controller: ComponentsStateDrivenController,
+      },
+    },
+    Config: {
+      Main: ConfigMain,
+    },
+    Extra: {
+      BrowserEvents: ExtraBrowserEvents,
+      Main: ExtraMain,
+      // PixiPatch: ExtraPixiPatch //FIXME
+    },
+    Lib: {
+      Cache: LibCache,
+      Composition: LibComposition,
+      Device: LibDevice,
+      Helper: LibHelper,
+      Loader: LibLoader,
+      LocalData: LibLocalData,
+      Logger: LibLogger,
+      Math: LibMath,
+      ObjectPool: LibObjectPool,
+      Time: LibTime,
+      Tween: LibTween,
+    },
+    Modules: {
+      Assets: {
+        BaseModel: ModulesAssetsBaseModel,
+        Config: ModulesAssetsConfig,
+        Controller: ModulesAssetsController,
+        Service: ModulesAssetsService,
+        Models: {
+          Atlas: ModulesAssetsModelsAtlas,
+          Audiosprite: ModulesAssetsModelsAudiosprite,
+          BitmapFont: ModulesAssetsModelsBitmapFont,
+          Container: ModulesAssetsModelsContainer,
+          Font: ModulesAssetsModelsFont,
+          Html: ModulesAssetsModelsHtml,
+          Image: ModulesAssetsModelsImage,
+          Json: ModulesAssetsModelsJson,
+          JsonAtlas: ModulesAssetsModelsJsonAtlas,
+          Sound: ModulesAssetsModelsSound,
+          Spine: ModulesAssetsModelsSpine,
+          SpineAtlas: ModulesAssetsModelsSpineAtlas,
         },
+      },
+      I18n: {
+        Config: ModulesI18nConfig,
+        Controller: ModulesI18nController,
+      },
+      Instances: {
+        Controller: ModulesInstancesController,
+      },
+      Logic: {
+        Controller: ModulesLogicController,
+        Main: ModulesLogicMain,
+        Sounds: ModulesLogicSounds,
         Config: {
-            Main: require('../config/main')
+          Sounds: ModulesLogicConfigSounds,
         },
-        Extra: {
-            BrowserEvents: require('../extra/browserEvents'),
-            Main: require('../extra/main'),
-            // PixiPatch: require('../extra/pixiPatch') //FIXME
+      },
+      Objects: {
+        BaseModel: ModulesObjectsBaseModel,
+        Cache: ModulesObjectsCache,
+        Config: ModulesObjectsConfig,
+        Controller: ModulesObjectsController,
+        Find: ModulesObjectsFind,
+        Pool: ModulesObjectsPool,
+        PropertyAdapter: ModulesObjectsPropertyAdapter,
+        Proxy: ModulesObjectsProxy,
+        Selector: ModulesObjectsSelector,
+        Service: ModulesObjectsService,
+        Styles: ModulesObjectsStyles,
+        Models: {
+          BitmapText: ModulesObjectsModelsBitmapText,
+          Button: ModulesObjectsModelsButton,
+          ButtonComposite: ModulesObjectsModelsButtonComposite,
+          Checkbox: ModulesObjectsModelsCheckbox,
+          Collection: ModulesObjectsModelsCollection,
+          Component: ModulesObjectsModelsComponent,
+          Container: ModulesObjectsModelsContainer,
+          EmitterFx: ModulesObjectsModelsEmitterFx,
+          Graphics: ModulesObjectsModelsGraphics,
+          Group: ModulesObjectsModelsGroup,
+          HitArea: ModulesObjectsModelsHitArea,
+          Image: ModulesObjectsModelsImage,
+          ImagesAnimation: ModulesObjectsModelsImagesAnimation,
+          Mask: ModulesObjectsModelsMask,
+          NineSlicePlane: ModulesObjectsModelsNineSlicePlane,
+          Slider: ModulesObjectsModelsSlider,
+          Spine: ModulesObjectsModelsSpine,
+          Text: ModulesObjectsModelsText,
+          Toggle: ModulesObjectsModelsToggle,
+          World: ModulesObjectsModelsWorld,
         },
-        Lib: {
-            Cache: require('../lib/cache'),
-            Composition: require('../lib/composition'),
-            Device: require('../lib/device'),
-            Helper: require('../lib/helper'),
-            Loader: require('../lib/loader'),
-            LocalData: require('../lib/localData'),
-            Logger: require('../lib/logger'),
-            Math: require('../lib/math'),
-            ObjectPool: require('../lib/objectPool'),
-            Time: require('../lib/time'),
-            Tween: require('../lib/tween')
+      },
+      Observer: {
+        Controller: ModulesObserverController,
+        Events: ModulesObserverEvents,
+      },
+      Scenes: {
+        Controller: ModulesScenesController,
+        Model: ModulesScenesModel,
+        PixiWrapper: ModulesScenesPixiWrapper,
+        Resolutions: ModulesScenesResolutions,
+        ResolutionsConfig: ModulesScenesResolutionsConfig,
+        Service: ModulesScenesService,
+      },
+      SoundManager: {
+        Controller: ModulesSoundManagerController,
+        SoundSprite: ModulesSoundManagerSoundSprite,
+      },
+      StatesManager: {
+        Action: ModulesStatesManagerAction,
+        All: ModulesStatesManagerAll,
+        ConfigStates: ModulesStatesManagerConfigStates,
+        Controller: ModulesStatesManagerController,
+        FunctionsStorage: ModulesStatesManagerFunctionsStorage,
+        Helper: ModulesStatesManagerHelper,
+        Race: ModulesStatesManagerRace,
+        Sequence: ModulesStatesManagerSequence,
+        Actions: {
+          //put your custom actions here
         },
-        Modules: {
-            Assets: {
-                BaseModel: require('../modules/assets/baseModel'),
-                Config: require('../modules/assets/config'),
-                Controller: require('../modules/assets/controller'),
-                Service: require('../modules/assets/service'),
-                Models: {
-                    Atlas: require('../modules/assets/models/atlas'),
-                    Audiosprite: require('../modules/assets/models/audiosprite'),
-                    BitmapFont: require('../modules/assets/models/bitmapFont'),
-                    Container: require('../modules/assets/models/container'),
-                    Font: require('../modules/assets/models/font'),
-                    Html: require('../modules/assets/models/html'),
-                    Image: require('../modules/assets/models/image'),
-                    Json: require('../modules/assets/models/json'),
-                    JsonAtlas: require('../modules/assets/models/jsonAtlas'),
-                    Sound: require('../modules/assets/models/sound'),
-                    Spine: require('../modules/assets/models/spine'),
-                    SpineAtlas: require('../modules/assets/models/spineAtlas'),
-                }
-            },
-            I18n: {
-                Config: require('../modules/i18n/config'),
-                Controller: require('../modules/i18n/controller')
-            },
-            Instances: {
-                Controller: require('../modules/instances/controller')
-            },
-            Logic: {
-                Controller: require('../modules/logic/controller'),
-                Main: require('../modules/logic/main'),
-                Sounds: require('../modules/logic/sounds'),
-                Config: {
-                    Sounds: require('../modules/logic/config/sounds')
-                }
-            },
-            Objects: {
-                BaseModel: require('../modules/objects/baseModel'),
-                Cache: require('../modules/objects/cache'),
-                Config: require('../modules/objects/config'),
-                Controller: require('../modules/objects/controller'),
-                Find: require('../modules/objects/find'),
-                Pool: require('../modules/objects/pool'),
-                PropertyAdapter: require('../modules/objects/propertyAdapter'),
-                Proxy: require('../modules/objects/proxy'),
-                Selector: require('../modules/objects/selector'),
-                Service: require('../modules/objects/service'),
-                Styles: require('../modules/objects/styles'),
-                Models: {
-                    // AtlasImage: require('../modules/objects/models/atlasImage'),
-                    BitmapText: require('../modules/objects/models/bitmapText'),
-                    Button: require('../modules/objects/models/button'),
-                    ButtonComposite: require('../modules/objects/models/buttonComposite'),
-                    Checkbox: require('../modules/objects/models/checkbox'),
-                    Collection: require('../modules/objects/models/collection'),
-                    Component: require('../modules/objects/models/component'),
-                    Container: require('../modules/objects/models/container'),
-                    // DragContainer: require('../modules/objects/models/dragContainer'),
-                    // Emitter: require('../modules/objects/models/emitter'),
-                    EmitterFx: require('../modules/objects/models/emitterFx'),
-                    Graphics: require('../modules/objects/models/graphics'),
-                    Group: require('../modules/objects/models/group'),
-                    HitArea: require('../modules/objects/models/hitArea'),
-                    Image: require('../modules/objects/models/image'),
-                    ImagesAnimation: require('../modules/objects/models/imagesAnimation'),
-                    Mask: require('../modules/objects/models/mask'),
-                    NineSlicePlane: require('../modules/objects/models/nineSlicePlane'),
-                    // Scrollbox: require('../modules/objects/models/scrollbox'), //FIXME
-                    Slider: require('../modules/objects/models/slider'),
-                    Spine: require('../modules/objects/models/spine'),
-                    Text: require('../modules/objects/models/text'),
-                    // TextInput: require('../modules/objects/models/textInput'),
-                    Toggle: require('../modules/objects/models/toggle'),
-                    World: require('../modules/objects/models/world')
-                }
-            },
-            Observer: {
-                Controller: require('../modules/observer/controller'),
-                Events: require('../modules/observer/events')
-            },
-            Scenes: {
-                Controller: require('../modules/scenes/controller'),
-                Model: require('../modules/scenes/model'),
-                PixiWrapper: require('../modules/scenes/pixiWrapper'),
-                Resolutions: require('../modules/scenes/resolutions'),
-                ResolutionsConfig: require('../modules/scenes/resolutionsConfig'),
-                Service: require('../modules/scenes/service')
-            },
-            SoundManager: {
-                Controller: require('../modules/soundManager/controller'),
-                SoundSprite: require('../modules/soundManager/soundSprite')
-            },
-            StatesManager: {
-                Action: require('../modules/statesManager/action'),
-                All: require('../modules/statesManager/all'),
-                ConfigStates: require('../modules/statesManager/configStates'),
-                Controller: require('../modules/statesManager/controller'),
-                FunctionsStorage: require('../modules/statesManager/functionsStorage'),
-                Helper: require('../modules/statesManager/helper'),
-                Race: require('../modules/statesManager/race'),
-                Sequence: require('../modules/statesManager/sequence'),
-                Actions: {
-                    //put your custom actions here
-                }
-            },
-            Template: {
-                Controller: require('../modules/template/controller'),
-                Model: require('../modules/template/model'),
-                Service: require('../modules/template/service'),
-                Types: require('../modules/template/types')
-            },
-            Transport: {
-                BaseConnectionType: require('../modules/transport/baseConnectionType'),
-                Config: require('../modules/transport/config'),
-                Controller: require('../modules/transport/controller'),
-                Decorator: require('../modules/transport/decorator'),
-                Service: require('../modules/transport/service'),
-                ConnectionTypes: {
-                    Websocket: require('../modules/transport/connectionTypes/websocket'),
-                    Xhr: require('../modules/transport/connectionTypes/xhr')
-                }
-            }
+      },
+      Template: {
+        Controller: ModulesTemplateController,
+        Model: ModulesTemplateModel,
+        Service: ModulesTemplateService,
+        Types: ModulesTemplateTypes,
+      },
+      Transport: {
+        BaseConnectionType: ModulesTransportBaseConnectionType,
+        Config: ModulesTransportConfig,
+        Controller: ModulesTransportController,
+        Decorator: ModulesTransportDecorator,
+        Service: ModulesTransportService,
+        ConnectionTypes: {
+          Websocket: ModulesTransportConnectionTypesWebsocket,
+          Xhr: ModulesTransportConnectionTypesXhr,
         },
-        Templates: {
-            Groups: {},
-            Scenes: {}
+      },
+    },
+    Templates: {
+      Groups: {
+      },
+      Scenes: {
+        Play: class {
+          objects = [
+            {
+              type: Urso.types.objects.COMPONENT,
+              componentName: "loader",
+            },
+          ];
         },
-        App: require('../app')
-    }
+      },
+    },
+    App: App,
+  },
 };

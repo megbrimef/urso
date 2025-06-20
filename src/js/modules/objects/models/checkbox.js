@@ -1,4 +1,4 @@
-const UrsoCoreModulesObjectsModelsToggle = require('./toggle');
+import UrsoCoreModulesObjectsModelsToggle from './toggle';
 
 class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
     constructor(params) {
@@ -97,4 +97,4 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
     }
 }
 
-module.exports = ModulesObjectsModelsCheckbox;
+export default ModulesObjectsModelsCheckbox;

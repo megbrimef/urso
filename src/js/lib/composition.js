@@ -42,7 +42,7 @@ class LibComposition {
 	}
 }
 
-module.exports = LibComposition;
+export default LibComposition;
 
 
 /**

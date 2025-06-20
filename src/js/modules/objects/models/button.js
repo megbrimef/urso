@@ -8,8 +8,7 @@
     }
 }*/
 
-
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -206,4 +205,4 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsButton;
+export default ModulesObjectsModelsButton;

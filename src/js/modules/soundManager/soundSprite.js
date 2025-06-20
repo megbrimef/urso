@@ -311,4 +311,4 @@ class SoundSprite {
     }
 };
 
-module.exports = SoundSprite;
+export default SoundSprite;

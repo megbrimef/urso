@@ -26,4 +26,4 @@ class LibLocalData {
     };
 }
 
-module.exports = LibLocalData;
+export default LibLocalData;

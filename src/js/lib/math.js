@@ -158,4 +158,4 @@ class LibMath {
   }
 }
 
-module.exports = LibMath;
+export default LibMath;

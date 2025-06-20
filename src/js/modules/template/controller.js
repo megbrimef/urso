@@ -25,4 +25,4 @@ class ModulesTemplateController {
 
 }
 
-module.exports = ModulesTemplateController;
+export default ModulesTemplateController;

@@ -1,4 +1,6 @@
-class ModulesObjectsModelsCollection {
+import ModulesObjectsBaseModel from './../baseModel';
+
+class ModulesObjectsModelsCollection extends ModulesObjectsBaseModel {
     constructor(param) {
         this._children = param || [];
         this._setProperty = this._setProperty.bind(this);
@@ -51,4 +53,4 @@ class ModulesObjectsModelsCollection {
     } 
 }
 
-module.exports = ModulesObjectsModelsCollection;
+export default ModulesObjectsModelsCollection;

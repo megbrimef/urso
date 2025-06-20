@@ -49,4 +49,4 @@ class ModulesLogicController {
     _subscribe() { };
 }
 
-module.exports = ModulesLogicController;
+export default ModulesLogicController;

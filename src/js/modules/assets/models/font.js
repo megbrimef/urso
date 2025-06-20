@@ -1,4 +1,4 @@
-const ModulesAssetsBaseModel = require('./../baseModel');
+import ModulesAssetsBaseModel from './../baseModel';
 
 class ModulesAssetsModelsFont extends ModulesAssetsBaseModel {
     constructor(params) {
@@ -8,4 +8,4 @@ class ModulesAssetsModelsFont extends ModulesAssetsBaseModel {
     }
 }
 
-module.exports = ModulesAssetsModelsFont;
+export default ModulesAssetsModelsFont;

@@ -14,4 +14,4 @@ class ModulesTransportDecorator {
 
 }
 
-module.exports = ModulesTransportDecorator;
+export default ModulesTransportDecorator;

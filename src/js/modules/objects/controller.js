@@ -136,4 +136,4 @@ class ModulesObjectsController {
     }
 }
 
-module.exports = ModulesObjectsController;
+export default ModulesObjectsController;

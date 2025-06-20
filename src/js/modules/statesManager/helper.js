@@ -24,4 +24,4 @@ class ModulesStatesManagerHelper {
 
 }
 
-module.exports = ModulesStatesManagerHelper;
+export default ModulesStatesManagerHelper;

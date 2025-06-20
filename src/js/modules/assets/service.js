@@ -561,4 +561,4 @@ class ModulesAssetsService {
     };
 }
 
-module.exports = ModulesAssetsService;
+export default ModulesAssetsService;

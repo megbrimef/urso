@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsGroup extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -19,4 +19,4 @@ class ModulesObjectsModelsGroup extends ModulesObjectsBaseModel {
     };
 }
 
-module.exports = ModulesObjectsModelsGroup;
+export default ModulesObjectsModelsGroup;

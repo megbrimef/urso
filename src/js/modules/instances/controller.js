@@ -354,4 +354,4 @@ class ModulesInstancesController {
     }
 }
 
-module.exports = ModulesInstancesController;
+export default ModulesInstancesController;

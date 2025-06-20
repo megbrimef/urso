@@ -23,7 +23,7 @@ class ModulesTemplateService {
 
         this._parseAssets(this._currentTemplate.assets, template._templatePath);
         this._parseObjects(this._currentTemplate.objects, template._templatePath);
-
+        
         if (additionalTemplateFlag) {
             this._actualFullTemplate.assets = Urso.helper.mergeArrays(this._actualFullTemplate.assets, this._currentTemplate.assets);
             this._actualFullTemplate.components = Urso.helper.mergeArrays(this._actualFullTemplate.components, this._currentTemplate.components);
@@ -134,4 +134,4 @@ class ModulesTemplateService {
 
 }
 
-module.exports = ModulesTemplateService;
+export default ModulesTemplateService;

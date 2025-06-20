@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="./build/js/index.js"></script>
+    <script>
+      // Example of using the imported function
+    //   Urso.runGame();
+    //   return;
+      (async () => {
+        const app = new PIXI.Application();
+        await app.init({ background: "#1099bb", resizeTo: window });
+        document.body.appendChild(app.canvas);
+        const cntr = new PIXI.Graphics();
+        cntr.beginFill(0x66f542);
+        cntr.drawRect(0, 0, 100, 100);
+        cntr.endFill();
+        cntr.y = 100;
+        cntr.x = 100;
+        app.stage.addChild(cntr);
+
+        let from = { y: 100 };
+        let to = { y: 600 };
+
+        // debugger
+        const run = () => {
+          const t = gsap.timeline();
+
+          t.to(from, {
+            ...to,
+            yoyo: true,
+            duration: 1,
+            onUpdate: () => {
+              cntr.y = from.y;
+            },
+            onComplete: () => {
+              cntr.y = 100;
+              from = { y: 100 };
+              to = { y: 600 };
+              run();
+            },
+          });
+        };
+        run();
+      })();
+    </script>
+  </body>
+</html>

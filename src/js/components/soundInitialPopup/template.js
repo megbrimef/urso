@@ -107,4 +107,4 @@ class ComponentsSoundInitialPopupTemplate {
     }
 };
 
-module.exports = ComponentsSoundInitialPopupTemplate;
+export default ComponentsSoundInitialPopupTemplate;

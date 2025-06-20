@@ -45,4 +45,4 @@ class ModulesTransportController {
     };
 }
 
-module.exports = ModulesTransportController;
+export default ModulesTransportController;

@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsBitmapText extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -53,4 +53,4 @@ class ModulesObjectsModelsBitmapText extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsBitmapText;
+export default ModulesObjectsModelsBitmapText;

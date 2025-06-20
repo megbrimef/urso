@@ -1,4 +1,4 @@
-const Race = require('./race.js');
+import Race from './race.js';
 
 class ModulesStatesManagerAll extends Race {
     constructor(params) {
@@ -20,4 +20,4 @@ class ModulesStatesManagerAll extends Race {
     }
 }
 
-module.exports = ModulesStatesManagerAll;
+export default ModulesStatesManagerAll;

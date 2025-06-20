@@ -18,4 +18,4 @@ class ModulesAssetsBaseModel {
     }
 }
 
-module.exports = ModulesAssetsBaseModel;
+export default ModulesAssetsBaseModel;

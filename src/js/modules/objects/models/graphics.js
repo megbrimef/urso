@@ -1,4 +1,4 @@
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsGraphics extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -18,6 +18,7 @@ class ModulesObjectsModelsGraphics extends ModulesObjectsBaseModel {
     }
 
     _drawPoligon() {
+
         if (!this.polygon.length && !this.rectangle.length)
             return;
 
@@ -37,4 +38,4 @@ class ModulesObjectsModelsGraphics extends ModulesObjectsBaseModel {
     };
 }
 
-module.exports = ModulesObjectsModelsGraphics;
+export default ModulesObjectsModelsGraphics;

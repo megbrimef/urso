@@ -165,4 +165,4 @@ class ModulesObserverController {
     };
 };
 
-module.exports = ModulesObserverController;
+export default ModulesObserverController;

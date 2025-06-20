@@ -589,4 +589,4 @@ class PropertyAdapter {
     }
 }
 
-module.exports = PropertyAdapter;
+export default PropertyAdapter;

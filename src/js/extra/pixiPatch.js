@@ -169,3 +169,5 @@ Object.defineProperty(PIXI.MeshMaterial.prototype, "texture", {
     enumerable: !1,
     configurable: !0
 });
+
+export default {}

@@ -1,66 +1,71 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from "./../base/controller";
 
 class ComponentsLoaderController extends ComponentsBaseController {
+  loadUpdate(loadProgress) {
+    this.setLoadProgress(loadProgress);
+  }
 
-    constructor(options) {
-        super(options);
+  create() {
+    this.setMask();
 
-        //load own assets
+    this.tween = Urso.getInstance("Lib.Tween");
+    const obj = Urso.findOne("^qqqq");
+    let from = { y: 100 };
+    let to = { y: 500 };
 
-        //then create loader objects
-        Urso.objects.create(this.getInstance('Template').objects);
-    }
+    // debugger
+    const run = () => {
+        const t = gsap.timeline();
 
-    assetsMount() {
-        return false;
-    }
+        t.to(from, { 
+            ...to,
+            duration: 1,
+            onUpdate: () => {
+                obj.y = from.y
+            },
+            onComplete: () => {
+                obj.y = 100;
+                from = { y: 100 }
+                to = { y: 500 }
+                run();
+            }
+        })
+    };
+    run();
+    //todo remove all objects
+  }
 
-    objectsMount() {
-        return false;
-    }
+  setMask() {
+    if (this.loaderBg && this.loaderBgMask)
+      this.loaderBg._baseObject.mask = this.loaderBgMask._baseObject;
+  }
 
-    loadUpdate(loadProgress) {
-        this.setLoadProgress(loadProgress);
-    }
+  formatAmountText(text) {
+    return `${text}%`;
+  }
 
-    create() {
-        this.setMask();
-        //todo remove all objects
-    }
+  setLoadProgress(val) {
+    if (!this.componentCreated) return;
 
-    setMask() {
-        if (this.loaderBg && this.loaderBgMask)
-            this.loaderBg._baseObject.mask = this.loaderBgMask._baseObject
-    }
+    this.loaderBgMask._baseObject.scale.x = val;
+    this.loadAmountText.text = this.formatAmountText(val);
+  }
 
-    formatAmountText(text) {
-        return `${text}%`;
-    }
+  get componentCreated() {
+    return !!this.loadAmountText && !!this.loaderBg && !!this.loaderBgMask;
+  }
 
-    setLoadProgress(val) {
-        if (!this.componentCreated)
-            return;
+  get loadAmountText() {
+    return Urso.findOne(".loadAmountText");
+  }
 
-        this.loaderBgMask._baseObject.scale.x = val;
-        this.loadAmountText.text = this.formatAmountText(val);
-    }
+  get loaderBg() {
+    return Urso.findOne("^loaderBg");
+  }
 
-    get componentCreated() {
-        return !!this.loadAmountText && !!this.loaderBg && !!this.loaderBgMask;
-    }
-
-    get loadAmountText() {
-        return Urso.findOne('.loadAmountText');
-    }
-
-    get loaderBg() {
-        return Urso.findOne('^loaderBg');
-    }
-
-    get loaderBgMask() {
-        return Urso.findOne('^loaderBgMask');
-    }
-
+  get loaderBgMask() {
+    return Urso.findOne("^loaderBgMask");
+  }
 }
 
-module.exports = ComponentsLoaderController;
+export default ComponentsLoaderController;

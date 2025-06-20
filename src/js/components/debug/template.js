@@ -52,4 +52,4 @@ class ComponentsDebugTemplate {
 
 }
 
-module.exports = ComponentsDebugTemplate;
+export default ComponentsDebugTemplate;

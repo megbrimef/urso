@@ -62,6 +62,7 @@ class ModulesObjectsProxy {
     _customGetLogic(object, key, reflectValue) {
         const target = object.target;
         const wrapKey = this._getAliases()[key];
+        
         const isReflectValueObject = typeof reflectValue !== 'undefined'; //&& typeof reflectValue !== 'boolean'; //it was for getting width and height
 
         if ((isReflectValueObject && (typeof wrapKey != 'undefined')) || !wrapKey)
@@ -112,7 +113,7 @@ class ModulesObjectsProxy {
 
         const baseObject = target._baseObject;
 
-        baseObject.updateTransform();
+        baseObject.updateTransform({});
         
         //Pixi texts have _texture.orig.width. When we call baseObject.width, Pixi runs update text. Its too slow operation.
         if (baseObject._texture && (!baseObject._texture.orig.width || !baseObject._texture.orig.height)) {
@@ -296,4 +297,4 @@ class ModulesObjectsProxy {
     }
 }
 
-module.exports = ModulesObjectsProxy;
+export default ModulesObjectsProxy;

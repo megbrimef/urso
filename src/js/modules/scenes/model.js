@@ -25,4 +25,4 @@ class ModulesScenesModel {
     }
 }
 
-module.exports = ModulesScenesModel;
+export default ModulesScenesModel;

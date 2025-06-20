@@ -141,4 +141,4 @@ class ModulesScenesService {
     }
 }
 
-module.exports = ModulesScenesService;
+export default ModulesScenesService;

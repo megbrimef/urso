@@ -19,5 +19,5 @@ class ModulesLogicConfigSounds {
 
 };
 
-module.exports = ModulesLogicConfigSounds;
+export default ModulesLogicConfigSounds;
 

@@ -1,4 +1,4 @@
-require('./config/load.js');
+import './config/load.js';
 
 //main config
 Urso.config = Urso.Core.Config.Main;

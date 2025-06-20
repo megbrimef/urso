@@ -1212,4 +1212,4 @@ LibDevice.isAndroidStockBrowser = function () {
     };
 })();
 
-module.exports = LibDevice;
+export default LibDevice;

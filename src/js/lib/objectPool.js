@@ -205,4 +205,4 @@ class LibObjectPool {
     }
 }
 
-module.exports = LibObjectPool;
+export default LibObjectPool;

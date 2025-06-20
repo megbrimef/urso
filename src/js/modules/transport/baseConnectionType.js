@@ -22,4 +22,4 @@ class ModulesTransportBaseConnectionType {
     };
 }
 
-module.exports = ModulesTransportBaseConnectionType;
+export default ModulesTransportBaseConnectionType;

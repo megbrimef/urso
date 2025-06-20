@@ -216,4 +216,4 @@ class ModulesStatesManagerController {
 
 }
 
-module.exports = ModulesStatesManagerController;
+export default ModulesStatesManagerController;

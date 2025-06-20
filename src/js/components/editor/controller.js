@@ -1,4 +1,4 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from './../base/controller';
 
 class ComponentsEditorController extends ComponentsBaseController {
     constructor(params) {
@@ -10,4 +10,4 @@ class ComponentsEditorController extends ComponentsBaseController {
 
 }
 
-module.exports = ComponentsEditorController;
+export default ComponentsEditorController;

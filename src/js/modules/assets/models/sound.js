@@ -1,4 +1,4 @@
-const ModulesAssetsBaseModel = require('./../baseModel');
+import ModulesAssetsBaseModel from './../baseModel';
 
 class ModulesAssetsModelsSound extends ModulesAssetsBaseModel {
     constructor(params) {
@@ -14,4 +14,4 @@ class ModulesAssetsModelsSound extends ModulesAssetsBaseModel {
     }
 }
 
-module.exports = ModulesAssetsModelsSound;
+export default ModulesAssetsModelsSound;

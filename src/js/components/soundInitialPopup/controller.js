@@ -1,4 +1,4 @@
-const ComponentsBaseController = require('./../base/controller');
+import ComponentsBaseController from './../base/controller';
 
 class ComponentsSoundInitialPopupController extends ComponentsBaseController {
 
@@ -40,4 +40,4 @@ class ComponentsSoundInitialPopupController extends ComponentsBaseController {
     }
 }
 
-module.exports = ComponentsSoundInitialPopupController;
+export default ComponentsSoundInitialPopupController;

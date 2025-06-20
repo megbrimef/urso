@@ -7,4 +7,4 @@ class ModulesObjectsConfig {
 
 }
 
-module.exports = ModulesObjectsConfig;
+export default ModulesObjectsConfig;

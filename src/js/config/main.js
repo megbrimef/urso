@@ -14,4 +14,4 @@ let ConfigMain = {
     }
 };
 
-module.exports = ConfigMain;
+export default ConfigMain;

@@ -57,4 +57,4 @@ class ComponentsDebugTimescale {
 
 }
 
-module.exports = ComponentsDebugTimescale;
+export default ComponentsDebugTimescale;

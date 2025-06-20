@@ -170,4 +170,4 @@ class ModulesScenesResolutions {
     };
 }
 
-module.exports = ModulesScenesResolutions;
+export default ModulesScenesResolutions;

@@ -62,4 +62,4 @@ class ModulesAssetsController {
     }
 }
 
-module.exports = ModulesAssetsController;
+export default ModulesAssetsController;

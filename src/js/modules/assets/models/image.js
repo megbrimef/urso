@@ -1,4 +1,4 @@
-const ModulesAssetsBaseModel = require('./../baseModel');
+import ModulesAssetsBaseModel from './../baseModel';
 
 class ModulesAssetsModelsImage extends ModulesAssetsBaseModel {
 
@@ -14,4 +14,4 @@ class ModulesAssetsModelsImage extends ModulesAssetsBaseModel {
     }
 }
 
-module.exports = ModulesAssetsModelsImage;
+export default ModulesAssetsModelsImage;

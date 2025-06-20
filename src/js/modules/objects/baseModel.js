@@ -1,4 +1,4 @@
-class ModulesObjectsBaseModel {
+export default class ModulesObjectsBaseModel {
     constructor(params) {
         this.simpleClass = true;
 
@@ -203,5 +203,3 @@ class ModulesObjectsBaseModel {
             this._baseObject.sortChildren();
     }
 }
-
-module.exports = ModulesObjectsBaseModel;

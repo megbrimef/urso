@@ -8,7 +8,7 @@ buttonModel = {
     }
 }*/
 
-const ModulesObjectsBaseModel = require('./../baseModel');
+import ModulesObjectsBaseModel from './../baseModel';
 
 class ModulesObjectsModelsButtonComposite extends ModulesObjectsBaseModel {
     constructor(params) {
@@ -35,4 +35,4 @@ class ModulesObjectsModelsButtonComposite extends ModulesObjectsBaseModel {
     }
 }
 
-module.exports = ModulesObjectsModelsButtonComposite;
+export default ModulesObjectsModelsButtonComposite;

@@ -94,4 +94,4 @@ class ModulesStatesManagerAction {
     }
 }
 
-module.exports = ModulesStatesManagerAction;
+export default ModulesStatesManagerAction;

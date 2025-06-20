@@ -40,7 +40,7 @@ class ModulesObjectsService {
         if (!this._world) {
             return; //world do not created yet
         }
-
+        
         //remove old classes
         if (this._world.class) {
             this._world.class.split(' ').forEach((className) => this._world.removeClass(className, true));
@@ -252,4 +252,4 @@ class ModulesObjectsService {
     }
 }
 
-module.exports = ModulesObjectsService;
+export default ModulesObjectsService;
