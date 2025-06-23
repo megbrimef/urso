@@ -322,7 +322,7 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
             if (replaceSlotContents)
                 currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            this.addChild(object); //todo make removeChild for addedToSlotObjects
+            this.addChild(object, true); //todo make removeChild for addedToSlotObjects
             currentSlot.addChild(object._baseObject);
             Urso.objects.refreshStyles();
         } else {

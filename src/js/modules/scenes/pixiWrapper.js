@@ -34,8 +34,17 @@ class ModulesScenesPixiWrapper {
 
         //define renderer
         PIXI.utils.skipHello();
-        this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
-        document.body.appendChild(this._renderer.view);
+        const app = new PIXI.Application();
+        this.ticker = app.ticker;
+        this.ticker.autoStart = false;
+        this.ticker.stop();
+
+        //this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
+        //document.body.appendChild(this._renderer.view);
+        this._renderer = app.renderer;
+        document.body.appendChild(app.view);
+
+        //debugger
 
         //root and world
         this._root = new PIXI.Container();
@@ -286,6 +295,8 @@ class ModulesScenesPixiWrapper {
 
         this.currentScene.update(deltaTime);
         this.currentScene.render();
+        //this._renderer.render(this._root);
+        this.ticker.update(deltaTime);
         this._renderer.render(this._root);
     };
 
