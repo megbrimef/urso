@@ -87,9 +87,10 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
      * play spine animation and execute function after animation completes
      * @param {String} animation - name of the animation to be played
      * @param {Function} func - function to be executed
+     * @param {Number} [track] - you can define track number for current animation
      */
-    playAndThen(animation, func) {
-        this.playInSequenceAndThen([animation], func);
+    playAndThen(animation, func, track) {
+        this.playInSequenceAndThen([animation], func, track);
     }
 
     /**
@@ -104,17 +105,19 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
      * play spine animations in sequence and execute function after last animation completes
      * @param {String[]} animations - names of the animations to be played
      * @param {Function} func - function to be executed
+     * @param {Number} [track] - you can define track number for current animation
      */
-    playInSequenceAndThen(animations, func) {
-        this._playInSequenceAndThen(animations, func);
+    playInSequenceAndThen(animations, func, track) {
+        this._playInSequenceAndThen(animations, func, track);
     }
 
     /**
      * play spine animations in sequence and execute function after last animation completes
      * @param {String[]} animations - names of the animations to be played
      * @param {Function} func - function to be executed
+     * @param {Number} [track] - you can define track number for current animation
      */
-    _playInSequenceAndThen(animations, func) {
+    _playInSequenceAndThen(animations, func, track) {
         this.stop();
         let removeSelf = () => { };
         let animationCount = 0;
@@ -124,7 +127,7 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
                 animationCount++;
 
                 if (animations[animationCount])
-                    this.play(animations[animationCount])
+                    this.play(animations[animationCount], false, track)
                 else {
                     func && func();
                     removeSelf();
@@ -134,7 +137,7 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
 
         removeSelf = () => this._baseObject.state.removeListener(completer);
         this._baseObject.state.addListener(completer);
-        this.play(animations[0]);
+        this.play(animations[0], false, track);
     }
 
     /**
@@ -334,7 +337,7 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
             if (replaceSlotContents)
                 currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            this.addChild(object); //todo make removeChild for addedToSlotObjects
+            this.addChild(object, true); //todo make removeChild for addedToSlotObjects
             currentSlot.addChild(object._baseObject);
             Urso.objects.refreshStyles();
         } else {

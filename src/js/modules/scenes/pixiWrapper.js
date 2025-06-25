@@ -300,6 +300,8 @@ class ModulesScenesPixiWrapper {
 
         this.currentScene.update(deltaTime);
         this.currentScene.render();
+        //this._renderer.render(this._root);
+        this.ticker.update(deltaTime);
         this._renderer.render(this._root);
     };
 
