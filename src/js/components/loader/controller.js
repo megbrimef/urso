@@ -7,32 +7,6 @@ class ComponentsLoaderController extends ComponentsBaseController {
 
   create() {
     this.setMask();
-
-    this.tween = Urso.getInstance("Lib.Tween");
-    const obj = Urso.findOne("^qqqq");
-    let from = { y: 100 };
-    let to = { y: 500 };
-
-    // debugger
-    const run = () => {
-        const t = gsap.timeline();
-
-        t.to(from, { 
-            ...to,
-            duration: 1,
-            onUpdate: () => {
-                obj.y = from.y
-            },
-            onComplete: () => {
-                obj.y = 100;
-                from = { y: 100 }
-                to = { y: 500 }
-                run();
-            }
-        })
-    };
-    run();
-    //todo remove all objects
   }
 
   setMask() {

@@ -50,23 +50,38 @@ class LibCache {
             page.uWrap = page.vWrap = 33071;
             textureAtlas.pages.push(page);
 
-            for (const frameName in atlas._frames) {
-                const nameSplit = frameName.split('.');
-                const name = nameSplit.splice(0, nameSplit.length - 1).join('.')
-                const frame = atlas._frames[frameName];
-                const region = new spine.TextureAtlasRegion(page, name);
+            for (const frameName in atlas.data.frames) {
+                let normalizedName = frameName;
                 
+                if(frameName.includes('.')) {
+                    const nameSplit = frameName.split('.');
+                    normalizedName = nameSplit.splice(0, nameSplit.length - 1).join('.')
+                }
+
+                const frame = atlas.data.frames[frameName];
+                const region = new spine.TextureAtlasRegion(page, normalizedName);
+                
+                // Set basic frame properties
                 region.width = frame.frame.w;
                 region.height = frame.frame.h;
                 region.u = frame.frame.x / baseTexture.texture.width;
                 region.v = frame.frame.y / baseTexture.texture.height;
                 region.u2 = (frame.frame.x + frame.frame.w) / baseTexture.texture.width;
                 region.v2 = (frame.frame.y + frame.frame.h) / baseTexture.texture.height;
-                region.rotate = false;
+                
+                // Set original size properties
                 region.originalWidth = frame.sourceSize.w;
                 region.originalHeight = frame.sourceSize.h;
+                
+                // Set offset properties (default to 0 if not present)
+                region.offsetX = frame.spriteSourceSize ? frame.spriteSourceSize.x : 0;
+                region.offsetY = frame.spriteSourceSize ? frame.spriteSourceSize.y : 0;
+                
+                // Disable rotation for now - TexturePacker rotation might need different handling
+                region.degrees = 0;
                 region.texture = baseTexture;
 
+                
                 textureAtlas.regions.push(region);
             }
         }
@@ -130,6 +145,11 @@ class LibCache {
     };
 
     addTexture(key, someData) {
+        if(key.includes('.')) {
+            const keySplit = key.split('.');
+            key = keySplit.splice(0, keySplit.length - 1).join('.')
+        }
+
         this._setDataToAssetsList('texture', key, someData);
     };
 

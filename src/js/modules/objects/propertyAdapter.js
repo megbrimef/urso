@@ -105,6 +105,7 @@ class PropertyAdapter {
         let x = this._getXAsNumber(object);
         x += this._adaptAnchorX(object);
         x += this._adaptAlignX(object);
+
         object._baseObject.x = x;
 
         this._adaptWidth(object);

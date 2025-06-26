@@ -27,7 +27,7 @@ class ModulesI18nController {
         if (!jsonResource)
             return Urso.logger.error('ModulesI18nController setLocale error, no loaded json:' + localeKey + '. Check assets please');
 
-        this.#vocabulary = jsonResource.data;
+        this.#vocabulary = jsonResource;
         this.emit(Urso.events.MODULES_I18N_NEW_LOCALE_WAS_SET, localeKey);
     }
 

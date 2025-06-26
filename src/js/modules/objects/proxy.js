@@ -88,6 +88,7 @@ class ModulesObjectsProxy {
 
         this._checkSelectorProperties(key);
 
+        value = target.modifyValue(key, value);
         this._setProperty(target, propertyName, value, oldValue);
 
         //if property is text - we will update it
@@ -234,7 +235,7 @@ class ModulesObjectsProxy {
     _getAliases() {
         return {
             'id': 'id',
-            'name': 'name',
+            'name': 'name', //'name',
             'class': 'class',
             'x': 'x',
             'y': 'y',

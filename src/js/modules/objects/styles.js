@@ -104,8 +104,7 @@ class ModulesObjectsStyles {
             object._styles[selector] = style;
 
             for (let [key, value] of Object.entries(style))
-                //FIXME
-                // if (typeof object._originalModel[key] === 'undefined')
+                if (typeof object._originalModel[key] === 'undefined')
                     Urso.objects._safeSetValueToTarget(object, key, value);
         }
     }

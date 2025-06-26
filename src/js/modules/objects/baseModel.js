@@ -58,6 +58,10 @@ export default class ModulesObjectsBaseModel {
         this.custom = Urso.helper.recursiveGet('custom', params, {}); //custom params
     }
 
+    modifyValue(key, val) {
+        return val;
+    }
+
     getAbsoluteSize() {
         return { width: this._baseObject.width, height: this._baseObject.height };
     }

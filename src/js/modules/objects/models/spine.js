@@ -320,29 +320,31 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
     }
 
     _addToSlot(slotName, object, replaceSlotContents) {
-        if (!object?._baseObject) {
-            Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: invalid object ' + object);
-            return;
-        }
+        //FIXME
+        // if (!object?._baseObject) {
+        //     Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: invalid object ' + object);
+        //     return;
+        // }
 
-        const spine = this._baseObject;
-        const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
-        const currentSlot = spine.slotContainers[slotIndex];
+        // const spine = this._baseObject;
+        // console.error('ModulesObjectsModelsSpine _addToSlot slotName: ' + slotName + ', object: ', spine);
+        // const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
+        // const currentSlot = spine.slotContainers[slotIndex];
 
-        if (currentSlot) {
-            object._baseObject.scale.y = -1;
+        // if (currentSlot) {
+        //     object._baseObject.scale.y = -1;
 
-            Urso.objects.removeChild(object.parent, object, true);
+        //     Urso.objects.removeChild(object.parent, object, true);
 
-            if (replaceSlotContents)
-                currentSlot.removeChildren(); //todo check if its proxy and reset parent
+        //     if (replaceSlotContents)
+        //         currentSlot.removeChildren(); //todo check if its proxy and reset parent
 
-            this.addChild(object, true); //todo make removeChild for addedToSlotObjects
-            currentSlot.addChild(object._baseObject);
-            Urso.objects.refreshStyles();
-        } else {
-            Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: no spine slot ' + slotName);
-        }
+        //     this.addChild(object); //todo make removeChild for addedToSlotObjects
+        //     currentSlot.addChild(object._baseObject);
+        //     Urso.objects.refreshStyles();
+        // } else {
+        //     Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: no spine slot ' + slotName);
+        // }
     }
 
     /**
