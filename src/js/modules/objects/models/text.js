@@ -59,9 +59,10 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
   }
 
   _makeFill(val) {
+  
     if (!Array.isArray(val)) return val; //if not array, return value
 
-    const fillGradientStops = this.fillGradientStops || this._calculatefillGradientStops();
+    const fillGradientStops = (this.fillGradientStops && this.fillGradientStops.length) || this._calculatefillGradientStops();
 
     const colorStops = fillGradientStops.map((stop, index) => {
       return {
