@@ -45,10 +45,13 @@ class ModulesScenesPixiWrapper {
         //root and world
         this._root = new PIXI.Container();
         this._root.label = 'root';
-        console.error('Urso: PIXI this._root');
         this._createWorld();
         const parent = document.querySelector(Urso.config.gameContainerSelector) || document.body;
-        await app.init({ background: "#1099bb", resizeTo: parent });
+        await app.init({
+            background: "0x222222",
+            resizeTo: parent,
+            resolution: Math.min(devicePixelRatio || 1, 2),
+        });
         parent.appendChild(app.canvas);
         app.stage.addChild(this._root)
         this._app = app
@@ -245,17 +248,17 @@ class ModulesScenesPixiWrapper {
     };
 
     _loop() {
-        if (this._loopStopped)
-            return false;
+        // if (this._loopStopped)
+        //     return false;
 
         // this._requestAnimFrame(this._loop);
 
-        if (!this._loopPaused) {
-            if (!this._fpsCheckAllowUpdate())
-                return;
+        // if (!this._loopPaused) {
+            // if (!this._fpsCheckAllowUpdate())
+            //     return;
 
             this._update();
-        }
+        // }
 
         return true;
     };

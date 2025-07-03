@@ -25,10 +25,10 @@
   },
   "homepage": "https://github.com/megbrimef/urso#readme",
   "dependencies": {
-    "@esotericsoftware/spine-pixi-v8": "^4.2.80",
+    "pixi.js": "^8.10.2",
+    "@esotericsoftware/spine-pixi-v8": "^4.2.84",
     "gsap": "^3.13.0",
-    "howler": "^2.2.4",
-    "pixi.js": "^8.9.2"
+    "howler": "^2.2.4"
   },
   "devDependencies": {
     "@vitejs/plugin-legacy": "^6.1.1",

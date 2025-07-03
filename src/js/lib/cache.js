@@ -37,7 +37,6 @@ class LibCache {
 
         for (const key in atlases) {
             const atlas = atlases[key];
-            
             const page = new spine.TextureAtlasPage(key);
             const { w, h } = atlas.data.meta.size;
             
@@ -64,10 +63,10 @@ class LibCache {
                 // Set basic frame properties
                 region.width = frame.frame.w;
                 region.height = frame.frame.h;
-                region.u = frame.frame.x / baseTexture.texture.width;
-                region.v = frame.frame.y / baseTexture.texture.height;
-                region.u2 = (frame.frame.x + frame.frame.w) / baseTexture.texture.width;
-                region.v2 = (frame.frame.y + frame.frame.h) / baseTexture.texture.height;
+                region.u = frame.frame.x / (baseTexture.texture.width * atlas.resolution);
+                region.v = frame.frame.y / (baseTexture.texture.height * atlas.resolution);
+                region.u2 = (frame.frame.x + frame.frame.w) / (baseTexture.texture.width * atlas.resolution);
+                region.v2 = (frame.frame.y + frame.frame.h) / (baseTexture.texture.height * atlas.resolution);
                 
                 // Set original size properties
                 region.originalWidth = frame.sourceSize.w;

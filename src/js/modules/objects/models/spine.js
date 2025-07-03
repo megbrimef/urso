@@ -292,8 +292,7 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
         const parser = spineAsset instanceof Uint8Array ?
             new spine.SkeletonBinary(attachmentLoader) :
             new spine.SkeletonJson(attachmentLoader);
-    
-    	parser.scale = 1;
+
 		const skeletonData = parser.readSkeletonData(spineAsset);
 
         this._baseObject = new spine.Spine({ 
