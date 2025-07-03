@@ -26,6 +26,7 @@
   "homepage": "https://github.com/megbrimef/urso#readme",
   "dependencies": {
     "pixi.js": "^8.10.2",
+    "@urso/revolt-fx": "^0.2.0",
     "@esotericsoftware/spine-pixi-v8": "^4.2.84",
     "gsap": "^3.13.0",
     "howler": "^2.2.4"
