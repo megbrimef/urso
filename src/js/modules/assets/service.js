@@ -541,9 +541,15 @@ class ModulesAssetsService {
 
         const widthFactor = width / resCfg.width;
 
-        return Object
+        const quality = Object
             .keys(qualityFactors)
             .reduce(...this._qualityReducer(qualityFactors, widthFactor));
+        
+        if(isMobile && quality === 'high') {
+            return 'hd';
+        }
+
+        return quality;
     }
 
     /**

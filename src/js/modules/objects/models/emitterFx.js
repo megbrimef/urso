@@ -76,7 +76,6 @@ class ModulesObjectsModelsEmitterFx extends ModulesObjectsBaseModel {
     };
 
     _createBundle() {
-        debugger
         this._bundle = new particlesFx.FX();
         let fx_settings_data = Urso.cache.getJson(this.cfg);
 

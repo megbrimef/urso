@@ -71,7 +71,7 @@ class ModulesLogicSounds {
             if (!json)
                 continue;
 
-            audiospriteData[audiospriteKey] = { json: json.data, audiosprite: audiosprite.data };
+            audiospriteData[audiospriteKey] = { json, audiosprite };
         }
 
         return audiospriteData;

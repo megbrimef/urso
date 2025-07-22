@@ -290,7 +290,7 @@ class ModulesObjectsProxy {
             'letterSpacing': 'style.letterSpacing',
             'textAlign': 'style.align',
             'enabled': 'input.enabled',
-            'cacheAsBitmap': 'cacheAsBitmap',
+            'cacheAsBitmap': 'cacheAsTexture',
             'ignoreParentMask': 'ignoreParentMask',
             //baseObject functions
             'toGlobal': 'toGlobal'

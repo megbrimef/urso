@@ -161,7 +161,7 @@ class ModulesScenesResolutions {
 
         this.getInstance('PixiWrapper').showCanvas();
         this.getInstance('PixiWrapper').resize(canvasSize.width, canvasSize.height);
-        this.getInstance('PixiWrapper').setWorldScale((canvasSize.width / this._templateSize.width) / dp, (canvasSize.height / this._templateSize.height) / dp);
+        this.getInstance('PixiWrapper').setWorldScale((canvasSize.width / this._templateSize.width), (canvasSize.height / this._templateSize.height));
         this.getInstance('PixiWrapper').setCanvasWidth(resolution.width / dp);
         this.getInstance('PixiWrapper').setCanvasHeight(resolution.height / dp);
 

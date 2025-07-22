@@ -57,7 +57,7 @@ class SoundSprite {
         if (!this._codec) {
             return;
         }
-
+        
         const reader = new FileReader();
         const blob = new Blob([audiosprite], { type: `audio/${this._codec}` });
 

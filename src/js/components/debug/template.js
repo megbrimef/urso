@@ -11,16 +11,16 @@ class ComponentsDebugTemplate {
                         name: 'debugCoords',
                         text: 'x:0, y:0',
                         fontFamily: 'Helvetica',
-                        fontSize: 15,
+                        fontSize: 30,
                         fill: '#00FF00'
                     },
                     {
                         type: Urso.types.objects.TEXT,
                         name: 'debugFps',
                         text: 'fps: 0',
-                        y: 15,
+                        y: 30,
                         fontFamily: 'Helvetica',
-                        fontSize: 15,
+                        fontSize: 30,
                         fill: '#00FF00'
                     },
                     {

@@ -2,7 +2,6 @@
 const NORMAL_FPS_COUNT = 60;
 const LOW_PERFORMANCE_FPS_COUNT = 30;
 
-
 class ModulesScenesPixiWrapper {
     constructor() {
         this.singleton = true;
@@ -50,7 +49,7 @@ class ModulesScenesPixiWrapper {
         await app.init({
             background: "0x222222",
             resizeTo: parent,
-            resolution: Math.min(devicePixelRatio || 1, 2),
+            resolution: 1
         });
         parent.appendChild(app.canvas);
         app.stage.addChild(this._root)
@@ -100,21 +99,21 @@ class ModulesScenesPixiWrapper {
      * @param {Number} height
      */
     resize(width, height) {
-        this._app.resize(width, height);
+        this._app.renderer.resize(width, height);
     };
 
     /**
      * hide canvas
      */
     hideCanvas() {
-        this._app.view.style.display = 'none';
+        this._app.canvas.style.display = 'none';
     }
 
     /**
      * show canvas
      */
     showCanvas() {
-        this._app.view.style.display = '';
+        this._app.canvas.style.display = '';
     }
 
     /**
@@ -132,7 +131,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasWidth(val) {
-        this._app.view.style.width = val + 'px';
+        this._app.canvas.style.width = val + 'px';
     };
 
     /**
@@ -140,7 +139,7 @@ class ModulesScenesPixiWrapper {
      * @param {Number} val
      */
     setCanvasHeight(val) {
-        this._app.view.style.height = val + 'px';
+        this._app.canvas.style.height = val + 'px';
     };
 
     /**
@@ -254,10 +253,10 @@ class ModulesScenesPixiWrapper {
         // this._requestAnimFrame(this._loop);
 
         // if (!this._loopPaused) {
-            // if (!this._fpsCheckAllowUpdate())
+            // if (!)
             //     return;
-
-            this._update();
+        this._fpsCheckAllowUpdate()
+        this._update();
         // }
 
         return true;
@@ -279,6 +278,8 @@ class ModulesScenesPixiWrapper {
             return false;
 
         this._lastUpdateTime = currentTime;
+
+        this._app.ticker.maxFPS = this._maxFPSLimit;
         return true;
     }
 

@@ -314,36 +314,33 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
         this._baseObject.state.addListener({ event: this._eventHandler.bind(this) });
     };
 
-    _eventHandler(entry, event) {
+    _eventHandler(_, event) {
         this.emit(Urso.events.MODULES_OBJECTS_SPINE_EVENT, { eventName: event.data.name, name: this.name, class: this.class });
     }
 
     _addToSlot(slotName, object, replaceSlotContents) {
-        //FIXME
-        // if (!object?._baseObject) {
-        //     Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: invalid object ' + object);
-        //     return;
-        // }
+        if (!object?._baseObject) {
+            Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: invalid object ' + object);
+            return;
+        }
 
-        // const spine = this._baseObject;
-        // console.error('ModulesObjectsModelsSpine _addToSlot slotName: ' + slotName + ', object: ', spine);
-        // const slotIndex = spine.spineData.slots.findIndex(({ name }) => name === slotName);
-        // const currentSlot = spine.slotContainers[slotIndex];
+        const spine = this._baseObject;
+  
 
-        // if (currentSlot) {
-        //     object._baseObject.scale.y = -1;
+        const currentSlot = spine.skeleton.findSlot(slotName);
+        
+        if (!currentSlot) 
+            return console.error('ModulesObjectsModelsSpine _addToSlot slotName: ' + slotName + ', object: ', spine);
+        
+        object._baseObject.scale.y = -1;
 
-        //     Urso.objects.removeChild(object.parent, object, true);
+        Urso.objects.removeChild(object.parent, object, true);
 
-        //     if (replaceSlotContents)
-        //         currentSlot.removeChildren(); //todo check if its proxy and reset parent
+        if (replaceSlotContents)
+            currentSlot.setAttachment(null); //todo check if its proxy and reset parent
 
-        //     this.addChild(object); //todo make removeChild for addedToSlotObjects
-        //     currentSlot.addChild(object._baseObject);
-        //     Urso.objects.refreshStyles();
-        // } else {
-        //     Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: no spine slot ' + slotName);
-        // }
+        this.addChild(object);
+        spine.addSlotObject(currentSlot, object._baseObject);
     }
 
     /**
