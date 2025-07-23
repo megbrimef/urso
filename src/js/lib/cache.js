@@ -63,18 +63,18 @@ class LibCache {
                 // Set basic frame properties
                 region.width = frame.frame.w;
                 region.height = frame.frame.h;
-                region.u = frame.frame.x / baseTexture.texture.width;
-                region.v = frame.frame.y / baseTexture.texture.height;
-                region.u2 = (frame.frame.x + frame.frame.w) / baseTexture.texture.width;
-                region.v2 = (frame.frame.y + frame.frame.h) / baseTexture.texture.height;
+                region.u = frame.frame.x / (baseTexture.texture.width * atlas.resolution);
+                region.v = frame.frame.y / (baseTexture.texture.height * atlas.resolution);
+                region.u2 = (frame.frame.x + frame.frame.w) / (baseTexture.texture.width * atlas.resolution);
+                region.v2 = (frame.frame.y + frame.frame.h) / (baseTexture.texture.height * atlas.resolution);
                 
                 // Set original size properties
                 region.originalWidth = frame.sourceSize.w;
                 region.originalHeight = frame.sourceSize.h;
                 
                 // Set offset properties (default to 0 if not present)
-                region.offsetX = frame.spriteSourceSize ? frame.spriteSourceSize.x : 0;
-                region.offsetY = frame.spriteSourceSize ? (frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h) : 0;
+                region.offsetX = frame.spriteSourceSize ? frame.spriteSourceSize.x / atlas.resolution : 0;
+                region.offsetY = frame.spriteSourceSize ? (frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h) / atlas.resolution : 0;
                 
                 // Disable rotation for now - TexturePacker rotation might need different handling
                 region.degrees = 0;
