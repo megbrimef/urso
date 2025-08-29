@@ -39,6 +39,7 @@ class LibCache {
             const atlas = atlases[key];
             const page = new spine.TextureAtlasPage(key);
             const { w, h } = atlas.data.meta.size;
+            const scale = (parseFloat(atlas.data.meta.scale) || 1);
             
             const baseTexture = new spine.SpineTexture(atlas.textureSource);
 
@@ -51,36 +52,59 @@ class LibCache {
 
             for (const frameName in atlas.data.frames) {
                 let normalizedName = frameName;
-                
-                if(frameName.includes('.')) {
+                if (frameName.includes('.')) {
                     const nameSplit = frameName.split('.');
-                    normalizedName = nameSplit.splice(0, nameSplit.length - 1).join('.')
+                    normalizedName = nameSplit.splice(0, nameSplit.length - 1).join('.');
                 }
 
                 const frame = atlas.data.frames[frameName];
                 const region = new spine.TextureAtlasRegion(page, normalizedName);
                 
-                // Set basic frame properties
-                region.width = frame.frame.w;
-                region.height = frame.frame.h;
-                region.u = frame.frame.x / (baseTexture.texture.width * atlas.resolution);
-                region.v = frame.frame.y / (baseTexture.texture.height * atlas.resolution);
-                region.u2 = (frame.frame.x + frame.frame.w) / (baseTexture.texture.width * atlas.resolution);
-                region.v2 = (frame.frame.y + frame.frame.h) / (baseTexture.texture.height * atlas.resolution);
+                // Denominators for UVs: use page (atlas image) dimensions
+                const denomW = page.width;
+                const denomH = page.height;
                 
-                // Set original size properties
-                region.originalWidth = frame.sourceSize.w;
-                region.originalHeight = frame.sourceSize.h;
+                // Check if frame is rotated (TexturePacker boolean or 90 marker)
+                const isRotated = frame.rotated === true || frame.rotated === 90;
                 
-                // Set offset properties (default to 0 if not present)
-                region.offsetX = frame.spriteSourceSize ? frame.spriteSourceSize.x / atlas.resolution : 0;
-                region.offsetY = frame.spriteSourceSize ? (frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h) / atlas.resolution : 0;
+                // Frame rect in the atlas (pixels)
+                const fx = frame.frame.x;
+                const fy = frame.frame.y;
+                const fw = frame.frame.w;
+                const fh = frame.frame.h;
                 
-                // Disable rotation for now - TexturePacker rotation might need different handling
-                region.degrees = 0;
+                // Region size (swap on rotation), divided by scale
+                region.width = (isRotated ? fh : fw) / scale;
+                region.height = (isRotated ? fw : fh) / scale;
+                
+                if (isRotated) {
+                    region.u = fx / denomW;
+                    region.v = fy / denomH;
+                    region.u2 = (fx + fh) / denomW; // swapped
+                    region.v2 = (fy + fw) / denomH; // swapped
+                    region.degrees = 90;
+                } else {
+                    region.u = fx / denomW;
+                    region.v = fy / denomH;
+                    region.u2 = (fx + fw) / denomW;
+                    region.v2 = (fy + fh) / denomH;
+                    region.degrees = 0;
+                }
+                
+                // Original (untrimmed) size divided by scale
+                region.originalWidth = frame.sourceSize.w / scale;
+                region.originalHeight = frame.sourceSize.h / scale;
+                
+                // Offsets relative to original rect (bottom-left), divided by scale
+                if (frame.spriteSourceSize) {
+                    region.offsetX = frame.spriteSourceSize.x / scale;
+                    region.offsetY = (frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h) / scale;
+                } else {
+                    region.offsetX = 0;
+                    region.offsetY = 0;
+                }
+                
                 region.texture = baseTexture;
-
-                
                 textureAtlas.regions.push(region);
             }
         }

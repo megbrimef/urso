@@ -48,7 +48,7 @@ class ModulesScenesPixiWrapper {
         const parent = document.querySelector(Urso.config.gameContainerSelector) || document.body;
         await app.init({
             background: "0x222222",
-            resizeTo: parent,
+            // resizeTo: parent,
             resolution: 1
         });
         parent.appendChild(app.canvas);

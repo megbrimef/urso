@@ -2,7 +2,7 @@ class ExtraBrowserEvents {
     constructor() {
         this.singleton = true;
 
-        this.RESIZE_DELAY = 250; //delay for resize event (browser will refresh his own params)
+        this.RESIZE_DELAY = 0; //delay for resize event (browser will refresh his own params)
 
         this._keyPressHandler = this._keyPressHandler.bind(this);
         this.resizeHandler = this.resizeHandler.bind(this);
@@ -42,7 +42,9 @@ class ExtraBrowserEvents {
             Urso.clearTimeout(this._resizeTimeoutId)
 
         this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE);
-        this._resizeTimeoutId = Urso.setTimeout(() => this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE), this.RESIZE_DELAY);
+        this._resizeTimeoutId = Urso.setTimeout(() => 
+            this.emit(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE)
+        , this.RESIZE_DELAY);
     }
 
     _pointerEventsHandler(event) {
