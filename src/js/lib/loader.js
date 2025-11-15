@@ -7,6 +7,8 @@ class LibLoader {
         this._onLoadUpdate = () => { };
         this._loader = null;
         this._completeCallback = () => { };
+        this._errorCallback = () => { };
+        this._reloadOnError = true;
 
         this._onError = this._onError.bind(this);
     };
@@ -102,7 +104,7 @@ class LibLoader {
      * start loading assets from assets query
      * @param {Function} callback 
      */
-    start(callback) {
+    start(callback, errorCallback = () => { }, reloadOnError = true) {
         if (this._isRunning)
             return false;
 
@@ -111,6 +113,8 @@ class LibLoader {
         this._iterationNumber++;
         const currentIteration = this._iterationNumber;
         this._completeCallback = callback;
+        this._errorCallback = errorCallback;
+        this._reloadOnError = reloadOnError;
         this._loader = new PIXI.Loader();
         const appVersion = Urso.config.appVersion;
 
@@ -201,9 +205,12 @@ class LibLoader {
         this._loader.reset();
         this._isRunning = false;
         this._lastLoadFailed = true;
+        this._errorCallback(error);
 
-        Urso.logger.warn('LibLoader all assets RELOAD...');
-        this._resizeTimeoutId = Urso.setTimeout(() => this.start(this._completeCallback), this.RELOAD_DELAY);
+        if (this._reloadOnError) {
+            Urso.logger.warn('LibLoader all assets RELOAD...');
+            Urso.setTimeout(() => this.start(this._completeCallback), this.RELOAD_DELAY);
+        }
     }
 
 };

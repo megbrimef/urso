@@ -58,12 +58,14 @@ class ModulesAssetsService {
      * @param {Object} assetsSpace
      * @param {Function} callback
      */
-    startLoad(assetsSpace, callback, updateCallback) {
+    startLoad(assetsSpace, callback, updateCallback, errorCallback, reloadOnError) {
         this.loadGroup(
             assetsSpace,
             this.getInstance('Config').loadingGroups.initial,
-            (() => { callback(); this._startLazyLoad(); }).bind(this),
-            updateCallback
+            (() => { callback(); this._startLazyLoad(errorCallback, reloadOnError); }).bind(this),
+            updateCallback,
+            errorCallback,
+            reloadOnError
         )
     }
 
@@ -74,7 +76,7 @@ class ModulesAssetsService {
      * @param {Function} callback
      * @returns
      */
-    loadGroup(assetsSpace, group, callback = () => { }, updateCallback = () => { }) {
+    loadGroup(assetsSpace, group, callback, updateCallback, errorCallback, reloadOnError) {
         if (!assetsSpace) //global space
             assetsSpace = this.assets;
 
@@ -82,13 +84,13 @@ class ModulesAssetsService {
             return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
 
         //we need load and parse atlases at first (!)
-        const loadRestAssetsCallback = () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback) };
+        const loadRestAssetsCallback = () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback, errorCallback, reloadOnError) };
 
         const loadAtlasesCallback = () => {
-            this._loadGroupAtlases(assetsSpace, group, loadRestAssetsCallback, Urso.types.assets.ATLAS);
+            this._loadGroupAtlases(assetsSpace, group, loadRestAssetsCallback, errorCallback, reloadOnError, Urso.types.assets.ATLAS);
         }
 
-        this._loadGroupAtlases(assetsSpace, group, loadAtlasesCallback, Urso.types.assets.JSONATLAS);
+        this._loadGroupAtlases(assetsSpace, group, loadAtlasesCallback, errorCallback, reloadOnError, Urso.types.assets.JSONATLAS);
     }
 
     preloadAllImagesInGPU() {
@@ -126,7 +128,7 @@ class ModulesAssetsService {
      * @param {String} group
      * @param {Function} callback
      */
-    _loadGroupAtlases(assetsSpace, group, callback, atlasType) {
+    _loadGroupAtlases(assetsSpace, group, callback, errorCallback, reloadOnError, atlasType) {
         const atlases = assetsSpace[group].filter(assetModel => assetModel.type === atlasType);
 
         if (!atlases.length)
@@ -137,12 +139,16 @@ class ModulesAssetsService {
         for (let assetModel of atlases)
             this._addAssetToLoader(assetModel, loader);
 
-        loader.start(() => {
-            if (atlasType === Urso.types.assets.ATLAS)
-                this._processLoadedAtlases(assetsSpace, group);
+        loader.start(
+            () => {
+                if (atlasType === Urso.types.assets.ATLAS)
+                    this._processLoadedAtlases(assetsSpace, group);
 
-            callback();
-        });
+                callback();
+            },
+            errorCallback,
+            reloadOnError
+        );
     }
 
     /**
@@ -151,7 +157,7 @@ class ModulesAssetsService {
      * @param {String} group
      * @param {Function} callback
      */
-    _loadGroupRestAssets(assetsSpace, group, callback, updateCallback) {
+    _loadGroupRestAssets(assetsSpace, group, callback, updateCallback, errorCallback, reloadOnError) {
         let loader = Urso.getInstance('Lib.Loader');
         //load update callback
         loader.setOnLoadUpdate((params) => { updateCallback(Math.floor(params.progress)); });
@@ -170,11 +176,18 @@ class ModulesAssetsService {
         loader.start(
             () => {
                 this._processLoadedAssets(assetsSpace, group);
-                this._loadNoAtlasSpines(noAtlasSpines, () => {
-                    this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group);
-                    callback();
-                });
-            }
+                this._loadNoAtlasSpines(
+                    noAtlasSpines,
+                    () => {
+                        this.emit(Urso.events.MODULES_ASSETS_GROUP_LOADED, group);
+                        callback();
+                    },
+                    errorCallback,
+                    reloadOnError
+                );
+            },
+            errorCallback,
+            reloadOnError
         );
     }
 
@@ -184,7 +197,7 @@ class ModulesAssetsService {
      * @param {Function} callback
      * @returns
      */
-    _loadNoAtlasSpines(noAtlasSpines, callback) {
+    _loadNoAtlasSpines(noAtlasSpines, callback, errorCallback, reloadOnError) {
         if (!noAtlasSpines.length)
             return callback();
 
@@ -193,7 +206,7 @@ class ModulesAssetsService {
         for (let assetModel of noAtlasSpines)
             this._addAssetToLoader(assetModel, loader);
 
-        loader.start(callback);
+        loader.start(callback, errorCallback, reloadOnError);
     }
 
     /**
@@ -417,22 +430,19 @@ class ModulesAssetsService {
     /**
      * start lazy load process
      */
-    _startLazyLoad() {
+    _startLazyLoad(errorCallback, reloadOnError) {
         if (this.lazyLoadProcessStarted)
             return;
 
         this.lazyLoadProcessStarted = true;
-        this._continueLazyLoad();
+        this._continueLazyLoad(errorCallback, reloadOnError);
     }
 
     /**
      * continue lazy load process (with current step)
      * @param {Number} step
      */
-    _continueLazyLoad(step) {
-        if (!step)
-            step = 0;
-
+    _continueLazyLoad(errorCallback, reloadOnError, step = 0) {
         const lazyLoadGroups = this.getInstance('Config').lazyLoadGroups;
 
         if (step >= lazyLoadGroups.length) {
@@ -445,7 +455,9 @@ class ModulesAssetsService {
         if (!groupName)
             Urso.logger.error('ModulesAssetsService lazy loading groupName error');
 
-        this.loadGroup(null, groupName, () => { this._continueLazyLoad(step + 1); })
+        const callback = () => { this._continueLazyLoad(errorCallback, reloadOnError, step + 1); }
+        const updateCallback = () => { };
+        this.loadGroup(null, groupName, callback, updateCallback, errorCallback, reloadOnError);
     }
 
     /**
