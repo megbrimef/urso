@@ -17,7 +17,9 @@ require('./app/config/load'); // your game application
 
 window.onload = Urso.runGame; //run game
 ```
+
 ### Table of Contents ###
+
 1. Getting Started
 2. Project Structure
 3. Engine Architecture and Launch Process
@@ -38,10 +40,10 @@ window.onload = Urso.runGame; //run game
 18. Game Text Localization
 19. Transport
 20. Additional Reference Sections
-    20.1. Core Modules (Lib)
-    20.2. Additional Information about Templates and Scenes
-    20.3. Practical Recommendations, Debugging, Profiling
-    20.4. Examples and API Reference (Compatible Elements)
+  - 20.1. Core Modules (Lib)
+  - 20.2. Additional Information about Templates and Scenes
+  - 20.3. Practical Recommendations, Debugging, Profiling
+  - 20.4. Examples and API Reference (Compatible Elements)
 21. Extra (BrowserEvents, PixiPatch)
 22. Types (Urso.types)
 23. Events (Urso.events)
@@ -54,7 +56,9 @@ window.onload = Urso.runGame; //run game
 30. Code Examples
 31. Links
 
-1. Getting Started
+------------------
+
+### 1. Getting Started ###
 ------------------
 After cloning the repository locally, you need to install all game dependencies before launching.
 
@@ -66,7 +70,7 @@ After installing dependencies, to launch the game you need to execute:
 - yarn start
 - npm run start
 
-2. Project Structure
+### 2. Project Structure ###
 --------------------
 Game source code and resources are located in:
 - src/app — source code (application)
@@ -77,7 +81,7 @@ Each game must include:
 - src/app/config/main.js — setting important game parameters (name, default scene).
 - src/js/index.js — application entry point. Engine code is connected through dependencies, load.js and main.js of the game. Once all engine files are loaded, you need to launch the application using Urso.runGame() function (usually on window.onload).
 
-3. Engine Architecture and Launch Process
+### 3. Engine Architecture and Launch Process ###
 ------------------------------------------
 The game depends on Core by default.
 
@@ -97,7 +101,7 @@ Urso.config.extendingChain = ['Urso.Core', 'Urso.App'];
 
 Urso.runGame method in turn will begin loading the default scene using the scene manager.
 
-4. Objects Required for Game Launch
+### 4. Objects Required for Game Launch ###
 ------------------------------------
 - Urso.helper — contains a set of helper methods for developer convenience (see src/js/lib/helper.js in Core repository).
 - Urso.observer — provides event-driven model operation (see src/js/modules/observer in Core repository).
@@ -114,7 +118,7 @@ Urso.runGame method in turn will begin loading the default scene using the scene
 - Urso.template — templating engine that provides work with templates (see src/js/modules/template in Core repository).
 - Urso.browserEvents — browser event translator to game (see src/js/extra/browserEvents.js in Core repository).
 
-5. Scenes, Scene Sizes, Templates, Components and Simple Objects
+### 5. Scenes, Scene Sizes, Templates, Components and Simple Objects ###
 ----------------------------------------------------------------
 Scene — a set of objects that are present on screen and display some specific game state (main menu, loading screen, game level).
 
@@ -149,7 +153,7 @@ General best practices for components
 - Local subscriptions
 - Selectors for searching inside component through this.common.find/One/All
 
-6. Component Connection and Organization
+### 6. Component Connection and Organization ###
 ----------------------------------------
 To add a component, in src/app/config/load.js you need to specify the path to component name and in the component folder specify all files that need to be loaded into the game.
 
@@ -173,14 +177,14 @@ Urso.localData — object (cache) where you can write and get parameters for fur
 - Urso.localData.set(key, value) — parameter writing.
 - Urso.localData.get(name) — value getting.
 
-7. Object Visibility Order (Layers)
+### 7. Object Visibility Order (Layers) ###
 ------------------------------------
 All objects have their visibility order — layer on scene. Each object can be behind or in front of another object.
 
 Order is implemented as follows:
 - Top object specified in code (in object list, for example on scene) will be behind the object specified below it in the list — i.e., in the background.
 
-8. Working with Scene Objects (Search, Selectors)
+### 8. Working with Scene Objects (Search, Selectors) ###
 --------------------------------------------------
 Tools for working with scene objects (and from console):
 - this.common.find — returns false/object/collection (Urso.find('selector') for console access).
@@ -202,7 +206,7 @@ Selector — combination of modifier and searched name. Example: '.logo' will se
 Combined selectors:
 - Urso.find('^nameContainer .classText') — search in '^nameContainer' object for objects with 'classText' class at any nesting level.
 
-9. Event Routers and Event-Driven Model (Observer)
+### 9. Event Routers and Event-Driven Model (Observer) ###
 ---------------------------------------------------
 Event routers, using Urso.observer, control the state of entire game and individual components.
 
@@ -232,7 +236,7 @@ Console access:
 - Urso.observer.remove — analog of this.removeListener.
 - Urso.observer.fire — analog of this.emit.
 
-10. Dynamic Scene Object Creation
+### 10. Dynamic Scene Object Creation ###
 ----------------------------------
 Objects can be created dynamically (for example, in components).
 
@@ -248,7 +252,7 @@ Urso.objects.create(
   someParentObject
 );
 
-11. Working with Classes and Entities
+### 11. Working with Classes and Entities ###
 -------------------------------------
 Class access:
 - this.getInstance('View') — returns object (instance) of View class of the same namespace. That is, for Components.Test.Controller returns object of Components.Test.View class.
@@ -262,7 +266,7 @@ These methods accept parameter — path to needed class. Example:
 Internal calls:
 - In any class you can call this.getInstance('Template') to get Template instance of the same entity.
 
-12. Adding Sound and Sound/Event Mapping Configuration
+### 12. Adding Sound and Sound/Event Mapping Configuration ###
 -------------------------------------------------------
 Sounds can be added for any game events: background music, button click sound, etc. Sounds are used as assets added to asset group.
 
@@ -296,7 +300,7 @@ Example:
     { soundKey: 'sound_check', event: 'soundCheck.resume', action: 'resume' },
     { soundKey: 'sound_check', event: 'soundCheck.play.loop', action: 'play', relaunch: true, loop: true }
 
-13. LazyLoad Mechanism (Asset Loading Groups)
+### 13. LazyLoad Mechanism (Asset Loading Groups) ###
 ----------------------------------------------
 Urso.assets — resource loading logic (see src/js/modules/assets in Core repository).
 
@@ -312,7 +316,7 @@ Prioritization:
 - Group queue corresponds to order in lazyLoadGroups array (see src/js/modules/assets/config in Core repository).
 - Example: loadingGroup: "lazy" and "afterLazy"; in config this.loadingGroups = { initial: 0, lazy: "lazy", afterLazy: "afterLazy" }, and this.lazyLoadGroups = [ this.loadingGroups.lazy, this.loadingGroups.afterLazy ] — priority "lazy", then "afterLazy".
 
-14. States Manager and Components.StateDriven
+### 14. States Manager and Components.StateDriven ###
 ----------------------------------------------
 States manager — connection of logical module (Modules.States) controlling active states and their actions, and components inherited from base state-dependent component (Components.StateDriven).
 
@@ -373,7 +377,7 @@ configActions = {
 - After closing — transition nextState: ['WAIT'].
 - In component controller state entry check (SHOW_MENU) through configStates; in configActions — open/close logic.
 
-15. LayersSwitcher Component
+### 15. LayersSwitcher Component ###
 ----------------------------
 Component for enabling and disabling layers in game (see urso\core\src\js\components\layersSwitcher).
 
@@ -397,7 +401,7 @@ this.groupsLayers example:
   'background': ['.background'],
 }
 
-16. Modifications and Mixins
+### 16. Modifications and Mixins ###
 -----------------------------
 Modifications — code files executed instead of standard ones under certain condition.
 
@@ -415,7 +419,7 @@ mixins: { Desktop: { Controller: require('./mixins/desktop/controller.js') } }
 
 If Urso.getInstancesModes() contains Desktop — method from mixin ('./mixins/desktop/controller.js') will execute in component Controller.
 
-17. Transitions for Objects
+### 17. Transitions for Objects ###
 ----------------------------
 Transition — smooth transformation (see src\js\modules\objects\baseModel.js in Core repository).
 
@@ -434,7 +438,7 @@ Changing:
 - object.x = 200; object.y = 300 (diagonal movement).
 You can set one coordinate for axis movement.
 
-18. Game Text Localization
+### 18. Game Text Localization ###
 ---------------------------
 Text translation to different languages is performed through JSON localization files for each language. Structure: translation key — text.
 
@@ -458,7 +462,7 @@ Usage:
 - Use localeId instead of text in text objects
 - Listen to language change event (Urso.events.MODULES_I18N_NEW_LOCALE_WAS_SET) and update texts
 
-19. Transport
+### 19. Transport ###
 -------------
 19.1. Connection Type Support
 - websocket, xhr (by configuration)
@@ -473,7 +477,7 @@ Usage:
 19.3. ModulesTransportDecorator Decorator
 - toServer/toFront
 
-20. Additional Reference Sections
+### 20. Additional Reference Sections ###
 
 20.1. Core Modules (Lib)
 - helper — utilities (for example, parseGetParams, waitForDomElement, arraysGetUniqElements, replaceAll, recursiveGet, mergeObjectsRecursive).
@@ -494,7 +498,7 @@ Usage:
 - For sound consider tab visibility rules (browser event handling).
 - Debug component — for FPS/metrics monitoring
 
-21. Extra (BrowserEvents, PixiPatch)
+### 21. Extra (BrowserEvents, PixiPatch) ###
 ------------------------------------
 21.1. BrowserEvents
 - Browser event translation (resize, visibilitychange, input) to engine events: EXTRA_BROWSEREVENTS_*
@@ -503,7 +507,7 @@ Usage:
 21.2. PixiPatch
 - PIXI fixes/extensions
 
-22. Types (Urso.types)
+### 22. Types (Urso.types) ###
 ----------------------
 22.1. assets
 - ATLAS, AUDIOSPRITE, BITMAPFONT, CONTAINER, FONT, IMAGE, JSON, JSONATLAS, SOUND, SPINE, HTML
@@ -539,7 +543,7 @@ Specialized objects
 - Screen orientations: Urso.device.ScreenOrientation.LANDSCAPE/ PORTRAIT
 - Engine constants
 
-23. Events (Urso.events)
+### 23. Events (Urso.events) ###
 ------------------------
 23.1. System Event Examples
 - MODULES_SCENES_NEW_SCENE_INIT
@@ -550,7 +554,7 @@ Specialized objects
 - module.domain.action
 - ui.*, game.*, sound.*, scenes.*, assets.*, transport.*
 
-24. Practical Patterns and Recommendations
+### 24. Practical Patterns and Recommendations ###
 -------------------------------------------
 24.1. Abstraction Layers
 - Logic — in services/routers
@@ -583,7 +587,7 @@ Specialized objects
 - Break complex states into all/race/sequence combinations
 - Use terminateEvents for graceful parallel Action stopping
 
-25. Optimization and Debugging
+### 25. Optimization and Debugging ###
 -------------------------------
 25.1. Debug Component
 - FPS display, draw calls, object count
@@ -601,7 +605,7 @@ Specialized objects
 25.4. Build
 - Debug build:dev; minimize build:prod
 
-26. FAQ
+### 26. FAQ ###
 -------
 - How to launch game? — see Quick Start: index.js + load.js + runGame
 - Where to connect modules? — config/load.js
@@ -610,7 +614,7 @@ Specialized objects
 - How to find object? — this.common.find/One/All or Urso.find*/ selectors ^ . #
 - How to configure asset quality? — through Urso.assets.updateQuality/ setQuality and qualityFactors config
 
-27. Examples from A to Z
+### 27. Examples from A to Z ###
 ------------------------
 27.1. Mini-menu + game transition
 - main.js: defaultScene = 'menu'
@@ -643,7 +647,7 @@ emit('fullscreen.toggle')
 27.9. Debug
 Add Debug component to scene for monitoring
 
-28. API Reference
+### 28. API Reference ###
 -----------------
 28.1. Core/Global
 - Urso.runGame()
@@ -681,7 +685,7 @@ Add Debug component to scene for monitoring
 28.8. Logger
 - error/warning/info/log; levels through defaultLogLevel
 
-29. Appendices
+### 29. Appendices ###
 --------------
 29.1. Naming Conventions
 - Event names: domain.action.detail (for example, sound.play.click, ui.button.play.click)
@@ -695,7 +699,7 @@ Add Debug component to scene for monitoring
 - Logs and levels reduced for production
 - Performance on target devices measured
 
-30. Code Examples
+### 30. Code Examples ###
 -----------------
 index.js
 
@@ -760,7 +764,7 @@ window.Urso.App = {
 
 require('./main.js');
 
-31. Links
+### 31. Links ###
 ---------
 - https://ursojs.io/examples.html
 - https://github.com/megbrimef/urso-examples
