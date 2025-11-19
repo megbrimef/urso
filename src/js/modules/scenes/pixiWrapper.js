@@ -42,9 +42,19 @@ class ModulesScenesPixiWrapper {
         //this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 });
         //document.body.appendChild(this._renderer.view);
         this._renderer = app.renderer;
-        document.body.appendChild(app.view);
+        let parentContainer = document.body;
 
-        //debugger
+        if (Urso.config.domParentSelector) {
+            const container = document.querySelector(Urso.config.domParentSelector);
+
+            if (container) {
+                parentContainer = container;
+            } else {
+                Urso.logger.warn(`No element found for domParentSelector: ${domParentSelector}`);
+            }
+        }
+
+        parentContainer.appendChild(this._renderer.view);
 
         //root and world
         this._root = new PIXI.Container();

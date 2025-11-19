@@ -11,7 +11,8 @@ let ConfigMain = {
     fps: {
         limit: 60, //max fps limit
         optimizeLowPerformance: false //down to 30 fps if lower 60
-    }
+    },
+    domParentSelector: false //or '#app-container' - div selector, to append canvas
 };
 
 module.exports = ConfigMain;
