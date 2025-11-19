@@ -12,6 +12,7 @@ class ModulesObserverConfig {
         EXTRA_BROWSEREVENTS_POINTER_EVENT: 'extra.browserEvents.window.pointer.event',
         EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',
         EXTRA_BROWSEREVENTS_WINDOW_RESIZE: 'extra.browserEvents.window.resize',
+        EXTRA_BROWSEREVENTS_PARENT_RESIZE: 'extra.browserEvents.parent.resize',
         EXTRA_BROWSEREVENTS_WINDOW_VISIBILITYCHANGE: 'extra.browserEvents.window.visibilitychange',
         MODULES_ASSETS_GROUP_LOADED: 'modules.assets.group.loaded',
         MODULES_ASSETS_LOAD_PROGRESS: 'modules.assets.load.progress',

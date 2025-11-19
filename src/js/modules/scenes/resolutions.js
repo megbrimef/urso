@@ -10,6 +10,9 @@ class ModulesScenesResolutions {
         this.preResize = this.preResize.bind(this);
         this.refreshSceneSize();
 
+        this._customDomElementlatestWidth = 0;
+        this._customDomElementlatestHeight = 0;
+
         //TODO optimization (performance)
         /*if (devicePixelRatio > 2)
             devicePixelRatio = 2;*/ // when we are calculating canvas size
@@ -18,7 +21,48 @@ class ModulesScenesResolutions {
     _subscribeOnce() {
         this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE, this.preResize, true);
         this.addListener(Urso.events.EXTRA_BROWSEREVENTS_WINDOW_RESIZE, this.refreshSceneSize, true);
+        this.addListener(Urso.events.EXTRA_BROWSEREVENTS_PARENT_RESIZE, this.refreshSceneSize, true);
         this.addListener(Urso.events.MODULES_SCENES_NEW_SCENE_INIT, this.refreshSceneSize, true);
+
+        if (Urso.config.domParentSelector) { this._observeCustomDomElementResize(); }
+    }
+
+    _observeCustomDomElementResize() {
+        const container = document.querySelector(Urso.config.domParentSelector);
+
+        if (!container) {
+            Urso.logger.warn(`No element found for domParentSelector: ${domParentSelector}`);
+            return;
+        }
+
+        const ro = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                if (entry.target.resizeHandler) {
+                    entry.target.resizeHandler(entry.target.clientHeight, entry.target.clientWidth);
+                }
+            }
+        });
+
+        container.resizeHandler = this._customDomElementResizeHandler.bind(this);
+        ro.observe(container);
+    }
+
+    _customDomElementResizeHandler(newHeight, newWidth) {
+        let needResize = false;
+
+        if (this._customDomElementlatestWidth !== newWidth) {
+            this._customDomElementlatestWidth = newWidth;
+            needResize = true;
+        }
+
+        if (this._customDomElementlatestHeight !== newHeight) {
+            this._customDomElementlatestHeight = newHeight;
+            needResize = true;
+        }
+
+        if (needResize) {
+            this.emit(Urso.events.EXTRA_BROWSEREVENTS_PARENT_RESIZE);
+        }
     }
 
     getTemplateSize() {
@@ -72,6 +116,17 @@ class ModulesScenesResolutions {
             width: window.innerWidth,
             height: window.innerHeight
         };
+
+        if (Urso.config.domParentSelector) {
+            const container = document.querySelector(Urso.config.domParentSelector);
+
+            if (container) {
+                windowSize = {
+                    width: container.offsetWidth,
+                    height: container.offsetHeight
+                };
+            }
+        }
 
         if (window.devicePixelRatio && window.devicePixelRatio !== 1) {
             windowSize.width *= window.devicePixelRatio;
