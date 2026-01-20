@@ -39,12 +39,15 @@ class LibCache {
             const atlas = atlases[key];
             const page = new spine.TextureAtlasPage(key);
             const { w, h } = atlas.data.meta.size;
-            const scale = (parseFloat(atlas.data.meta.scale) || 1);
-            
+
             const baseTexture = new spine.SpineTexture(atlas.textureSource);
 
-            page.width = w;
-            page.height = h;
+            // Use actual texture dimensions for page (may differ from meta.size due to resolution scaling)
+            const texW = atlas.textureSource.pixelWidth || atlas.textureSource.source?.pixelWidth || w;
+            const texH = atlas.textureSource.pixelHeight || atlas.textureSource.source?.pixelHeight || h;
+
+            page.width = texW;
+            page.height = texH;
             page.texture = baseTexture;
             page.minFilter = page.magFilter = 9729;
             page.uWrap = page.vWrap = 33071;
@@ -60,45 +63,33 @@ class LibCache {
                 const frame = atlas.data.frames[frameName];
                 const region = new spine.TextureAtlasRegion(page, normalizedName);
                 
-                // Denominators for UVs: use page (atlas image) dimensions
-                const denomW = page.width;
-                const denomH = page.height;
-                
                 // Check if frame is rotated (TexturePacker boolean or 90 marker)
                 const isRotated = frame.rotated === true || frame.rotated === 90;
-                
+
                 // Frame rect in the atlas (pixels)
                 const fx = frame.frame.x;
                 const fy = frame.frame.y;
                 const fw = frame.frame.w;
                 const fh = frame.frame.h;
+
+                // Region size (swap on rotation)
+                region.width = isRotated ? fh : fw;
+                region.height = isRotated ? fw : fh;
+
+                region.u = fx / texW;
+                region.v = fy / texH;
+                region.u2 = (fx + fw) / texW;
+                region.v2 = (fy + fh) / texH;
+                region.degrees = isRotated ? 90 : 0;
                 
-                // Region size (swap on rotation), divided by scale
-                region.width = (isRotated ? fh : fw) / scale;
-                region.height = (isRotated ? fw : fh) / scale;
-                
-                if (isRotated) {
-                    region.u = fx / denomW;
-                    region.v = fy / denomH;
-                    region.u2 = (fx + fh) / denomW; // swapped
-                    region.v2 = (fy + fw) / denomH; // swapped
-                    region.degrees = 90;
-                } else {
-                    region.u = fx / denomW;
-                    region.v = fy / denomH;
-                    region.u2 = (fx + fw) / denomW;
-                    region.v2 = (fy + fh) / denomH;
-                    region.degrees = 0;
-                }
-                
-                // Original (untrimmed) size divided by scale
-                region.originalWidth = frame.sourceSize.w / scale;
-                region.originalHeight = frame.sourceSize.h / scale;
-                
-                // Offsets relative to original rect (bottom-left), divided by scale
+                // Original (untrimmed) size - already at export scale in JSON
+                region.originalWidth = frame.sourceSize.w;
+                region.originalHeight = frame.sourceSize.h;
+
+                // Offsets relative to original rect (bottom-left)
                 if (frame.spriteSourceSize) {
-                    region.offsetX = frame.spriteSourceSize.x / scale;
-                    region.offsetY = (frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h) / scale;
+                    region.offsetX = frame.spriteSourceSize.x;
+                    region.offsetY = frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h;
                 } else {
                     region.offsetX = 0;
                     region.offsetY = 0;
