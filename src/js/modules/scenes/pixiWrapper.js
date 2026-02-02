@@ -50,7 +50,11 @@ class ModulesScenesPixiWrapper {
             if (container) {
                 parentContainer = container;
             } else {
-                Urso.logger.warn(`No element found for domParentSelector: ${domParentSelector}`);
+                Urso.logger.warn(`No element found for domParentSelector: ${Urso.config.domParentSelector}`);
+                Urso.logger.warn(`waitForDomElement...`);
+                Urso.helper.waitForDomElement(Urso.config.domParentSelector).then(() => {
+                    parentContainer.appendChild(this._renderer.view);
+                });
             }
         }
 
