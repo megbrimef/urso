@@ -31,7 +31,11 @@ class ModulesScenesResolutions {
         const container = document.querySelector(Urso.config.domParentSelector);
 
         if (!container) {
-            Urso.logger.warn(`No element found for domParentSelector: ${domParentSelector}`);
+            Urso.logger.warn(`No element found for domParentSelector: ${Urso.config.domParentSelector}`);
+            Urso.logger.warn(`waitForDomElement...`);
+            Urso.helper.waitForDomElement(Urso.config.domParentSelector).then(() => {
+                this._observeCustomDomElementResize();
+            });
             return;
         }
 
