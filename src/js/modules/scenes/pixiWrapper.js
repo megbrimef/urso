@@ -46,6 +46,8 @@ class ModulesScenesPixiWrapper {
                 Urso.logger.warn(`No element found for domParentSelector: ${Urso.config.domParentSelector}`);
                 Urso.logger.warn(`waitForDomElement...`);
                 Urso.helper.waitForDomElement(Urso.config.domParentSelector).then(() => {
+                    Urso.logger.warn(`Element for domParentSelector: ${Urso.config.domParentSelector} was created. AppendChild`);
+                    parentContainer = document.querySelector(Urso.config.domParentSelector);
                     parentContainer.appendChild(this._renderer.view);
                 });
             }
