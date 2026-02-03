@@ -34,6 +34,7 @@ class ModulesScenesResolutions {
             Urso.logger.warn(`No element found for domParentSelector: ${Urso.config.domParentSelector}`);
             Urso.logger.warn(`waitForDomElement...`);
             Urso.helper.waitForDomElement(Urso.config.domParentSelector).then(() => {
+                Urso.logger.warn(`Element for domParentSelector: ${Urso.config.domParentSelector} was created. Run _observeCustomDomElementResize`);
                 this._observeCustomDomElementResize();
             });
             return;
