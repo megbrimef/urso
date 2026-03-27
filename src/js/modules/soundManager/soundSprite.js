@@ -131,15 +131,14 @@ class SoundSprite {
     setVolume({ soundKey, volume = 1, saveVolumeState = true }) {
         this._player.volume(volume, this._soundsState[soundKey].id);
 
-        if (volume === 0) {
-            this._changeSoundMute(true, soundKey);
-            return;
-        } else if (this._soundsState[soundKey]._muted) {
-            this._changeSoundMute(false, soundKey);
-        }
-
         if (saveVolumeState) {
             this._soundsState[soundKey].volume = volume;
+        }
+
+        if (volume === 0) {
+            this._changeSoundMute(true, soundKey);
+        } else if (this._soundsState[soundKey]._muted) {
+            this._changeSoundMute(false, soundKey);
         }
     };
 
