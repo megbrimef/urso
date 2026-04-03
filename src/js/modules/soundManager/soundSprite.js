@@ -116,7 +116,7 @@ class SoundSprite {
         this.setLoop(soundKey, loop);
 
         if (!resetVolume) //set saved volume value
-            volume = this._soundsState[soundKey].volume
+            volume = this._soundsState[soundKey].volume * this._totalVolume;
 
         this.setVolume({ soundKey, volume });
 
