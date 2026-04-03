@@ -116,7 +116,7 @@ class SoundSprite {
         this.setLoop(soundKey, loop);
 
         if (!resetVolume) //set saved volume value
-            volume = this._soundsState[soundKey].volume * this._totalVolume;
+            volume = this._soundsState[soundKey].volume;
 
         this.setVolume({ soundKey, volume });
 
@@ -129,7 +129,7 @@ class SoundSprite {
     };
 
     setVolume({ soundKey, volume = 1, saveVolumeState = true }) {
-        this._player.volume(volume, this._soundsState[soundKey].id);
+        this._player.volume(volume * this._totalVolume, this._soundsState[soundKey].id);
 
         if (saveVolumeState) {
             this._soundsState[soundKey].volume = volume;
@@ -158,7 +158,7 @@ class SoundSprite {
         const soundKeys = Object.keys(this._soundsState);
         this._player._volume = this._totalVolume;
         soundKeys.forEach(soundKey => {
-            const soundVolume = this._soundsState[soundKey].volume * this._totalVolume;
+            const soundVolume = this._soundsState[soundKey].volume;
             this.setVolume({ soundKey, volume: soundVolume, saveVolumeState: false });
         });
     }
@@ -209,7 +209,7 @@ class SoundSprite {
         const delta = fadeTo - fadeFrom;
 
         const onUpdate = () => {
-            const volume = (fadeFrom + (delta * this._fadeTweens[soundKey].ratio)) * this._totalVolume;
+            const volume = (fadeFrom + (delta * this._fadeTweens[soundKey].ratio));
             this.setVolume({ soundKey, volume });
         };
 
@@ -255,7 +255,6 @@ class SoundSprite {
     };
 
     _reactToEvent(soundKey, { action, volume, ...otherParams }) {
-        volume *= this._totalVolume;
         const self = this;
         const params = { ...otherParams, action, soundKey, volume };
 
