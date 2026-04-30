@@ -77,7 +77,7 @@ class SoundSprite {
     }
 
     _subscribePlayerEvents() {
-        if (Howler.Howler._audioUnlocked) {
+        if (Howler._audioUnlocked) {
             this._audioUnlockHandler();
         } else {
             this._player.on('unlock', () => setTimeout(() => {
