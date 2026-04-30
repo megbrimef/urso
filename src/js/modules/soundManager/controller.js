@@ -15,7 +15,7 @@ class SoundManagerController {
 
     _setCodec() {
         for (const codec of this._codecsToCheck) {
-            if (Howler.codecs(codec)) {
+            if (Howler.Howler.codecs(codec)) {
                 this._selectedCodec = codec;
                 return;
             }
