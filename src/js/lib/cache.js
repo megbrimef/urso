@@ -42,9 +42,11 @@ class LibCache {
 
             const baseTexture = new spine.SpineTexture(atlas.textureSource);
 
-            // Use actual texture dimensions for page (may differ from meta.size due to resolution scaling)
-            const texW = atlas.textureSource.pixelWidth || atlas.textureSource.source?.pixelWidth || w;
-            const texH = atlas.textureSource.pixelHeight || atlas.textureSource.source?.pixelHeight || h;
+            // Use the JSON meta size: frame coords are in raw image pixels, and pixelWidth is
+            // scaled by resolution (e.g. 0.9x scale → pixelWidth ≈ 0.9 * actual), so we must
+            // divide UVs by the actual pixel count, which meta.size always reflects correctly.
+            const texW = w;
+            const texH = h;
 
             page.width = texW;
             page.height = texH;
@@ -82,18 +84,15 @@ class LibCache {
                 region.v2 = (fy + fh) / texH;
                 region.degrees = isRotated ? 90 : 0;
                 
-                // Original (untrimmed) size - already at export scale in JSON
-                region.originalWidth = frame.sourceSize.w;
-                region.originalHeight = frame.sourceSize.h;
-
-                // Offsets relative to original rect (bottom-left)
-                if (frame.spriteSourceSize) {
-                    region.offsetX = frame.spriteSourceSize.x;
-                    region.offsetY = frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h;
-                } else {
-                    region.offsetX = 0;
-                    region.offsetY = 0;
-                }
+                // Use trimmed frame size as originalSize so mesh UVs [0,1] stay within the
+                // packed region. Setting originalWidth = sourceSize would extend UVs across the
+                // full untrimmed sprite, hitting neighboring atlas regions for transparent areas.
+                // Trade-off: trimmed frames show texture compressed into the packed region.
+                // Proper fix: re-export atlas with trimming disabled for mesh attachments.
+                region.originalWidth = region.width;
+                region.originalHeight = region.height;
+                region.offsetX = 0;
+                region.offsetY = 0;
                 
                 region.texture = baseTexture;
                 textureAtlas.regions.push(region);
