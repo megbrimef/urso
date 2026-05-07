@@ -18,46 +18,9 @@
     </style>
   </head>
   <body>
-    <script src="./build/js/index.js"></script>
-    <script>
-      // Example of using the imported function
-    //   Urso.runGame();
-    //   return;
-      (async () => {
-        const app = new PIXI.Application();
-        await app.init({ background: "#1099bb", resizeTo: window });
-        document.body.appendChild(app.canvas);
-        const cntr = new PIXI.Graphics();
-        cntr.beginFill(0x66f542);
-        cntr.drawRect(0, 0, 100, 100);
-        cntr.endFill();
-        cntr.y = 100;
-        cntr.x = 100;
-        app.stage.addChild(cntr);
-
-        let from = { y: 100 };
-        let to = { y: 600 };
-
-        const run = () => {
-          const t = gsap.timeline();
-
-          t.to(from, {
-            ...to,
-            yoyo: true,
-            duration: 1,
-            onUpdate: () => {
-              cntr.y = from.y;
-            },
-            onComplete: () => {
-              cntr.y = 100;
-              from = { y: 100 };
-              to = { y: 600 };
-              run();
-            },
-          });
-        };
-        run();
-      })();
+    <script type="module">
+      import './src/js/index.js';
+      window.onload = Urso.runGame;
     </script>
   </body>
 </html>
