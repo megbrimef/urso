@@ -1,7 +1,7 @@
 import './config/load.js';
+import '../app/config/load.js';
 
-//main config
 Urso.config = Urso.Core.Config.Main;
+Urso.config.extendingChain = ['Urso.Core', 'Urso.App'];
 
-//function to run game with engine
 Urso.runGame = (new Urso.Core.App()).setup;
