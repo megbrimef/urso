@@ -31,25 +31,45 @@ class LibCache {
         return this._globalAtlas;
     }
 
+    _getMeshFrameNames() {
+        const names = new Set();
+        const meshTypes = new Set(['mesh', 'weightedmesh', 'linkedmesh']);
+
+        for (const key in Urso.cache.assetsList.spine) {
+            const data = Urso.cache.assetsList.spine[key];
+            if (!data?.skins) continue;
+
+            for (const skin of data.skins) {
+                if (!skin.attachments) continue;
+                for (const slotName in skin.attachments) {
+                    const slot = skin.attachments[slotName];
+                    for (const attName in slot) {
+                        const att = slot[attName];
+                        if (meshTypes.has(att.type))
+                            names.add(att.path || attName);
+                    }
+                }
+            }
+        }
+
+        return names;
+    }
+
     _createGlobalAtlas() {
         const textureAtlas = new spine.TextureAtlas('');
         const atlases = Urso.cache.assetsList.atlas;
+        const meshFrameNames = this._getMeshFrameNames();
 
         for (const key in atlases) {
             const atlas = atlases[key];
             const page = new spine.TextureAtlasPage(key);
             const { w, h } = atlas.data.meta.size;
+            const scale = parseFloat(atlas.data.meta.scale) || 1;
 
             const baseTexture = new spine.SpineTexture(atlas.textureSource);
 
-            // Use the JSON meta size: frame coords are in raw image pixels, and pixelWidth is
-            // scaled by resolution (e.g. 0.9x scale → pixelWidth ≈ 0.9 * actual), so we must
-            // divide UVs by the actual pixel count, which meta.size always reflects correctly.
-            const texW = w;
-            const texH = h;
-
-            page.width = texW;
-            page.height = texH;
+            page.width = w;
+            page.height = h;
             page.texture = baseTexture;
             page.minFilter = page.magFilter = 9729;
             page.uWrap = page.vWrap = 33071;
@@ -64,36 +84,43 @@ class LibCache {
 
                 const frame = atlas.data.frames[frameName];
                 const region = new spine.TextureAtlasRegion(page, normalizedName);
-                
-                // Check if frame is rotated (TexturePacker boolean or 90 marker)
                 const isRotated = frame.rotated === true || frame.rotated === 90;
-
-                // Frame rect in the atlas (pixels)
                 const fx = frame.frame.x;
                 const fy = frame.frame.y;
                 const fw = frame.frame.w;
                 const fh = frame.frame.h;
 
-                // Region size (swap on rotation)
-                region.width = isRotated ? fh : fw;
-                region.height = isRotated ? fw : fh;
-
-                region.u = fx / texW;
-                region.v = fy / texH;
-                region.u2 = (fx + fw) / texW;
-                region.v2 = (fy + fh) / texH;
+                region.u = fx / w;
+                region.v = fy / h;
+                region.u2 = (fx + fw) / w;
+                region.v2 = (fy + fh) / h;
                 region.degrees = isRotated ? 90 : 0;
-                
-                // Use trimmed frame size as originalSize so mesh UVs [0,1] stay within the
-                // packed region. Setting originalWidth = sourceSize would extend UVs across the
-                // full untrimmed sprite, hitting neighboring atlas regions for transparent areas.
-                // Trade-off: trimmed frames show texture compressed into the packed region.
-                // Proper fix: re-export atlas with trimming disabled for mesh attachments.
-                region.originalWidth = region.width;
-                region.originalHeight = region.height;
-                region.offsetX = 0;
-                region.offsetY = 0;
-                
+
+                if (meshFrameNames.has(normalizedName)) {
+                    // Mesh frames: keep originalSize equal to packed size so regionUVs [0,1]
+                    // stay within [region.u, region.u2]. Using sourceSize here would map UVs
+                    // across the full untrimmed sprite, hitting neighboring atlas regions.
+                    region.width = isRotated ? fh : fw;
+                    region.height = isRotated ? fw : fh;
+                    region.originalWidth = region.width;
+                    region.originalHeight = region.height;
+                    region.offsetX = 0;
+                    region.offsetY = 0;
+                } else {
+                    // Region/other frames: use design-space sizes for correct display dimensions.
+                    region.width = (isRotated ? fh : fw) / scale;
+                    region.height = (isRotated ? fw : fh) / scale;
+                    region.originalWidth = frame.sourceSize ? frame.sourceSize.w / scale : region.width;
+                    region.originalHeight = frame.sourceSize ? frame.sourceSize.h / scale : region.height;
+                    if (frame.spriteSourceSize && frame.sourceSize) {
+                        region.offsetX = frame.spriteSourceSize.x / scale;
+                        region.offsetY = (frame.sourceSize.h - frame.spriteSourceSize.y - frame.spriteSourceSize.h) / scale;
+                    } else {
+                        region.offsetX = 0;
+                        region.offsetY = 0;
+                    }
+                }
+
                 region.texture = baseTexture;
                 textureAtlas.regions.push(region);
             }
