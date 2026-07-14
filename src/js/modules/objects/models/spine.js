@@ -177,8 +177,8 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
      * @param {String} slotName
      * @param {Object} object - created by engine object
      */
-    addToSlot(slotName, object) {
-        this._addToSlot(slotName, object, false);
+    addToSlot(slotName, object, followAttachmentTimeline) {
+        this._addToSlot(slotName, object, false, followAttachmentTimeline);
     }
 
     /**
@@ -186,8 +186,8 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
      * @param {String} slotName
      * @param {Object} object - created by engine object
      */
-    replaceSlotWith(slotName, object) {
-        this._addToSlot(slotName, object, true);
+    replaceSlotWith(slotName, object, followAttachmentTimeline) {
+        this._addToSlot(slotName, object, true, followAttachmentTimeline);
     }
 
     /**
