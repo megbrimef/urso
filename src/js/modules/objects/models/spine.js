@@ -318,7 +318,7 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
         this.emit(Urso.events.MODULES_OBJECTS_SPINE_EVENT, { eventName: event.data.name, name: this.name, class: this.class });
     }
 
-    _addToSlot(slotName, object, replaceSlotContents) {
+    _addToSlot(slotName, object, replaceSlotContents, followAttachmentTimeline = true) {
         if (!object?._baseObject) {
             Urso.logger.warn('ModulesObjectsModelsSpine _addToSlot error: invalid object ' + object);
             return;
@@ -334,13 +334,14 @@ class ModulesObjectsModelsSpine extends ModulesObjectsBaseModel {
         
         object._baseObject.scale.y = -1;
 
-        Urso.objects.removeChild(object.parent, object, true);
+        if (object.parent)
+            Urso.objects.removeChild(object.parent, object, true);
 
         if (replaceSlotContents)
             currentSlot.setAttachment(null); //todo check if its proxy and reset parent
 
         this.addChild(object);
-        spine.addSlotObject(currentSlot, object._baseObject);
+        spine.addSlotObject(currentSlot, object._baseObject, { followAttachmentTimeline });
     }
 
     /**
