@@ -26,10 +26,12 @@ class ModulesObjectsController {
             result = [];
 
             for (const object of objects) {
-                result.push(this._createSingleObject(object, parent, doNotRefreshStylesFlag, _system));
+                // PERF: suppress nested refreshes during batch — refresh once at the end instead of N+1 times
+                result.push(this._createSingleObject(object, parent, true, _system));
             }
         } else
-            result = this._createSingleObject(objects, parent, doNotRefreshStylesFlag, _system);
+            // PERF: suppress nested refresh for single object — caller controls the single batched refresh below
+            result = this._createSingleObject(objects, parent, true, _system);
 
         if (!doNotRefreshStylesFlag)
             this.refreshStyles(parent);

@@ -56,9 +56,12 @@ class ModulesScenesService {
         const newTemplatePart = Urso.template.parse({ objects: [objects] }, true);
 
         if (newTemplatePart.assets.length) {
-            Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag));
+            // PERF: force refresh for deferred creation — these objects are created after the outer batch refresh,
+            // so they must get their own refresh. Do not suppress it by inheriting doNotRefreshStylesFlag.
+            Urso.assets.preload(newTemplatePart.assets, () => this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, false));
             return null; //objects will be created soon. Maybe we can return a promice //todo
         } else
+            // FIXED: forward flag for synchronous path — these objects are created inside the batch and covered by the outer refresh
             return this._newTemplateAssetsLoadedHandler(newTemplatePart, parent, doNotRefreshStylesFlag);
     }
 
