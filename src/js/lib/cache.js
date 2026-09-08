@@ -8,6 +8,7 @@ class LibCache {
             atlas: {},
             binary: {},
             bitmapFont: {},
+            container: {}, // FIXED: addContainer/getContainer were trying to access undefined assetsList.container — initialize it
             file: {},
             image: {},
             json: {},

@@ -136,7 +136,7 @@ class LibLoader {
                 if (jsonData) {
                     switch (asset.type) {
                         case Urso.types.assets.JSON:
-                            Urso.cache.addJson(asset.key, { data: jsonData });
+                            Urso.cache.addJson(asset.key, jsonData); // FIXED: unwrap { data: jsonData } envelope — normal load path stores unwrapped shape, so both paths must match
                             break;
                         case Urso.types.assets.ATLAS:
                             //FIXME
