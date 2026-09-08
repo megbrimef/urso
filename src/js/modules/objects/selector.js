@@ -72,6 +72,18 @@ class ModulesObjectsSelector {
                 )
                     return false;
 
+            } else if (property.type === 'type') {
+                // FIXED: compare the object's NUMERIC type against the lowercase flipped type name, so a bare
+                // selector word ('button') can match Urso.types.objects.BUTTON. The flipped map is memoised
+                // because this runs for every candidate object on every search.
+                if (!this._typesFlipped)
+                    this._typesFlipped = Urso.helper.objectFlip(Urso.types.objects);
+
+                const expectedTypeName = this._typesFlipped[object.type];
+
+                if (!expectedTypeName || expectedTypeName.toLowerCase() !== property.value)
+                    return false;
+
             } else if (object[property.type] !== property.value)
                 return false;
         }
@@ -91,8 +103,11 @@ class ModulesObjectsSelector {
         for (let selectorsPart of selectorsParts) {
             let selectorPartParsed = this._parseSelectorPart(selectorsPart);
 
-            if (!selectorPartParsed)
+            if (!selectorPartParsed) {
+                // FIXED: do not push false into array; return false immediately for clean failure
                 Urso.logger.error('ModulesObjectsService error, cannot parse selector part: ' + selectorsPart);
+                return false;
+            }
 
             selectorsPartsParsed.push(selectorPartParsed);
         }
@@ -127,6 +142,18 @@ class ModulesObjectsSelector {
                 if (restItems)
                     return Urso.helper.mergeArrays(result, restItems);
             }
+        }
+
+        // ADDED: if no prefixed form matched, try parsing as a bare type word
+        let bareTypeMatch = new RegExp("^(" + characterEncoding + ")").exec(selectorPart);
+        if (bareTypeMatch) {
+            result.push({ type: 'type', value: bareTypeMatch[1] });
+
+            let restSelectorPart = Urso.helper.stringReplace(bareTypeMatch[0], '', selectorPart);
+            let restItems = this._parseSelectorPart(restSelectorPart);
+
+            if (restItems)
+                return Urso.helper.mergeArrays(result, restItems);
         }
 
         return (result && result.length > 0) ? result : false;

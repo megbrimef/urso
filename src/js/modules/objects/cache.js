@@ -9,7 +9,8 @@ class ModulesObjectsCache {
         this._data = {
             ids: {},
             names: {},
-            classes: {}
+            classes: {},
+            types: {} // ADDED: type index for selector lookups
         }
     }
 
@@ -76,6 +77,14 @@ class ModulesObjectsCache {
         return false;
     }
 
+    getType(key) {
+        // ADDED: retrieve all objects of a given type - many-to-one like classes
+        if (this._data.types[key])
+            return Object.values(this._data.types[key]);
+
+        return false;
+    }
+
     _addClass(key, object) {
         if (!this._data.classes[key])
             this._data.classes[key] = {};
@@ -93,6 +102,27 @@ class ModulesObjectsCache {
 
         if (!Object.keys(this._data.classes[key]).length)
             delete this._data.classes[key];
+    }
+
+    addType(key, object) {
+        // ADDED: add object to type index - many-to-one mapping like class
+        if (!this._data.types[key])
+            this._data.types[key] = {};
+
+        if (!this._data.types[key][object._uid])
+            this._data.types[key][object._uid] = object;
+    }
+
+    removeType(key, object) {
+        // ADDED: remove object from type index
+        if (!this._data.types[key])
+            return;
+
+        if (this._data.types[key][object._uid])
+            delete this._data.types[key][object._uid];
+
+        if (!Object.keys(this._data.types[key]).length)
+            delete this._data.types[key];
     }
 }
 

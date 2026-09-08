@@ -240,6 +240,17 @@ class ModulesObjectsService {
             this.getInstance('Cache').addName(proxy.name, proxy);
         if (proxy.class)
             this.getInstance('Cache').addClass(proxy.class, proxy);
+
+        // ADDED: register object's type in cache (converted to lowercase string)
+        if (proxy.type) {
+            if (!this._objectsTypesFlipped)
+                this._objectsTypesFlipped = Urso.helper.objectFlip(Urso.types.objects);
+
+            let typeName = this._objectsTypesFlipped[proxy.type];
+            if (typeName) {
+                this.getInstance('Cache').addType(typeName.toLowerCase(), proxy);
+            }
+        }
     }
 
     _removeFromCache(proxy) {
@@ -249,6 +260,17 @@ class ModulesObjectsService {
             this.getInstance('Cache').removeName(proxy.name, proxy);
         if (proxy.class)
             this.getInstance('Cache').removeClass(proxy.class, proxy);
+
+        // ADDED: unregister object's type from cache
+        if (proxy.type) {
+            if (!this._objectsTypesFlipped)
+                this._objectsTypesFlipped = Urso.helper.objectFlip(Urso.types.objects);
+
+            let typeName = this._objectsTypesFlipped[proxy.type];
+            if (typeName) {
+                this.getInstance('Cache').removeType(typeName.toLowerCase(), proxy);
+            }
+        }
     }
 }
 
