@@ -1,257 +1,167 @@
 # Urso engine — remaining work
 
-Open items only. Everything fixed on `fix/engine-audit-0.9` has been removed — see `git log a1c85db..HEAD` for what was done and why.
+Open items only. Everything fixed on `fix/engine-audit-0.9` has been removed — see `git log a1c85db..HEAD`.
 
-Already shipped and therefore absent from this list: the v8 migration of the object models, the dead public API in the Pixi wrapper, the lazy-load group state machine, bare type selectors, the asset-loader progress/error/retry path, the object-property hot-path allocations, the Text construction storm, texture-key mangling, and the Core config decoupling.
+Every item below was re-checked against the current source before being kept. Line numbers are current as of the branch tip; API claims are verified against the installed PixiJS **8.10.2** in `node_modules/pixi.js`.
 
-Line numbers are current as of the tip of that branch. API claims verified against the installed PixiJS **8.10.2** in `node_modules/pixi.js`.
+## Read this before acting on anything here
+
+Three findings in earlier revisions of this file turned out to be **wrong**, each from reading code statically without tracing the whole path. They are recorded in §7 rather than deleted, because in every case the "fix" would have broken working code:
+
+- `@urso/revolt-fx` is **not** a v7-era dependency; its `PIXI.BLEND_MODES` reference is deliberate v8 feature detection.
+- The engine is **already DPI-correct**; `resolution: 1` is right and `autoDensity` would double-apply.
+- A benchmark that reported `refreshStyles` at 13 ms / 1.4 s was measuring the harness's own linear scan, not the engine.
+
+Treat the un-actioned items below as leads to verify, not as confirmed defects.
 
 **Contents**
 
-1. [Lazy load by groups — remaining pieces](#1-lazy-load-by-groups--remaining-pieces)
-2. [Asset and cache layer](#2-asset-and-cache-layer)
-3. [Performance](#3-performance)
-4. [Remaining PixiJS v8 debt](#4-remaining-pixijs-v8-debt)
-5. [Unfinished features](#5-unfinished-features)
-6. [Correctness and design issues](#6-correctness-and-design-issues)
-7. [Configuration and integration](#7-configuration-and-integration)
-8. [Follow-ups created by this branch](#8-follow-ups-created-by-this-branch)
-9. [Docs, tests, tooling](#9-docs-tests-tooling)
-10. [Suggested order](#10-suggested-order)
+1. [Asset and cache layer](#1-asset-and-cache-layer)
+2. [Performance](#2-performance)
+3. [Unfinished features](#3-unfinished-features)
+4. [Correctness and design issues](#4-correctness-and-design-issues)
+5. [Configuration and integration](#5-configuration-and-integration)
+6. [Follow-ups created by this branch](#6-follow-ups-created-by-this-branch)
+7. [Corrections — do not "fix" these](#7-corrections--do-not-fix-these)
+8. [Docs, tests, tooling](#8-docs-tests-tooling)
+9. [Suggested order](#9-suggested-order)
 
 ---
 
-## 1. Lazy load by groups — remaining pieces
+## 1. Asset and cache layer
 
-The core mechanism works now: per-scene passes, no deadlocks on unregistered groups, `isGroupLoaded`/`isGroupLoading`, and a promise API alongside the callbacks. Four things are still missing.
+### 1.1 Atlas frame keys still collide — `assets/service.js:272, 289`
+Frames are keyed by basename, so `icon.png` in two atlases both resolve to `icon`. A **decision was taken** to keep the flat key format (existing templates depend on it) and instead make the collision loud, which is done: it now errors naming the frame and both atlases. The overwrite itself is unchanged, so the last atlas loaded still wins.
 
-### 1.1 `this.assets` mixes two incompatible shapes and leaks — `assets/service.js:48, 177`
-`_createNewAssetsSpace()` stores a per-preload space at a numeric key:
-```js
-this.assets[this._loadCounter] = {};   // { 0: [ ...initial models... ] }
-```
-while `_addAsset` stores lazy groups as flat arrays at string keys:
-```js
-this.assets[model.loadingGroup].push(model);   // [ ...models... ]
-```
-So `this.assets` is simultaneously a map of preload-spaces and a map of group-arrays, told apart only by key type. `_processLoadedAssets` deletes the inner group but leaves the numeric space `{}` behind — one empty object leaked per `preload()` call, forever.
+The namespacing fix, `addFolderPathInAtlasTextureKey`, is still read from config at `:272` and never applied — the code that would prefix a frame key with its folder path is commented out at `:289`. It cannot simply be uncommented: it references an undefined `folderPath`, calls `addFile` rather than `addTexture`, and iterates a mistyped `imageData.texture`. Implementing it changes the key format for every frame in a subfolder, so it needs the same kind of decision the collision reporting got.
 
-Fix: split into `this._preloadSpaces` and `this._groups`, or drop the numeric spaces entirely and key everything by group name. This is also what removes the `initial: 0` numeric/string ambiguity that `loadGroup` currently has to special-case.
+### 1.2 Global atlas rebuild is O(N²) — `lib/cache.js:23-31, 157`
+`addAtlas` calls `clearGlobalAtlas()` on every atlas, and the `globalAtlas` getter rebuilds the whole `spine.TextureAtlas` on next access, re-walking every spine skin and attachment via `_getMeshFrameNames()`. Loading N atlases while reading the global atlas between them rebuilds N times. Add a rebuild-once-after-batch flag.
 
-### 1.2 Groups cannot be unloaded
-There is no `unloadGroup(name)`. Once loaded, a group's textures stay in `Urso.cache.assetsList` for the process lifetime, and `_addedAssetsCache` (`assets/service.js:10`) permanently records the key so the asset can never be re-registered. A game that lazy-loads a bonus round and returns to base game only grows.
+### 1.3 Texture resolution is never applied — `assets/service.js:403`
+`//TODO change resolution of base texture`. The `qualityFactors` in `assets/config.js` decide *which file* is fetched but not how it renders, so HD assets draw at the wrong size.
 
-Needs: `Urso.assets.unloadGroup(name)` that calls `PIXI.Assets.unload(...)`, drops the entries from `Urso.cache`, removes the keys from `_addedAssetsCache`, and removes the group from `_loadedGroups` so it can be loaded again.
-
-### 1.3 `placeHolder` is parsed and ignored — `assets/baseModel.js:17`
-```js
-this.placeHolder = Urso.helper.recursiveGet('placeHolder', params, false); //placeHolder assets model //TODO
-```
-The whole point of lazy loading is that an object can exist before its texture arrives. Nothing reads this field, so an `IMAGE` whose asset sits in a lazy group still fails at creation with `no image with key` (`objects/models/image.js:27`). Implement it: resolve to the placeholder texture at create time, then swap when `MODULES_ASSETS_GROUP_LOADED` fires for that group.
-
-### 1.4 No worked example — `src/app/`
-`assets/config.js` documents the contract now, but `src/app/` still contains only `config/load.js` and `templates/scenes/play.js`. Add a commented `src/app/modules/assets/config.js` stub plus a scene template that tags an asset with a `loadingGroup`, so the override-through-`extendingChain` path is demonstrated once end to end.
+### 1.4 Other pipeline gaps
+- `lib/loader.js:157` — the `ATLAS`-sourced-from-`JSONATLAS` branch is still commented out, so such an atlas is skipped entirely.
+- `assets/service.js` `_processLoadedAssets` — no longer post-processes `IMAGE` (resolution), `BITMAPFONT` or `FONT`; only `SPINEATLAS` survives. v8's `Assets` handles web fonts and bitmap fonts natively, so verify and delete the dead branches, or reimplement.
+- `assets/service.js` `preloadAllImagesInGPU()` — empty body. Implement with v8's `renderer.prepare` (needs `import 'pixi.js/prepare'`) or remove it and its controller passthrough.
+- `noAtlasSpine` — eight references across `assets/service.js` and `lib/loader.js`, half-disabled and self-labelled `FIXME remove noAtlasSpine`.
 
 ---
 
-## 2. Asset and cache layer
+## 2. Performance
 
-### 2.1 Atlas frame keys still collide — `assets/service.js:268, 284`
-`addTexture` no longer mangles keys (only real image extensions are stripped now), but two frames with the same basename in different atlases still overwrite each other — `_setDataToAssetsList` logs a warning and writes anyway. The intended namespacing fix, `addFolderPathInAtlasTextureKey`, is read from config at `:268` and then never applied; the code that would prefix a frame key with its folder path is commented out at `:284`.
+The measured hot-path allocations, the Text construction storm and the per-object style refresh are all fixed. What is left needs profiling on target hardware, not static reasoning.
 
-Note that the commented code cannot simply be uncommented: it references an undefined `folderPath`, calls `addFile` rather than `addTexture`, and iterates a mistyped `imageData.texture`. Deriving the folder from `assetModel.path` is also a breaking change to key format for existing games, so this needs a decision before implementation.
+### 2.1 Culling is available but unproven
+`CullerPlugin` now registers behind `config.renderer.culling` (default `false`), and `cullable` / `cullArea` / `cullableChildren` are exposed as object properties. Nothing enables them. Culling trades CPU (per-object bounds checks) for GPU savings, so it is a **loss** on a CPU-bound app. Profile a real scene on target hardware before turning it on, and consider `cullableChildren = false` on static UI subtrees so the culler does not recurse.
 
-### 2.2 Global atlas rebuild is O(N²) — `lib/cache.js:23-31, 157`
-`addAtlas` calls `clearGlobalAtlas()` on every atlas, and the `globalAtlas` getter rebuilds the entire `spine.TextureAtlas` from scratch on next access, re-walking every spine skin and attachment via `_getMeshFrameNames()`. Loading N atlases while reading the global atlas between them rebuilds N times. Given the recent commit history (`global atlas update`, `fixed uv for spine issue`) this area is already fragile — add a rebuild-once-after-batch flag.
+### 2.2 Render groups and batching are unused
+- `objects/config.js:5` — `objectsToCache` is empty, so the object pool is off. Defensible, but nothing documents when to turn it on.
+- Nothing calls `enableRenderGroup`. `cacheAsTexture` is now reachable via the `cacheAsBitmap` property but no engine code or template uses it, so static UI panels and complex `Graphics` still re-render every frame.
+- The scene graph is built in template order with no type grouping, so an interleaved `IMAGE / GRAPHICS / IMAGE / GRAPHICS` template produces four draw calls where two would do. Worth documenting at minimum.
 
-### 2.3 Texture resolution is never applied — `assets/service.js:398`
-`//TODO change resolution of base texture`. The `qualityFactors` in `assets/config.js:11-15` decide *which file* is fetched but not how it renders, so HD assets draw at the wrong size.
-
-### 2.4 Other pipeline gaps
-- `lib/loader.js:141-145` — the `ATLAS`-sourced-from-`JSONATLAS` branch is commented out, so such an atlas is skipped entirely (the loop `continue`s without queueing it).
-- `assets/service.js:299` — `_processLoadedAssets` no longer post-processes `IMAGE` (resolution), `BITMAPFONT` or `FONT`; only `SPINEATLAS` survives. v8's `Assets` handles web fonts and bitmap fonts natively — verify and delete the dead branches, or reimplement.
-- `assets/service.js:153` — `preloadAllImagesInGPU()` has an empty body. Implement with v8's `renderer.prepare` (needs `import 'pixi.js/prepare'`) or remove it and its controller passthrough.
-- `assets/service.js:225`, `lib/loader.js:151-162` — the `noAtlasSpine` / global-atlas metadata path is half-disabled and self-labelled `FIXME remove noAtlasSpine`.
-
----
-
-## 3. Performance
-
-The measured hot-path allocations are fixed. What remains is structural: work the engine does per scene build or per frame that no micro-optimisation addresses.
-
-### 3.1 `refreshStyles()` re-runs every style selector on every add/remove/destroy — `objects/service.js:173, 186, 222`, `objects/styles.js:22, 96-97`
-`Urso.objects.create()` and every add/remove/destroy call `refreshStyles()` with no argument. That runs `_resetInactualStyles()` (walks the whole style cache, calling `testObject` on each cached object) and then `_apply()` for **every selector in the template**, each of which performs a full `findAll(selector)` search.
-
-Building a scene of N objects with S style selectors is therefore O(N × S) selector searches plus a full cache re-validation per object. `//todo optimization` is already on all three call sites. With the per-access proxy allocations gone, this is now the largest remaining CPU cost on scene build.
-
-Fix: batch the refresh — create the whole tree with `doNotRefreshStylesFlag`, then refresh once — and scope `_apply` to the subtree being added rather than the world. Needs care: narrowing the scope can change which styles end up applied.
-
-### 3.2 Culling is never enabled anywhere
-`CullerPlugin` is never registered, and `cullable` / `cullArea` / `cullableChildren` appear nowhere in `src/` (the only hit is inside the disabled `extra/pixiPatch.js`). Every object is submitted to the renderer every frame regardless of whether it is on screen.
-
-Fix: register `CullerPlugin` before `app.init()`, expose `cullable`/`cullArea` as object-model properties through the proxy alias map, and set `cullableChildren = false` on static UI subtrees so the culler does not recurse into them. Profile first — culling trades CPU (per-object bounds checks) for GPU, so it is a loss when the app is CPU-bound.
-
-### 3.3 No render groups, no `cacheAsTexture`, no batching guidance
-- `objects/config.js:5` — `objectsToCache` is an empty array, so the object pool is off by default. Defensible, but nothing documents when to turn it on.
-- Nothing in the engine ever calls `cacheAsTexture` or `enableRenderGroup`, and the proxy mapping for it was removed (see §8). Static UI panels and complex `Graphics` re-render from scratch every frame.
-- `interactiveChildren` is never set to `false` on any container, so hit-testing recurses through every subtree on every pointer event.
-- The scene graph is built in template order with no type grouping, so an interleaved `IMAGE / GRAPHICS / IMAGE / GRAPHICS` template produces four draw calls where two would do. Worth a note in the docs at minimum.
-
-### 3.4 Renderer init leaves performance options unset — `scenes/pixiWrapper.js:43-47`
-```js
-await app.init({ background: "0x222222", resolution: 1 });
-```
-No `antialias`, `powerPreference`, `preference` (webgl/webgpu), no `gcActive`/`gcMaxUnusedTime`/`gcFrequency`, and no `PrepareSystem` upload before a scene is shown — so the first frame after every scene load hitches while textures upload. See §7 for `resolution: 1`, which is a correctness issue on high-DPI displays as well as a performance knob.
-
-### 3.5 Per-fire string allocation in the observer — `observer/controller.js:31-32`
+### 2.3 Per-fire string allocation in the observer — `observer/controller.js:31-32`
 ```js
 this._fireLocal(eventName, params);
 this._fireLocal(eventName + this._getLocalSuffix(), params);
 ```
-Every `fire()` concatenates a new string for the scene-scoped dispatch and walks two listener lists. `MODULES_SCENES_UPDATE` fires every frame, so this is at least 60 string allocations a second, more with per-frame game events. Cache the suffixed name per event, or key local listeners by a nested map instead of a concatenated string.
+Every `fire()` concatenates a new string for the scene-scoped dispatch and walks two listener lists. `MODULES_SCENES_UPDATE` fires every frame, so that is at least 60 string allocations a second. Cache the suffixed name per event, or key local listeners by a nested map instead of a concatenated string.
+
+### 2.4 The DPI cap is implicit — `scenes/resolutions.js`
+`maxResolutionFactor` limits the backing store to `ResolutionsConfig.maxSize()` (default 1920), so a 4K or high-DPI display renders at reduced density to protect fill rate. There is also a commented-out `if (devicePixelRatio > 2) devicePixelRatio = 2` in the `Resolutions` constructor showing the same intent. This is deliberate and correct (see §7), but it is a side effect of whatever `maxSize()` happens to return rather than a documented knob. Surface it as explicit config. Ergonomics, not correctness.
 
 ---
 
-## 4. Remaining PixiJS v8 debt
+## 3. Unfinished features
 
-### 4.1 `fillCustomColors` is advertised but dead — `extra/pixiPatch.js`, `objects/models/text.js:27`, `objects/proxy.js:53`
-`pixiPatch.js` targets v6/v7 internals (`PIXI.Text.prototype.drawLetterSpacing`, `PIXI.Container.prototype.renderAdvanced`, `PIXI.MeshMaterial`), none of which exist in v8. It is correctly disabled at `config/load.js:27` and `:186` — but the per-character text colouring it provided is still parsed, still assigned to the base object, and still mapped in the proxy alias table, so the option is a silent no-op. Either reimplement on v8 (`SplitText`, or per-character `Text` objects) or remove the parameter, its proxy mapping, and its documentation.
+### 3.1 Editor component — `components/editor/api.js:9, 79`
+`addStyle()` and `editObject(id, key, value)` are empty. `_assetsKeys` is missing `AUDIOSPRITE`, `HTML`, `JSONATLAS`, `SOUND`, `SPINEATLAS`; `_objectsKeys` covers a fraction of the object types. Finish, or mark the component experimental.
 
-### 4.2 `config.appVersion` anticache is dead — `lib/loader.js:129`
-`defaultQueryString` is commented out, so the documented anticache mechanism does nothing. v8 equivalent: `Assets.init({ defaultSearchParams: { appVersion } })`.
-
-### 4.3 The `@urso/revolt-fx` build warning is benign — do not "fix" it
-CORRECTION to an earlier entry in this file, which claimed this package was a v7-era
-dependency that needed upgrading or forking. That was wrong, and verified so:
-
-- `node_modules/@urso/revolt-fx/package.json` declares `peerDependencies: { "pixi.js": "^8.x" }`.
-- The `PIXI['BLEND_MODES']` reference at `FX.js:521` is a deliberate **v8 feature detection**:
-  ```js
-  __getBlendMode(value) {
-      if (PIXI['BLEND_MODES'] === undefined && typeof value == 'number') {
-          return this.useBlendModes ? FX._blendModes[value] : 'normal';
-      }
-      return value;
-  }
-  ```
-  with `FX._blendModes = ['normal', 'add', 'multiply', 'screen']`. The absence of
-  `BLEND_MODES` is how it detects v8, and it then maps a legacy numeric blend mode onto
-  the v8 string form.
-
-So the `IMPORT_IS_UNDEFINED ... FX.js:521` line printed on every build is Rollup correctly
-noting the import resolves to undefined — which is precisely what the code tests for. The
-package is v8-native and `EMITTERFX` is fine.
-
-What is actually left here is only noise management: the warning is misleading enough that
-someone will eventually try to "fix" it. Either silence it via Rollup's `onwarn` in
-`vite.config.js` (matching that specific code and module) or leave a comment there pointing
-at this entry. Separately, `@urso/revolt-fx` is the one runtime dependency still bundled
-rather than externalised — a consistency question, not a bug, since it declares Pixi as a
-peer and the bundled copy resolves Pixi through the same external import.
-
----
-
-## 5. Unfinished features
-
-### 5.1 Object types with no model — `modules/template/types.js`
-Exported in `Urso.types.objects` and dispatched in `objects/service.js`, but the model classes do not exist. `getInstance` returns `false`, so creation fails with `ModulesObjectsCreate model type error` (`objects/service.js:126`):
-
-| Type | Dispatch | Status |
-|---|---|---|
-| `ATLASIMAGE` | `objects/service.js:92-94` | case commented out; `Models.AtlasImage` missing |
-| `DRAGCONTAINER` | `objects/service.js:98` | `Models.DragContainer` missing |
-| `EMITTER` | no case → `default` → `Models.Emitter` | missing; only `EMITTERFX` exists |
-| `SCROLLBOX` | no case → `default` → `Models.Scrollbox` | missing |
-| `TEXTINPUT` | `objects/service.js:113` | `Models.TextInput` missing |
-
-`propertyAdapter.js` already references `DRAGCONTAINER`, `EMITTER`, `SCROLLBOX` and `TEXTINPUT`, so these were intended to ship. Decide per type: implement, or remove from `types.js` so a template fails at parse time with a clear message instead of at creation. Now that bare type selectors work, these names are also reachable as selectors, which makes the phantom entries more visible.
-
-### 5.2 Editor component — `components/editor/api.js`
-`addStyle()` (`:9-11`) and `editObject(id, key, value)` (`:75`) are empty. `_assetsKeys` is missing `AUDIOSPRITE`, `HTML`, `JSONATLAS`, `SOUND`, `SPINEATLAS`; `_objectsKeys` covers 6 of 25 object types. Finish, or mark the component experimental.
-
-### 5.3 Transport is unreachable through config — `modules/transport/*`
-- `config.useTransport` (`config/main.js:10`) is declared and documented in README §19.2 but referenced nowhere else in `src/`. `Urso.transport.init()` is never called by the engine, and nothing tells a game it must call it.
-- `transport/controller.js:2-9` — `_service` is `null` until `init()`, so every handler setter (`setOnConnectionHandler`, `setResponseHandler`, …) throws if called first.
+### 3.2 Transport is unreachable through config — `modules/transport/*`
+- `config.useTransport` is declared in `config/main.js` and documented in README §19.2, but appears **nowhere else in `src/`** (verified: one occurrence total). `Urso.transport.init()` is never called by the engine and nothing tells a game it must call it.
+- `transport/controller.js` — `_service` is `null` until `init()`, so every handler setter throws if called first.
 - The controller has no `singleton = true`, unlike every other module controller.
-- `transport/config.js:9` — `host: Urso.helper.parseGetParams('wsHost')`. The host can only come from a URL query param; there is no static config path, and an absent param yields `undefined`.
-- `transport/service.js:125` — `// TODO : SET VALIDATION MODELS`; messages are unvalidated.
-- `transport/connectionTypes/websocket.js:24` — reconnect uses a raw `setTimeout` instead of `Urso.setTimeout`, so it ignores `timeScale`.
+- `transport/config.js` — `host` comes only from a `wsHost` URL query param; there is no static config path and an absent param yields `undefined`.
+- `transport/service.js` — `// TODO : SET VALIDATION MODELS`; messages are unvalidated.
+- `transport/connectionTypes/websocket.js` — reconnect uses a raw `setTimeout` instead of `Urso.setTimeout`, so it ignores `timeScale`.
 
-### 5.4 Smaller unfinished items
-- `objects/baseModel.js:57` — `append: false` ("object will not created") is parsed but never checked anywhere.
-- `objects/baseModel.js:93` — `addChildAt(childObject, zIndex, …)` ignores `zIndex` and just calls `addChild`. Honour it (`zIndex` + `sortableChildren`) or drop the parameter.
-- `objects/models/toggle.js:84-88`, `objects/models/button.js:100-104` — `pixelPerfectOver` / `pixelPerfectClick` parse into empty `//todo` blocks; both options are silently ignored.
+### 3.3 Smaller unfinished items
+- `objects/baseModel.js:61` — `append: false` ("object will not created") is parsed but never checked anywhere.
+- `objects/baseModel.js:104` — `addChildAt(childObject, zIndex, …)` ignores `zIndex` and just calls `addChild`. Honour it (`zIndex` + `sortableChildren`) or drop the parameter.
+- `objects/models/button.js`, `objects/models/toggle.js` — `pixelPerfectOver` / `pixelPerfectClick` parse into empty `//todo` blocks; both are silently ignored.
 - `components/debug/controller.js:8` — `renderStats` and `resolution` debug panels are commented out of the list.
-- `components/base/controller.js:43` — `loadUpdate()` is an empty `//todo` on the base component, yet it is called for every component on every progress tick.
-- `scenes/service.js:60` — `addObject` returns `null` for objects created before assets resolve (`//todo Maybe we can return a promise`). Callers cannot distinguish success from "not yet".
-- `components/deviceRotate/controller.js:26-44` — builds a div with classes `fullscreen`, `device-rotate`, `fullscreen-info` and loads `assets/images/fullscreen/rotate.png`. Neither the stylesheet nor the image exists in this repo, so the overlay is invisible unless the game supplies both. Document the contract or ship a minimal injected style.
+- `components/base/controller.js` — `loadUpdate()` is an empty `//todo` on the base component, yet it is called for every component on every progress tick.
+- `scenes/service.js` — `addObject` returns `null` for objects created before assets resolve. Callers cannot distinguish success from "not yet". Now that the deferred path forces its own style refresh, returning a promise would make this coherent.
+- `components/deviceRotate/controller.js` — builds a div with classes `fullscreen`, `device-rotate`, `fullscreen-info` and loads `assets/images/fullscreen/rotate.png`. Neither the stylesheet nor the image exists in this repo, so the overlay is invisible unless the game supplies both. Document the contract or ship a minimal injected style.
+- `observer/events.js:29-30` — `MODULES_OBJECTS_TEXTINPUT_BLUR` and `..._INPUT` are unreachable now that the `TEXTINPUT` object type is gone. Left in place deliberately in case external code references them; remove on the next breaking release.
 
 ---
 
-## 6. Correctness and design issues
+## 4. Correctness and design issues
 
-- `objects/propertyAdapter.js:268` — `Math.atan(xCatet / yCatet)` carries `//todo or yCatet/xCatet ?`. An unresolved correctness question in the alignment math; worth a test rather than a comment.
-- `objects/propertyAdapter.js:306` — `// TODO: CHECK SCALE CAN BE NEGATIVE`; negative `scaleY` is currently rejected, which breaks flipped sprites.
+- `objects/propertyAdapter.js:269` — `Math.atan(xCatet / yCatet)` carries `//todo or yCatet/xCatet ?`. An unresolved question in the alignment math; worth a test rather than a comment.
+- `objects/propertyAdapter.js:307` — `// TODO: CHECK SCALE CAN BE NEGATIVE`; negative `scaleY` is rejected, which breaks flipped sprites.
 - `objects/styles.js:34` — style resolution ignores the parent (`//todo consider parent`), so the CSS-like inheritance the docs imply is not implemented.
 - `objects/styles.js:6-7` — the `Styles` singleton constructs a real `Models.Text` (and so a `PIXI.Text`) at startup purely to read defaults, and holds it forever.
-- `lib/tween.js:248-251` — completed tweens are reclaimed, but a tween that never completes (looping, or started and abandoned) is never freed, and `_update` iterates the map with `for...in` every frame.
+- `lib/tween.js` — completed tweens are reclaimed, but a tween that never completes (looping, or started and abandoned) is never freed, and `_update` iterates the map with `for...in` every frame.
 - `scenes/resolutions.js:13` — `//TODO optimization (performance)` on the resize path.
-- Orientation helpers (`_isPortrait`, `_showOnLandscape`, `_showOnPortrait`) are duplicated across `fullscreen/controller.js`, `fullscreen/ios.js`, `fullscreen/android.js` and `deviceRotate/controller.js`, and read from two different sources — `fullscreen/controller.js:41-46` uses `ResolutionsConfig.contents` while `fullscreen/ios.js:82-87` uses `ResolutionsConfig._orientations`, a private field accessed from outside the class. Consolidate into one helper.
+- Orientation helpers (`_isPortrait`, `_showOnLandscape`, `_showOnPortrait`) are duplicated across `fullscreen/controller.js`, `fullscreen/ios.js`, `fullscreen/android.js` and `deviceRotate/controller.js`, and read from two different sources — one uses `ResolutionsConfig.contents`, another `ResolutionsConfig._orientations`, a private field accessed from outside the class. Consolidate.
 
 ---
 
-## 7. Configuration and integration
+## 5. Configuration and integration
 
-- **CORRECTION — the engine is already DPI-correct; `resolution: 1` is right.** An earlier
-  revision of this file claimed the canvas "renders at 1x on high-DPI displays and ignores
-  `Urso.device.getPixelRatio()`". That was wrong. Traced through `scenes/resolutions.js`:
-  `_getWindowSize()` (`:70-82`) multiplies `innerWidth`/`innerHeight` by `devicePixelRatio`, so
-  every resolution figure downstream is in PHYSICAL pixels. `_applyResolutionToPixi` (`:155-169`)
-  then calls `renderer.resize()` with those physical counts — the backing store — and sets
-  `canvas.style` to `resolution / devicePixelRatio` — the CSS size. On a 2x display with an
-  800x600 viewport that is a 1600x1200 backing store at 800x600 CSS: an effective density of
-  exactly 2.00x. That IS `resolution: devicePixelRatio` + `autoDensity: true`, hand-rolled.
-  Passing `resolution: 1` to `app.init()` is therefore CORRECT, and enabling Pixi's `autoDensity`
-  would double-apply the scaling. **Do not "fix" this.**
-
-  What genuinely exists here is a deliberate cap, not a bug: `maxResolutionFactor` limits the
-  backing store to `ResolutionsConfig.maxSize()` (default 1920), so a 4K or high-DPI display
-  renders at reduced density to protect fill rate. There is also a commented-out
-  `if (devicePixelRatio > 2) devicePixelRatio = 2` in the `Resolutions` constructor showing the
-  same intent. Worth surfacing as an explicit, documented config knob rather than a side effect
-  of whatever `maxSize()` happens to return — but that is an ergonomics task, not a correctness one.
-
-- **`init()` ordering** — `_root` and `_createWorld()` run before `await app.init()` (`pixiWrapper.js:38-43`). It works, but the world is built against a renderer that does not exist yet; moving them after `init()` makes failure modes clearer.
-- **Globals** — `extra/main.js` assigns `window.PIXI`, `window.gsap` and `window.UrsoUtils`. Every engine file depends on the `PIXI` global rather than importing, which is why `extra/main.js` must load first; `soundManager/controller.js:18` reaches for `UrsoUtils.Howler` the same way. Document the load-order contract, or move to real imports.
+- **`init()` ordering** — `_root` and `_createWorld()` run at `pixiWrapper.js:38` but `app.init()` is not awaited until `:79`. It works, but the world is built against a renderer that does not exist yet; moving them after `init()` would make failure modes clearer.
+- **Globals** — `extra/main.js` assigns `window.PIXI`, `window.gsap` and `window.UrsoUtils`. Every engine file depends on the `PIXI` global rather than importing, which is why `extra/main.js` must load first; `soundManager/controller.js` reaches for `UrsoUtils.Howler` the same way. Document the load-order contract, or move to real imports.
 
 ---
 
-## 8. Follow-ups created by this branch
+## 6. Follow-ups created by this branch
 
-- **`cacheAsBitmap` is now unsupported.** The proxy mapping was removed because v8's `cacheAsTexture` is a method, not a property, and assigning to it destroyed the method. Re-enabling the feature needs a method-call mapping in `objects/proxy.js` (the existing `function.` convention only calls methods without arguments). Until then, setting `cacheAsBitmap` on an object silently does nothing.
 - **`Urso.scenes.getRenderer()` is a breaking change.** It returned the `Application`; it now returns `app.renderer` as its JSDoc always promised, with `getApp()` added for callers that want the Application. Needs a README note and a changelog migration line.
-- **`build/js/index.js` is no longer loadable via a plain `<script>` tag.** Externalising `pixi.js`, `gsap`, `howler` and the spine runtime was correct for an npm library (3.2 MB → 340 KB, no duplicate Pixi), but the output now carries bare imports and needs a resolver. Document the supported consumption path, and decide whether a second self-contained IIFE/UMD build is worth shipping for script-tag users.
-- **Production mode now silences the host page's `console.log`.** `lib/logger.js` has always done `window.log = console.log = () => {}` when the LOG level is off, but the default level included LOG so it never fired. Now that `config.mode === 'production'` defaults to ERROR-only, a production build overwrites the global `console.log` for the whole page, not just the engine. That is aggressive for a library. Decide whether to keep it (and document it loudly) or scope the suppression to `window.log` only.
-- **`_fpsCheckAllowUpdate()` always returns `true`.** Removing the duplicate manual gate left it a pure side-effect call (update the FPS counter, set `ticker.maxFPS`), so the `if (!this._fpsCheckAllowUpdate()) return false;` guard in `_loop` is dead. Rename it to `_updateFpsLimit()` and drop the guard, or reinstate a real return contract.
+- **`build/js/index.js` is no longer loadable via a plain `<script>` tag.** Externalising `pixi.js`, `gsap`, `howler` and the spine runtime was correct for an npm library (3.2 MB → ~350 KB, no duplicate Pixi), but the output now carries bare imports and needs a resolver. Document the supported consumption path, and decide whether a second self-contained IIFE/UMD build is worth shipping.
+- **Production mode silences the host page's `console.log`.** `lib/logger.js:19` does `window.log = console.log = () => {}` when the LOG level is off. That has always been there, but the default level included LOG so it never fired; now that `config.mode === 'production'` defaults to ERROR-only, a production build overwrites the global `console.log` for the whole page, not just the engine. Aggressive for a library — either keep it and document it loudly, or scope the suppression to `window.log`.
+- **`_fpsCheckAllowUpdate()` always returns `true`** (verified: no `return false` remains). Removing the duplicate manual gate left it a pure side-effect call — update the FPS counter, set `ticker.maxFPS` — so the `if (!this._fpsCheckAllowUpdate()) return false;` guard in `_loop` is dead. Rename it `_updateFpsLimit()` and drop the guard, or give it a real return contract.
+- **The `@urso/revolt-fx` build warning is noise.** See §7; it is benign but misleading enough that someone will try to "fix" it. Either silence it with a Rollup `onwarn` filter in `vite.config.js` matching that specific code and module, or leave a pointer comment. Separately, revolt-fx is the one runtime dependency still bundled rather than externalised — a consistency question, not a bug.
 
 ---
 
-## 9. Docs, tests, tooling
+## 7. Corrections — do not "fix" these
 
-- **Test coverage is a starting point, not a suite.** `npm test` runs three smoke suites — type selectors, the lazy-load group state machine, and the loader's success/error/retry contract (43 assertions, all verified to fail against the pre-fix code). Nothing covers the template→assets→objects→components pipeline, the instance factory's mode/mixin resolution, or the property proxy. A test that instantiates every path registered in `config/load.js` would catch §5.1 automatically.
-- **No linter or formatter.** Indentation is inconsistent across the codebase (2-space in components, 4-space in modules).
+Recorded because each was reported as a defect in an earlier revision of this file, and acting on any of them would break working code.
+
+### 7.1 `@urso/revolt-fx` is v8-native
+Its `package.json` declares `peerDependencies: { "pixi.js": "^8.x" }`, and the `PIXI['BLEND_MODES']` reference at `FX.js:521` is deliberate v8 feature detection:
+```js
+if (PIXI['BLEND_MODES'] === undefined && typeof value == 'number')
+    return this.useBlendModes ? FX._blendModes[value] : 'normal';
+```
+with `FX._blendModes = ['normal', 'add', 'multiply', 'screen']`. The **absence** of `BLEND_MODES` is how it detects v8, and it then maps a legacy numeric blend mode onto the v8 string form. The `IMPORT_IS_UNDEFINED` line on every build is Rollup correctly reporting the import resolves to undefined — exactly what the code tests for.
+
+### 7.2 The engine is already DPI-correct; `resolution: 1` is right
+`scenes/resolutions.js` `_getWindowSize()` multiplies `innerWidth`/`innerHeight` by `devicePixelRatio`, so every resolution figure downstream is in **physical pixels**. `_applyResolutionToPixi` passes those to `renderer.resize()` (the backing store) and sets `canvas.style` to `resolution / devicePixelRatio` (the CSS size). Traced on a 2× display with an 800×600 viewport: a 1600×1200 backing store at 800×600 CSS — an effective density of exactly **2.00×**. That *is* `resolution: devicePixelRatio` + `autoDensity`, hand-rolled. Passing `resolution: 1` to `app.init()` is therefore correct, and enabling Pixi's `autoDensity` would double-apply the scaling.
+
+### 7.3 `refreshStyles` was never 13 ms at 100 objects
+An early benchmark reported 13 ms per refresh at 100 objects and 1.4 s at 2000. Those numbers came from the harness's own `findAll` doing a linear scan of the world. The real `Find.do()` resolves the last selector rule through the objects cache, so `findAll` is O(matching). Corrected figures with an index-backed stub: ~2 ms at 100 objects, ~10 ms at 500, ~33 ms at 2000.
+
+---
+
+## 8. Docs, tests, tooling
+
+- **Test coverage is a starting point.** `npm test` runs six Node smoke suites (102 assertions): type selectors, lazy-load groups, the loader's success/error/retry contract, texture-cache keys, asset placeholders, and styles. Uncovered: the template→assets→objects→components pipeline, the instance factory's mode/mixin resolution, and the property proxy. Two real bugs this branch caught late — a call to a non-existent `Urso.events.on`, and a `require()` in an ES module — both lived in paths no test executed. That is the argument for widening coverage, not a general plea for more tests.
+- **No linter or formatter.** Indentation is inconsistent (2-space in components, 4-space in modules).
 - **`README.bak.md` is still checked in.**
-- README needs updating for the behaviour changes in §8, plus the newly working bare type selectors and the `isGroupLoaded` / `isGroupLoading` / promise additions to `Urso.assets`.
+- README needs updating for the §6 behaviour changes, the removed object types, and the assets runtime API (`loadGroup` / `unloadGroup` / `isGroupLoaded` / `isGroupLoading` / `getPlaceholderKey`, the `placeHolder` swap).
 
 ---
 
-## 10. Suggested order
+## 9. Suggested order
 
-1. **§1.1** — the `this.assets` split. Precondition for `unloadGroup` (§1.2), and it removes the `initial`-group special-casing `loadGroup` currently carries.
-2. **§2.1** — atlas frame collisions. Still silent data loss; the intended namespacing fix exists but needs a decision on key format first.
-3. **§1.2, §1.3, §1.4** — finish lazy loading: unload, placeholders, worked example.
-4. **§3.1** — the `refreshStyles()` storm, now the largest remaining CPU cost on scene build.
-5. **§5.1** — decide implement-vs-remove for the five phantom object types before anyone writes a template against them.
-6. **§4** — remaining v8 debt; §4.1 (`fillCustomColors`) and §4.3 (`revolt-fx`) are the two with user-visible impact.
-7. **§3.2 – §3.4 and §7** — culling, render groups, renderer init and the resolution/DPI redesign. Last, because they need profiling on target hardware and §7 touches two files that must change together.
-8. **§8 + §9** — resolve the follow-ups and document the breaking changes before the next publish.
+1. **§6** — document the breaking changes before this branch goes anywhere. `getRenderer()`, the non-script-tag build, and the `console.log` override all affect consumers and none is discoverable from the code.
+2. **§1.1** — atlas frame collisions. Now loud rather than silent, but still last-write-wins; the namespacing fix needs a key-format decision.
+3. **§2.1 / §2.2** — culling and render groups, once you can profile a real scene on target hardware. The knobs exist; what is missing is evidence.
+4. **§1.2 – §1.4** — the remaining asset-pipeline gaps.
+5. **§3.2** — transport, if any game actually uses it; it is currently unreachable through config.
+6. **§4** — the correctness questions, starting with the alignment-math `atan` and negative `scaleY`, both of which want a test rather than an opinion.
+7. **§8** — widen coverage toward the pipeline and the property proxy, where the two late bugs hid.
