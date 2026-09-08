@@ -1,5 +1,12 @@
 import * as spine from '@esotericsoftware/spine-pixi-v8';
 
+// FIXED: texture extension stripping was too broad — added whitelist to prevent data loss
+// when atlas frames named ui.button.normal silently collapsing onto ui.button due to
+// indiscriminate dot-stripping. This set defines all image formats the engine can load.
+const KNOWN_TEXTURE_EXTENSIONS = new Set([
+    'png', 'jpg', 'jpeg', 'webp', 'avif', 'gif', 'bmp', 'svg', 'ktx', 'ktx2', 'basis', 'dds'
+]);
+
 class LibCache {
     _globalAtlas = null
 
@@ -143,7 +150,9 @@ class LibCache {
 
     _setDataToAssetsList(assetType, key, data) {
         if (this.assetsList[assetType][key])
-            console.warn(`LibCache ${assetType}: key already exists: `, key, data);
+            // FIXED: collision warning now goes through Urso.logger.warn so it respects
+            // the engine's configured log level, making data loss visible to users.
+            Urso.logger.warn(`LibCache ${assetType}: key already exists: `, key, data);
 
         this.assetsList[assetType][key] = data;
     }
@@ -186,9 +195,15 @@ class LibCache {
     };
 
     addTexture(key, someData) {
-        if(key.includes('.')) {
-            const keySplit = key.split('.');
-            key = keySplit.splice(0, keySplit.length - 1).join('.')
+        // FIXED: extension stripping is now guarded by whitelist — only strip if the final
+        // segment after the dot is a known texture extension (case-insensitive match).
+        // This prevents atlas frames named ui.button.normal from silently becoming ui.button.
+        const lastDotIndex = key.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < key.length - 1) {
+            const extension = key.substring(lastDotIndex + 1).toLowerCase();
+            if (KNOWN_TEXTURE_EXTENSIONS.has(extension)) {
+                key = key.substring(0, lastDotIndex);
+            }
         }
 
         this._setDataToAssetsList('texture', key, someData);
