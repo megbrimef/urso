@@ -90,12 +90,45 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
         this.localeVariables
       );
 
+    // PERF: Proxy property assignments emit TextStyle update events triggering re-renders (~18 times) — build complete style object upfront for single constructor pass
     const styles = {
       fontFamily: this.fontFamily,
-      leading: this.leading,
+      fontStyle: this.fontStyle,
+      fontWeight: this.fontWeight,
+      fill: this.modifyValue('fill', this.fill),
       align: this.textAlign,
+      leading: this.leading,
+      letterSpacing: this.letterSpacing,
+      lineHeight: this.lineHeight,
+      wordWrap: this.wordWrap,
+      wordWrapWidth: this.wordWrapWidth,
+      dropShadow: false,
     };
-    this._baseObject = new PIXI.Text(this.text, styles);
+
+    // Only include fontSize if explicitly set (defaults to false, avoid passing undefined to Pixi)
+    if (this.fontSize) {
+      styles.fontSize = this.fontSize;
+    }
+
+    // Pixi v8 stroke is object { color, width } when thickness > 0
+    if (this.strokeThickness > 0) {
+      styles.stroke = {
+        color: this.stroke,
+        width: this.strokeThickness,
+      };
+    }
+
+    // Pixi v8 dropShadow is object { color, blur, angle, distance } when enabled
+    if (this.dropShadow) {
+      styles.dropShadow = {
+        color: this.dropShadowColor,
+        blur: this.dropShadowBlur,
+        angle: this.dropShadowAngle,
+        distance: this.dropShadowDistance,
+      };
+    }
+
+    this._baseObject = new PIXI.Text({ text: this.text, style: styles });
 
     if (this.fillCustomColors) {
       this._baseObject.fillCustomColors = this.fillCustomColors;
