@@ -23,9 +23,17 @@ class ModulesObjectsModelsNineSlicePlane extends ModulesObjectsBaseModel {
         let texture = Urso.cache.getTexture(this.assetKey)
 
         if (!texture)
-            Urso.logger.error('ModulesObjectsModelsImage assets error: no image with key: ' + this.assetKey);
+            // FIXED: error message incorrectly said 'ModulesObjectsModelsImage' — should be 'ModulesObjectsModelsNineSlicePlane'
+            Urso.logger.error('ModulesObjectsModelsNineSlicePlane assets error: no image with key: ' + this.assetKey);
 
-        this._baseObject = new PIXI.NineSlicePlane(texture, this.leftWidth, this.topHeight, this.rightWidth, this.bottomHeight);
+        // FIXED: v8 NineSlicePlane constructor takes single options object, not positional border width args — positional args silently dropped
+        this._baseObject = new PIXI.NineSliceSprite({
+            texture,
+            leftWidth: this.leftWidth,
+            topHeight: this.topHeight,
+            rightWidth: this.rightWidth,
+            bottomHeight: this.bottomHeight
+        });
     };
 }
 

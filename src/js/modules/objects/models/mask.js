@@ -18,8 +18,6 @@ class ModulesObjectsModelsMask extends ModulesObjectsBaseModel {
 
     _addBaseObject() {
         let mask = new PIXI.Graphics();
-        mask.lineStyle(0);
-        mask.beginFill(0xffffff);
 
         if (this.rectangle)
             this._drawRect(mask, this.rectangle);
@@ -27,13 +25,15 @@ class ModulesObjectsModelsMask extends ModulesObjectsBaseModel {
             for (let rectangle of this.rectangles)
                 this._drawRect(mask, rectangle);
 
-        mask.endFill();
+        // FIXED: v7 API lineStyle(0), beginFill/endFill are deprecated — v8 uses fill() after shape method
+        mask.fill(0xffffff);
 
         this._baseObject = mask;
     };
 
     _drawRect(maskObject, rectangle) {
-        maskObject.drawRect(rectangle[0], rectangle[1], rectangle[2], rectangle[3]);
+        // FIXED: v7 API drawRect is deprecated — v8 uses rect() method
+        maskObject.rect(rectangle[0], rectangle[1], rectangle[2], rectangle[3]);
     }
 }
 

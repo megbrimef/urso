@@ -22,15 +22,14 @@ class ModulesObjectsModelsGraphics extends ModulesObjectsBaseModel {
         if (!this.polygon.length && !this.rectangle.length)
             return;
 
-        this._baseObject.beginFill(this.fillColor);
-
         if (this.polygon.length) {
-            this._baseObject.drawPolygon(this.polygon);
+            this._baseObject.poly(this.polygon);
         } else if (this.rectangle.length) {
-            this._baseObject.drawRect(...this.rectangle)
+            this._baseObject.rect(...this.rectangle)
         }
 
-        this._baseObject.endFill();
+        // FIXED: v7 API beginFill/drawPolygon/drawRect/endFill are deprecated — v8 uses shape method then fill()
+        this._baseObject.fill(this.fillColor);
     };
 
     _addBaseObject() {

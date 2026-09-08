@@ -44,7 +44,8 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
         let object = Urso.objects.create(model, this);
 
         object._baseObject.interactive = true;
-        object._baseObject.buttonMode = true;
+        // FIXED: v7 API buttonMode is removed in v8 — replaced with cursor property
+        object._baseObject.cursor = 'pointer';
 
         object._baseObject
             .on('pointerdown', this._onButtonDown.bind(this))
@@ -68,15 +69,15 @@ class ModulesObjectsModelsCheckbox extends UrsoCoreModulesObjectsModelsToggle {
             return;
 
         this._checkbox._baseObject.clear();
-        this._checkbox._baseObject.beginFill(fillColor);
 
         if (polygon && polygon.length) {
-            this._checkbox._baseObject.drawPolygon(polygon);
+            this._checkbox._baseObject.poly(polygon);
         } else if (rectangle && rectangle.length) {
-            this._checkbox._baseObject.drawRect(...rectangle)
+            this._checkbox._baseObject.rect(...rectangle)
         }
 
-        this._checkbox._baseObject.endFill();
+        // FIXED: v7 API beginFill/drawPolygon/drawRect/endFill are deprecated — v8 uses shape method then fill()
+        this._checkbox._baseObject.fill(fillColor);
     };
 
     _changeTexture(key) {

@@ -57,7 +57,8 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
             this._changeTexture(`${this.status}Out`);
 
         this._isDisabled = false;
-        this._baseObject.buttonMode = true;
+        // FIXED: v7 API buttonMode is removed in v8 — replaced with cursor property
+        this._baseObject.cursor = 'pointer';
         this._baseObject.interactive = true;
     }
 
@@ -67,7 +68,8 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
 
         this._changeTexture(`${this.status}Disabled`);
         this._isDisabled = true;
-        this._baseObject.buttonMode = false;
+        // FIXED: v7 API buttonMode is removed in v8 — replaced with cursor property
+        this._baseObject.cursor = 'default';
         this._baseObject.interactive = false;
     }
 
@@ -76,7 +78,8 @@ class ModulesObjectsModelsToggle extends UrsoCoreModulesObjectsModelsButton {
         this._changeTexture('unpressedOut');
 
         this._baseObject.interactive = true;
-        this._baseObject.buttonMode = true;
+        // FIXED: v7 API buttonMode is removed in v8 — replaced with cursor property
+        this._baseObject.cursor = 'pointer';
 
         if (this.pixelPerfectOver) {
             //todo

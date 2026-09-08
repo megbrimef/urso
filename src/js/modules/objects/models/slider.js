@@ -139,7 +139,8 @@ class ModulesObjectsModelsSlider extends ModulesObjectsBaseModel {
      */
     _setEvents(obj) {
         obj.interactive = true;
-        obj.buttonMode = true;
+        // FIXED: v7 API buttonMode is removed in v8 — replaced with cursor property
+        obj.cursor = 'pointer';
 
         obj
             .on('pointerdown', this._onPointerDown.bind(this))

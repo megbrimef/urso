@@ -59,12 +59,11 @@ class ModulesObjectsModelsHitArea extends ModulesObjectsBaseModel {
     _addBaseObject() {
         this._baseObject = new PIXI.Graphics();
 
-        this._baseObject.lineStyle(0);
-        this._baseObject.beginFill(0xffffff);
-        this._baseObject.drawRect(0, 0, this.width, this.height);
-        this._baseObject.endFill();
+        // FIXED: v7 API lineStyle(0) is obsolete — no stroke is the default in v8
+        // FIXED: v7 API beginFill/drawRect/endFill are deprecated — v8 uses rect().fill()
+        this._baseObject.rect(0, 0, this.width, this.height).fill(0xffffff);
         this._baseObject.alpha = 0;
-        this._baseObject.cacheAsBitmap = true;
+        // FIXED: v7 API cacheAsBitmap is deprecated in v8 — no benefit for invisible interactive rectangle
 
         this._baseObject.eventMode = 'static';
         this._baseObject.cursor = 'pointer';
