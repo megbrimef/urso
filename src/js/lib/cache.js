@@ -25,6 +25,8 @@ class LibCache {
             spineAtlas: {},
             texture: {},
         };
+        // FIXED: track texture sources to identify which atlas owns each cached frame — prevents silent data loss when two atlases have frames with the same basename
+        this._textureSources = {};
     };
 
     clearGlobalAtlas() {
@@ -148,8 +150,8 @@ class LibCache {
         return textureAtlas;
     }
 
-    _setDataToAssetsList(assetType, key, data) {
-        if (this.assetsList[assetType][key])
+    _setDataToAssetsList(assetType, key, data, suppressWarning = false) {
+        if (this.assetsList[assetType][key] && !suppressWarning)
             // FIXED: collision warning now goes through Urso.logger.warn so it respects
             // the engine's configured log level, making data loss visible to users.
             Urso.logger.warn(`LibCache ${assetType}: key already exists: `, key, data);
@@ -194,7 +196,7 @@ class LibCache {
         this._setDataToAssetsList('sound', key, someData);
     };
 
-    addTexture(key, someData) {
+    addTexture(key, someData, sourceKey = null) {
         // FIXED: extension stripping is now guarded by whitelist — only strip if the final
         // segment after the dot is a known texture extension (case-insensitive match).
         // This prevents atlas frames named ui.button.normal from silently becoming ui.button.
@@ -206,7 +208,32 @@ class LibCache {
             }
         }
 
-        this._setDataToAssetsList('texture', key, someData);
+        // FIXED: detect texture cache collisions by frame basename and name both atlases — prevents silent data loss when two atlases contain frames with the same name
+        const previousSource = this._textureSources[key];
+
+        // FIXED: a re-registration from the SAME source is not a collision — an atlas can legitimately be
+        // processed again (a loader retry, or a scene re-display re-running _processLoadedAtlases over an
+        // already-cached atlas). Reporting those would fire an error per frame for a non-problem and train
+        // people to ignore the message that matters.
+        const isSameSource = previousSource && sourceKey && previousSource === sourceKey;
+
+        if (this.assetsList.texture[key] !== undefined && !isSameSource) {
+            const sourceInfo = [];
+            if (previousSource) sourceInfo.push(`registered from atlas "${previousSource}"`);
+            else sourceInfo.push('previous registration source unknown');
+            if (sourceKey) sourceInfo.push(`now being overwritten by atlas "${sourceKey}"`);
+            Urso.logger.error(
+                `LibCache texture collision: frame key "${key}" is defined in multiple atlases ` +
+                `(${sourceInfo.join(', ')}). Rename one of the frames so the basenames differ, ` +
+                `or reorder your atlas load sequence if last-write-wins is intended.`
+            );
+        }
+
+        if (sourceKey) {
+            this._textureSources[key] = sourceKey;
+        }
+
+        this._setDataToAssetsList('texture', key, someData, true);
     };
 
     addSpine(key, someData) {

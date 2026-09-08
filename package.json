@@ -22,7 +22,7 @@
     "build:prod": "vite build",
     "serve": "vite preview",
     "watch": "vite build --watch",
-    "test": "node test/selectors.test.mjs && node test/lazyLoadGroups.test.mjs && node test/loader.test.mjs",
+    "test": "node test/selectors.test.mjs && node test/lazyLoadGroups.test.mjs && node test/loader.test.mjs && node test/textureCache.test.mjs",
     "prepublishOnly": "npm run build:prod"
   },
   "repository": {

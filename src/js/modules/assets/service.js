@@ -274,7 +274,8 @@ class ModulesAssetsService {
             if(!assetModel.cacheTextures) continue; // FIXED: return exits entire method, should skip only this iteration — changed to continue
     
             for (let [key, val] of Object.entries(imageData.textures)) {
-                Urso.cache.addTexture(key, val);
+                // FIXED: pass atlas key as sourceKey to addTexture so collisions can name both culprit atlases
+                Urso.cache.addTexture(key, val, assetKey);
             }
 
             // for (const name of Object.keys(imageData.texture)) {
