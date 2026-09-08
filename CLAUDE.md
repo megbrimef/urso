@@ -11,12 +11,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm install          # or yarn
 npm run dev          # vite dev server, serves index.html which imports src/js/index.js
-npm run build:prod   # vite lib build -> build/js/index.js (ES only, minify:false)
+npm test             # six Node smoke suites, chained with && (see below)
+npm run build:prod   # vite lib build -> build/js/index.js (ES, minified, deps external)
 npm run watch        # build in watch mode
 npm run serve        # preview a produced build
 ```
 
-There is no test suite, linter, or formatter configured. The README's "yarn start" is stale — the dev script is `dev`.
+`npm test` runs plain Node ESM scripts under `test/` — no framework. Each stubs the
+`Urso` global, imports the real source file, and exits non-zero on failure. They cover
+the type-selector index, the lazy-load group state machine, the asset loader's
+success/error/retry contract, texture-cache key handling, asset placeholders, and
+styles. Everything else — the template→assets→objects→components pipeline, the
+instance factory's mode/mixin resolution, the property proxy — is uncovered. There is
+still no linter or formatter.
+
+**The build externalises `pixi.js`, `gsap`, `howler` and the spine runtime**, so
+`build/js/index.js` carries bare imports and needs a resolver; it is not loadable via a
+plain `<script>` tag.
 
 ## Architecture
 
@@ -72,8 +83,8 @@ Selectors: `^name`, `.class`, `#id`, bare = object type; space-separated selecto
 
 - `modules/logic` — "logic blocks" (`main`, `sounds`, plus `getAdditionalLogicBlocks()` overrides). `Urso.logic.do('fnName', ...args)` fans the call out to whichever blocks implement it.
 - `modules/statesManager` — declarative state machine; states combine actions via `all` / `race` / `sequence`, each action has `guard` / `run(finishCallback)` / `terminate`. `Components.StateDriven` is the base class for state-reactive components (call `super._subscribeOnce()` when overriding).
-- `modules/scenes/resolutionsConfig.js` — virtual canvas size (default 1920×1080 landscape, `adaptive: true`) and per-device stretch limits. `pixiWrapper.js` is the only file that touches the Pixi `Application`/ticker.
-- `modules/assets` — quality factors (`medium`/`hd`/`high`), WebP detection, and lazy-load groups (`loadingGroups` / `lazyLoadGroups` in `assets/config.js`); assets without a `loadingGroup` load in the initial preload.
+- `modules/scenes/resolutionsConfig.js` — virtual canvas size (default 1920×1080 landscape, `adaptive: true`) and per-device stretch limits. `pixiWrapper.js` is the only file that touches the Pixi `Application`/ticker. `Urso.scenes.getRenderer()` returns the **renderer**; `getApp()` returns the `Application`. Note `resolutions.js` hand-rolls device-pixel-ratio itself (multiplies the backing size by `devicePixelRatio`, divides the CSS size by it), which is why `app.init()` passes `resolution: 1` and no `autoDensity` — enabling Pixi's own would double-apply it.
+- `modules/assets` — quality factors (`medium`/`hd`/`high`), WebP detection, and lazy-load groups (`loadingGroups` / `lazyLoadGroups` in `assets/config.js`); assets without a `loadingGroup` load in the initial preload. Runtime API: `loadGroup(name)` (returns a promise as well as taking a callback; never rejects), `unloadGroup(name)`, `isGroupLoaded` / `isGroupLoading`, `getPlaceholderKey`. An asset's `placeHolder` names a stand-in texture shown until its group arrives, then swapped by the object base model. Note the service keeps two separate stores: `_groups` for named lazy groups, while each `preload()` gets its own throwaway assets space.
 - `lib/composition.js` — multiple inheritance helper (`Urso.Game.Lib.Composition.inherit(A, B)`).
 
 ## Conventions
