@@ -24,7 +24,7 @@ import ConfigMain from "../config/main";
 
 import ExtraBrowserEvents from "../extra/browserEvents";
 import ExtraMain from "../extra/main";
-// import ExtraPixiPatch from '../extra/pixiPatch'; //FIXME
+// REMOVED: ExtraPixiPatch import — feature inert since v8 migration, removed to simplify surface
 
 import LibCache from "../lib/cache";
 import LibComposition from "../lib/composition";
@@ -183,7 +183,7 @@ window.Urso = {
     Extra: {
       BrowserEvents: ExtraBrowserEvents,
       Main: ExtraMain,
-      // PixiPatch: ExtraPixiPatch //FIXME
+      // REMOVED: PixiPatch entry — feature inert since v8 migration, removed to simplify surface
     },
     Lib: {
       Cache: LibCache,

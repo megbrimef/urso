@@ -42,7 +42,7 @@ window.onload = Urso.runGame; //run game
     20.2. Additional Information about Templates and Scenes
     20.3. Practical Recommendations, Debugging, Profiling
     20.4. Examples and API Reference (Compatible Elements)
-21. Extra (BrowserEvents, PixiPatch)
+21. Extra (BrowserEvents)
 22. Types (Urso.types)
 23. Events (Urso.events)
 24. Practical Patterns and Recommendations
@@ -493,14 +493,11 @@ Usage:
 - For sound consider tab visibility rules (browser event handling).
 - Debug component — for FPS/metrics monitoring
 
-21. Extra (BrowserEvents, PixiPatch)
+21. Extra (BrowserEvents)
 ------------------------------------
 21.1. BrowserEvents
 - Browser event translation (resize, visibilitychange, input) to engine events: EXTRA_BROWSEREVENTS_*
 - Provides scene/sound/render reaction
-
-21.2. PixiPatch
-- PIXI fixes/extensions
 
 22. Types (Urso.types)
 ----------------------

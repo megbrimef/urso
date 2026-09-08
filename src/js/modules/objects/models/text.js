@@ -24,7 +24,7 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
     this.fontWeight = Urso.helper.recursiveGet('fontWeight', params, 'normal'); // 'bold'
 
     this.fill = Urso.helper.recursiveGet('fill', params, '#000000'); // gradient  ['#ffffff', '#00ff99']
-    this.fillCustomColors = Urso.helper.recursiveGet('fillCustomColors', params, false); //or array [{position:12,color:'#000000'},...]
+    // REMOVED: fillCustomColors per-character colouring feature — inert since v8 migration, removed to simplify surface
     this.stroke = Urso.helper.recursiveGet('stroke', params, 'black');
     this.strokeThickness = Urso.helper.recursiveGet('strokeThickness', params, 0);
     this.dropShadow = Urso.helper.recursiveGet('dropShadow', params, false);
@@ -130,9 +130,7 @@ class ModulesObjectsModelsText extends ModulesObjectsBaseModel {
 
     this._baseObject = new PIXI.Text({ text: this.text, style: styles });
 
-    if (this.fillCustomColors) {
-      this._baseObject.fillCustomColors = this.fillCustomColors;
-    }
+    // REMOVED: fillCustomColors assignment — feature inert since v8 migration, removed to simplify surface
   }
 
   _newLocaleHandler() {

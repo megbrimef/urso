@@ -50,7 +50,7 @@ const ALIASES = {
     'fontStyle': 'style.fontStyle',
     'fontWeight': 'style.fontWeight',
     'fill': 'style.fill',
-    'fillCustomColors': 'fillCustomColors',
+    // REMOVED: 'fillCustomColors' alias — feature inert since v8 migration, removed to simplify surface
     'stroke': 'style.stroke.color',
     'strokeThickness': 'style.stroke.width',
     'dropShadow': 'style.dropShadow',
