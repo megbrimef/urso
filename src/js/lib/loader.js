@@ -1,3 +1,8 @@
+// FIXED: track whether appVersion anticache search param has been applied to the resolver once.
+// LibLoader is not a singleton—a fresh instance is created per asset group—so module-level state
+// prevents re-setting the same param value. This is clearer than tracking on the resolver itself.
+let _searchParamsApplied = false;
+
 class LibLoader {
     constructor() {
         this.RELOAD_DELAY = 250;
@@ -125,8 +130,11 @@ class LibLoader {
         this._loader = PIXI.Assets // new PIXI.Loader();
         const appVersion = Urso.config.appVersion;
 
-        if (appVersion) {
-            // this._loader.defaultQueryString = `appVersion=${appVersion}`; //FIXME
+        if (appVersion && !_searchParamsApplied) {
+            // FIXED: Pixi v7 had PIXI.Loader.defaultQueryString. Pixi v8 uses resolver.setDefaultSearchParams to add
+            // anticache query params to all resolved URLs. Apply once per game lifetime to bust cache on version bump.
+            PIXI.Assets.resolver.setDefaultSearchParams({ appVersion });
+            _searchParamsApplied = true;
         }
 
         // FIXED: replaced per-asset async map with batch loading to support progress tracking and proper error handling

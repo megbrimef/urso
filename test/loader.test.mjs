@@ -7,10 +7,15 @@ const check = (name, cond) => { cond ? (pass++, console.log('  PASS', name)) : (
 const timeouts = [];
 let resetCalls = 0;
 let loadBehaviour = () => ({});
+let setDefaultSearchParamsCallCount = 0;
+let setDefaultSearchParamsLastArg = null;
 
 global.PIXI = {
   Assets: {
-    resolver: { hasKey: () => false },
+    resolver: {
+      hasKey: () => false,
+      setDefaultSearchParams: (params) => { setDefaultSearchParamsCallCount++; setDefaultSearchParamsLastArg = params; }
+    },
     add: () => {},
     load: async (aliases, onProgress) => { onProgress?.(0.5); return loadBehaviour(aliases); },
     reset: () => { resetCalls++; },
@@ -95,6 +100,39 @@ console.log('\n[5] progress is reported on the 0-100 scale consumers expect');
   await l.start(() => {});
   check('mid-load 0.5 reported as 50', seen.includes(50));
   check('completion reported as 100', seen.includes(100));
+}
+
+console.log('\n[6] with appVersion at its default (0), setDefaultSearchParams is never called');
+{
+  loadBehaviour = () => ({ a: {} });
+  setDefaultSearchParamsCallCount = 0;
+  setDefaultSearchParamsLastArg = null;
+  global.Urso.config.appVersion = 0;
+  const l = makeLoader();
+  l.addAsset({ type: 6, key: 'a', path: 'a.png' });
+  await l.start(() => {});
+  check('setDefaultSearchParams not called', setDefaultSearchParamsCallCount === 0);
+}
+
+console.log('\n[7] with appVersion set to a truthy value, it is passed through as a search param');
+{
+  loadBehaviour = () => ({ a: {} });
+  setDefaultSearchParamsCallCount = 0;
+  setDefaultSearchParamsLastArg = null;
+  global.Urso.config.appVersion = '1.2.3';
+  const l = makeLoader();
+  l.addAsset({ type: 6, key: 'a', path: 'a.png' });
+  await l.start(() => {});
+  check('setDefaultSearchParams called exactly once', setDefaultSearchParamsCallCount === 1);
+  check('called with appVersion as search param', setDefaultSearchParamsLastArg?.appVersion === '1.2.3');
+
+  // This is the reason the applied-once flag is module-level rather than per-instance:
+  // Lib.Loader is NOT a singleton, a fresh instance is built for every asset group, and the
+  // value lands on the shared PIXI.Assets.resolver. A second group must not re-set it.
+  const l2 = makeLoader();
+  l2.addAsset({ type: 6, key: 'b', path: 'b.png' });
+  await l2.start(() => {});
+  check('a second loader instance does not re-apply it', setDefaultSearchParamsCallCount === 1);
 }
 
 console.log(`\n${fail === 0 ? 'ALL PASS' : 'FAILURES'} — ${pass} passed, ${fail} failed`);
