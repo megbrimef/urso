@@ -88,16 +88,11 @@ class ModulesObjectsService {
 
         switch (object.type) {
             //exceptions with camelCase namings
-            //FIXME
-            // case Urso.types.objects.ATLASIMAGE:
-            //     model = this.getInstance('Models.AtlasImage', object);
-            //     break;
+            // REMOVED: ATLASIMAGE — never implemented, redundant now that atlas frames are cached by name
             case Urso.types.objects.BITMAPTEXT:
                 model = this.getInstance('Models.BitmapText', object);
                 break;
-            case Urso.types.objects.DRAGCONTAINER:
-                model = this.getInstance('Models.DragContainer', object);
-                break;
+            // REMOVED: DRAGCONTAINER — never implemented
             case Urso.types.objects.EMITTERFX:
                 model = this.getInstance('Models.EmitterFx', object);
                 break;
@@ -110,23 +105,46 @@ class ModulesObjectsService {
             case Urso.types.objects.NINESLICEPLANE:
                 model = this.getInstance('Models.NineSlicePlane', object);
                 break;
-            case Urso.types.objects.TEXTINPUT:
-                model = this.getInstance('Models.TextInput', object);
-                break;
-            default:
-                const objectName = Urso.helper.capitaliseFirstLetter(
-                    this._objectsTypesFlipped[object.type].toLowerCase()
-                );
+            // REMOVED: TEXTINPUT — never implemented
+            default: {
+                // FIXED: this did `this._objectsTypesFlipped[object.type].toLowerCase()` unguarded, so an
+                // unknown type threw "Cannot read properties of undefined" from deep inside scene building,
+                // saying nothing about object types. That is now much easier to hit: a template still
+                // referencing one of the five removed constants gets `type: undefined`, because
+                // Urso.types.objects no longer defines them.
+                const typeName = this._objectsTypesFlipped[object.type];
+
+                if (!typeName) {
+                    Urso.logger.error(
+                        'ModulesObjectsCreate unknown object type: ' + object.type +
+                        ' — not a member of Urso.types.objects. Note ATLASIMAGE, DRAGCONTAINER, EMITTER,' +
+                        ' SCROLLBOX and TEXTINPUT were removed as never implemented; use IMAGE, CONTAINER' +
+                        ' and EMITTERFX instead.',
+                        object
+                    );
+
+                    return false;
+                }
+
+                const objectName = Urso.helper.capitaliseFirstLetter(typeName.toLowerCase());
 
                 model = this.getInstance(`Models.${objectName}`, object);
                 break;
+            }
         }
 
-        if (!model)
+        // FIXED: these two checks logged and then carried on, so an unresolvable model reached
+        // `model._baseObject` and threw TypeError on `false` one line later — the error message was
+        // never actually reachable. Bail out instead, matching getInstance's own false-on-miss contract.
+        if (!model) {
             Urso.logger.error('ModulesObjectsCreate model type error', object.type, object);
+            return false;
+        }
 
-        if (!model._baseObject)
+        if (!model._baseObject) {
             Urso.logger.error('ModulesObjectsCreate baseObject error', model);
+            return false;
+        }
 
         //proxing model
         let proxy = this.getInstance('Proxy').get(model);

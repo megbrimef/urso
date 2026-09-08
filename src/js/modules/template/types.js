@@ -17,7 +17,8 @@ class ModulesTemplateTypes {
             },
 
             objects: {
-                // ATLASIMAGE: 1,
+                // REMOVED: ATLASIMAGE — never implemented, redundant now that atlas frames are cached by name
+                // 1 is reserved (DO NOT REUSE - part of public API and reverse-mapped at runtime)
                 BITMAPTEXT: 2,
                 BUTTON: 3,
                 BUTTONCOMPOSITE: 4,
@@ -25,8 +26,10 @@ class ModulesTemplateTypes {
                 COLLECTION: 6,
                 COMPONENT: 7,
                 CONTAINER: 8,
-                DRAGCONTAINER: 9,
-                EMITTER: 10,
+                // REMOVED: DRAGCONTAINER — never implemented
+                // 9 is reserved (DO NOT REUSE - part of public API and reverse-mapped at runtime)
+                // REMOVED: EMITTER — never implemented
+                // 10 is reserved (DO NOT REUSE - part of public API and reverse-mapped at runtime)
                 EMITTERFX: 11,
                 GRAPHICS: 12,
                 GROUP: 13,
@@ -35,11 +38,13 @@ class ModulesTemplateTypes {
                 IMAGESANIMATION: 16,
                 MASK: 17,
                 NINESLICEPLANE: 18,
-                SCROLLBOX: 19,
+                // REMOVED: SCROLLBOX — never implemented
+                // 19 is reserved (DO NOT REUSE - part of public API and reverse-mapped at runtime)
                 SLIDER: 20,
                 SPINE: 21,
                 TEXT: 22,
-                TEXTINPUT: 23,
+                // REMOVED: TEXTINPUT — never implemented
+                // 23 is reserved (DO NOT REUSE - part of public API and reverse-mapped at runtime)
                 TOGGLE: 24,
                 WORLD: 25
             }

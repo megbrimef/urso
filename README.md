@@ -509,7 +509,7 @@ Usage:
 
 22.2. objects
 Object types (Urso.types.objects)
-- ATLASIMAGE, BITMAPTEXT, BUTTON, BUTTONCOMPOSITE, CHECKBOX, COLLECTION, COMPONENT, CONTAINER, DRAGCONTAINER, EMITTER, EMITTERFX, GRAPHICS, GROUP, HITAREA, IMAGE, IMAGESANIMATION, MASK, NINESLICEPLANE, SCROLLBOX, SLIDER, SPINE, TEXT, TEXTINPUT, TOGGLE, WORLD
+- BITMAPTEXT, BUTTON, BUTTONCOMPOSITE, CHECKBOX, COLLECTION, COMPONENT, CONTAINER, EMITTERFX, GRAPHICS, GROUP, HITAREA, IMAGE, IMAGESANIMATION, MASK, NINESLICEPLANE, SLIDER, SPINE, TEXT, TOGGLE, WORLD
 
 Creation
 - Urso.objects.create(params, parent?)
@@ -532,7 +532,7 @@ Base model properties (ModulesObjectsBaseModel)
 Specific object model properties contain all base model properties as well as their own properties, which can be found in model setupParams.
 
 Specialized objects
-- Button/Toggle/Checkbox/Slider — interactive; Scrollbox — scrolling; Spine — animation; Emitter — particles; NineSlicePlane — adaptive panels; Text/TextInput/BitmapText — text
+- Button/Toggle/Checkbox/Slider — interactive; Spine — animation; EmitterFx — particles; NineSlicePlane — adaptive panels; Text/BitmapText — text
 
 22.3. Other Enumerations
 - Screen orientations: Urso.device.ScreenOrientation.LANDSCAPE/ PORTRAIT

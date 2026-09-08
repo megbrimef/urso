@@ -42,9 +42,9 @@ class PropertyAdapter {
         this._parentTypes = [
             Urso.types.objects.COMPONENT,
             Urso.types.objects.CONTAINER,
-            Urso.types.objects.DRAGCONTAINER,
+            // REMOVED: DRAGCONTAINER — never implemented
             Urso.types.objects.GROUP,
-            Urso.types.objects.SCROLLBOX,
+            // REMOVED: SCROLLBOX — never implemented
             Urso.types.objects.SLIDER,
             Urso.types.objects.SPINE,
             Urso.types.objects.WORLD
@@ -55,7 +55,7 @@ class PropertyAdapter {
          */
         this._typesWithoutAnchor = [
             Urso.types.objects.CHECKBOX,
-            Urso.types.objects.EMITTER,
+            // REMOVED: EMITTER — never implemented
             Urso.types.objects.EMITTERFX,
             Urso.types.objects.GRAPHICS,
             Urso.types.objects.HITAREA,
@@ -63,7 +63,7 @@ class PropertyAdapter {
             Urso.types.objects.NINESLICEPLANE,
             Urso.types.objects.SLIDER,
             Urso.types.objects.SPINE,
-            Urso.types.objects.TEXTINPUT,
+            // REMOVED: TEXTINPUT — never implemented
             Urso.types.objects.WORLD
         ];
     }
