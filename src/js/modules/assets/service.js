@@ -3,8 +3,8 @@ class ModulesAssetsService {
     constructor() {
         this.singleton = true;
 
-        this.assets = {};
-        this._loadCounter = 0;
+        // FIXED: Separated lazy group storage into dedicated _groups field — removes confusion with per-scene preload spaces and eliminates empty object leak
+        this._groups = {};
 
         this._currentQuality = 'auto';
         this._addedAssetsCache = [];
@@ -83,23 +83,24 @@ class ModulesAssetsService {
         return new Promise((resolve) => {
             const config = this.getInstance('Config');
 
-            // FIXED: the `initial` group must never be cached as "loaded" — unlike a named lazy group it is a
-            // FRESH per-scene assets space (see _createNewAssetsSpace), so treating it as a one-time global
-            // group made every scene after the first skip its own preload and render with no assets at all.
-            const isInitialGroup = group === config.loadingGroups.initial;
+            // FIXED: A caller-supplied space is a per-scene preload space; it must never be recorded as a completed
+            // group, because the next scene passes a DIFFERENT space under the same key. The belt-and-braces
+            // || group === config.loadingGroups.initial guard handles direct calls to loadGroup(null, <initial>).
+            const isPreloadSpace = !!assetsSpace || group === config.loadingGroups.initial;
 
             if (!assetsSpace) //global space
-                assetsSpace = this.assets;
+                // FIXED: Use _groups for persistent lazy-group registry instead of this.assets — separates per-scene preload spaces from named lazy groups
+                assetsSpace = this._groups;
 
             // FIXED: If group already loaded, invoke callback immediately and continue chain — prevents redundant loads
-            if (!isInitialGroup && this._loadedGroups.includes(group)) {
+            if (!isPreloadSpace && this._loadedGroups.includes(group)) {
                 callback();
                 resolve();
                 return;
             }
 
             // FIXED: If group is currently loading, queue this callback to run when it completes — prevents duplicate simultaneous loads
-            if (!isInitialGroup && this._loadingGroups[group]) {
+            if (!isPreloadSpace && this._loadingGroups[group]) {
                 this._loadingGroups[group].push(() => { callback(); resolve(); });
                 return;
             }
@@ -121,14 +122,14 @@ class ModulesAssetsService {
             }
 
             // Mark this group as in-flight with an empty callback queue (named lazy groups only)
-            if (!isInitialGroup)
+            if (!isPreloadSpace)
                 this._loadingGroups[group] = [];
 
             //we need load and parse atlases at first (!)
             const loadRestAssetsCallback = () => {
                 this._loadGroupRestAssets(assetsSpace, group, () => {
                     // FIXED: When load completes, mark group as loaded, drain queued callbacks, and resolve this promise — enables state tracking
-                    if (!isInitialGroup) {
+                    if (!isPreloadSpace) {
                         this._loadedGroups.push(group);
                         const queuedCallbacks = this._loadingGroups[group] || [];
                         delete this._loadingGroups[group];
@@ -175,9 +176,8 @@ class ModulesAssetsService {
      * @returns {Object}
      */
     _createNewAssetsSpace() {
-        this._loadCounter++;
-        this.assets[this._loadCounter] = {};
-        return this.assets[this._loadCounter];
+        // FIXED: Return fresh space without storing on instance — eliminates per-preload empty object leak, spaces live only as long as caller holds them
+        return {};
     }
 
     /**
@@ -488,11 +488,12 @@ class ModulesAssetsService {
         if (model.loadingGroup === this.getInstance('Config').loadingGroups.initial) {
             assetsSpace[model.loadingGroup].push(model);
         } else {
+            // FIXED: Store lazy groups in dedicated _groups field instead of this.assets — separates per-scene preload spaces from persistent lazy group registry
             //add single asset to loading group
-            if (!this.assets[model.loadingGroup])
-                this.assets[model.loadingGroup] = [];
+            if (!this._groups[model.loadingGroup])
+                this._groups[model.loadingGroup] = [];
 
-            this.assets[model.loadingGroup].push(model);
+            this._groups[model.loadingGroup].push(model);
         }
     }
 

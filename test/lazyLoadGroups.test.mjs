@@ -41,7 +41,8 @@ console.log('\n[2] a named lazy group IS cached after first load');
 {
   loads = [];
   const s = makeService();
-  s.assets = { bonus: ['a'] };
+  // FIXED: Changed to use _groups field for lazy group storage instead of assets
+  s._groups = { bonus: ['a'] };
   await s.loadGroup(null, 'bonus');
   await s.loadGroup(null, 'bonus');
   check('second call did not reload', loads.length === 1);
@@ -52,7 +53,8 @@ console.log('\n[3] concurrent loads of one group share a single load');
 {
   loads = [];
   const s = makeService();
-  s.assets = { bonus: ['a'] };
+  // FIXED: Changed to use _groups field for lazy group storage instead of assets
+  s._groups = { bonus: ['a'] };
   let cbCount = 0;
   const p1 = s.loadGroup(null, 'bonus', () => cbCount++);
   const p2 = s.loadGroup(null, 'bonus', () => cbCount++);
@@ -67,7 +69,8 @@ console.log('\n[4] a KNOWN group with no assets resolves quietly (no deadlock)')
 {
   logged.length = 0;
   const s = makeService();
-  s.assets = {};
+  // FIXED: Changed to use _groups field for lazy group storage instead of assets
+  s._groups = {};
   let called = false;
   await s.loadGroup(null, 'bonus', () => { called = true; });
   check('callback still fired', called);
@@ -78,7 +81,8 @@ console.log('\n[5] an UNKNOWN group still logs an error but never deadlocks');
 {
   logged.length = 0;
   const s = makeService();
-  s.assets = {};
+  // FIXED: Changed to use _groups field for lazy group storage instead of assets
+  s._groups = {};
   let called = false;
   await s.loadGroup(null, 'typoGroup', () => { called = true; });
   check('callback still fired', called);
@@ -89,7 +93,8 @@ console.log('\n[6] full lazy chain completes and re-arms for the next scene');
 {
   loads = []; emitted = [];
   const s = makeService();
-  s.assets = { bonus: ['a'], outro: ['b'] };
+  // FIXED: Changed to use _groups field for lazy group storage instead of assets
+  s._groups = { bonus: ['a'], outro: ['b'] };
   s._startLazyLoad();
   await new Promise(r => setTimeout(r, 50));
   check('both configured groups loaded in order', loads.join(',') === 'bonus,outro');
