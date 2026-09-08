@@ -47,7 +47,7 @@ export default class ModulesObjectsBaseModel {
         this.angle = Urso.helper.recursiveGet('angle', params, 0);
         this.visible = Urso.helper.recursiveGet('visible', params, true);
         this.alpha = Urso.helper.recursiveGet('alpha', params, 1);
-        this.blendMode = Urso.helper.recursiveGet('blendMode', params, 1);
+        this.blendMode = Urso.helper.recursiveGet('blendMode', params, 'normal'); // FIXED: numeric v5 constant replaced with v8 string mode — Pixi v8 blend modes are strings ('normal', 'add', 'multiply', 'screen', etc.)
         this.ignoreParentMask = Urso.helper.recursiveGet('ignoreParentMask', params, false); //if true - do not apply parent mask on rendering
 
         this.transitionDelay = Urso.helper.recursiveGet('transitionDelay', params, false); //time in ms

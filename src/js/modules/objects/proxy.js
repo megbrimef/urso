@@ -91,11 +91,7 @@ class ModulesObjectsProxy {
         value = target.modifyValue(key, value);
         this._setProperty(target, propertyName, value, oldValue);
 
-        //if property is text - we will update it
-        // FIXME
-        // if (propertyName === 'text') {
-        //     target._baseObject.updateText(true);
-        // }
+        // FIXED: text update hook removed — Pixi v8 Text auto-updates when .text is assigned, no explicit call needed
 
         this._checkMaxSize(target);
 
@@ -260,7 +256,7 @@ class ModulesObjectsProxy {
             'frame': 'frame',
             'blendMode': 'blendMode',
             'tint': 'tint',
-            'action': 'events.onInputUp._bindings.0._listener', //todo
+            // FIXED: removed dead Pixi v4/v5 signal path — 'events.onInputUp._bindings.0._listener' does not exist in Pixi v8
             'btnFrames.over': 'frames.over',
             'btnFrames.out': 'frames.out',
             'btnFrames.down': 'frames.down',
@@ -290,7 +286,7 @@ class ModulesObjectsProxy {
             'letterSpacing': 'style.letterSpacing',
             'textAlign': 'style.align',
             'enabled': 'input.enabled',
-            'cacheAsBitmap': 'cacheAsTexture',
+            // FIXED: removed cacheAsBitmap mapping — cacheAsTexture is a method in Pixi v8 and assignment destroys it; method-call mapping needed to fix
             'ignoreParentMask': 'ignoreParentMask',
             //baseObject functions
             'toGlobal': 'toGlobal'
