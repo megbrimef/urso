@@ -120,8 +120,34 @@ Every `fire()` concatenates a new string for the scene-scoped dispatch and walks
 ### 4.2 `config.appVersion` anticache is dead — `lib/loader.js:129`
 `defaultQueryString` is commented out, so the documented anticache mechanism does nothing. v8 equivalent: `Assets.init({ defaultSearchParams: { appVersion } })`.
 
-### 4.3 `@urso/revolt-fx` is a v7-era dependency
-It references `PIXI.BLEND_MODES`, which does not exist in v8 — every build prints `IMPORT_IS_UNDEFINED ... FX.js:521`. The `EMITTERFX` object type depends on it. Either upgrade/fork the package for v8 or confirm the affected code path is unreachable. It is also the one runtime dependency still bundled rather than externalised.
+### 4.3 The `@urso/revolt-fx` build warning is benign — do not "fix" it
+CORRECTION to an earlier entry in this file, which claimed this package was a v7-era
+dependency that needed upgrading or forking. That was wrong, and verified so:
+
+- `node_modules/@urso/revolt-fx/package.json` declares `peerDependencies: { "pixi.js": "^8.x" }`.
+- The `PIXI['BLEND_MODES']` reference at `FX.js:521` is a deliberate **v8 feature detection**:
+  ```js
+  __getBlendMode(value) {
+      if (PIXI['BLEND_MODES'] === undefined && typeof value == 'number') {
+          return this.useBlendModes ? FX._blendModes[value] : 'normal';
+      }
+      return value;
+  }
+  ```
+  with `FX._blendModes = ['normal', 'add', 'multiply', 'screen']`. The absence of
+  `BLEND_MODES` is how it detects v8, and it then maps a legacy numeric blend mode onto
+  the v8 string form.
+
+So the `IMPORT_IS_UNDEFINED ... FX.js:521` line printed on every build is Rollup correctly
+noting the import resolves to undefined — which is precisely what the code tests for. The
+package is v8-native and `EMITTERFX` is fine.
+
+What is actually left here is only noise management: the warning is misleading enough that
+someone will eventually try to "fix" it. Either silence it via Rollup's `onwarn` in
+`vite.config.js` (matching that specific code and module) or leave a comment there pointing
+at this entry. Separately, `@urso/revolt-fx` is the one runtime dependency still bundled
+rather than externalised — a consistency question, not a bug, since it declares Pixi as a
+peer and the bundled copy resolves Pixi through the same external import.
 
 ---
 
