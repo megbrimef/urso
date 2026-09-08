@@ -1,3 +1,75 @@
+// PERF: allocating fresh literals on every property access — moved to module-level constants
+const SELECTOR_PROPERTIES = [
+    'id', 'name', 'class'
+];
+
+const ORIGINAL_MODEL_EXCEPTIONS = [
+    'parent', 'contents'
+];
+
+const ALIASES = {
+    'id': 'id',
+    'name': 'name', //'name',
+    'class': 'class',
+    'x': 'x',
+    'y': 'y',
+    'z': 'zIndex',
+    'angle': 'angle',
+    'anchorX': 'anchor.x', //'anchor.x',
+    'anchorY': 'anchor.y', //'anchor.y',
+    'width': 'width', //'width',
+    'height': 'height', //'height',
+    'stretchingType': 'stretchingType',
+    'scaleX': 'scale.x', //'scale.x',
+    'scaleY': 'scale.y', //'scale.y',
+    'alignX': 'alignX', //'alignX',
+    'alignY': 'alignY', //'alignY',
+    'parent': 'parent',
+    'rightOffset': 'rightOffset',
+    'bottomOffset': 'bottomOffset',
+    'alpha': 'alpha',
+    'visible': 'visible',
+    'text': 'text',
+    //'assetKey': 'function.setAssetKey', /todo
+    'frame': 'frame',
+    'blendMode': 'blendMode',
+    'tint': 'tint',
+    // FIXED: removed dead Pixi v4/v5 signal path — 'events.onInputUp._bindings.0._listener' does not exist in Pixi v8
+    'btnFrames.over': 'frames.over',
+    'btnFrames.out': 'frames.out',
+    'btnFrames.down': 'frames.down',
+    'btnFrames.up': 'frames.up',
+    'align': 'align',
+    'filters': 'filters',
+    'lineSpacing': 'lineSpacing',
+    'maxWidth': 'maxWidth',
+    'maxHeight': 'maxHeight',
+    'lineHeight': 'style.lineHeight',
+    'fontFamily': 'style.fontFamily',
+    'fontSize': 'style.fontSize',
+    'fontStyle': 'style.fontStyle',
+    'fontWeight': 'style.fontWeight',
+    'fill': 'style.fill',
+    'fillCustomColors': 'fillCustomColors',
+    'stroke': 'style.stroke.color',
+    'strokeThickness': 'style.stroke.width',
+    'dropShadow': 'style.dropShadow',
+    'dropShadowColor': 'style.dropShadow.color',
+    'dropShadowBlur': 'style.dropShadow.blur',
+    'dropShadowAngle': 'style.dropShadow.angle',
+    'dropShadowDistance': 'style.dropShadow.distance',
+    'wordWrap': 'style.wordWrap',
+    'wordWrapWidth': 'style.wordWrapWidth',
+    'leading': 'style.leading',
+    'letterSpacing': 'style.letterSpacing',
+    'textAlign': 'style.align',
+    'enabled': 'input.enabled',
+    // FIXED: removed cacheAsBitmap mapping — cacheAsTexture is a method in Pixi v8 and assignment destroys it; method-call mapping needed to fix
+    'ignoreParentMask': 'ignoreParentMask',
+    //baseObject functions
+    'toGlobal': 'toGlobal'
+};
+
 class ModulesObjectsProxy {
     constructor() {
         this.singleton = true;
@@ -61,7 +133,7 @@ class ModulesObjectsProxy {
     //returns reflectValue = value that would be used when target[key] is called
     _customGetLogic(object, key, reflectValue) {
         const target = object.target;
-        const wrapKey = this._getAliases()[key];
+        const wrapKey = ALIASES[key];  // PERF: direct constant access instead of method call
         
         const isReflectValueObject = typeof reflectValue !== 'undefined'; //&& typeof reflectValue !== 'boolean'; //it was for getting width and height
 
@@ -72,11 +144,11 @@ class ModulesObjectsProxy {
     }
 
     _customSetLogic(target, key, value, proxy, oldValue) {
-        if (!this._getOriginalModelExceptions().includes(key))
+        if (!ORIGINAL_MODEL_EXCEPTIONS.includes(key))  // PERF: direct constant access instead of method call
             target._originalModel[key] = value;
 
         //apply to pixi
-        const propertyName = this._getAliases()[key];
+        const propertyName = ALIASES[key];  // PERF: direct constant access instead of method call
 
         if (!propertyName)
             return false;
@@ -110,12 +182,7 @@ class ModulesObjectsProxy {
 
         const baseObject = target._baseObject;
 
-        baseObject.updateTransform({});
-        
-        //Pixi texts have _texture.orig.width. When we call baseObject.width, Pixi runs update text. Its too slow operation.
-        if (baseObject._texture && (!baseObject._texture.orig.width || !baseObject._texture.orig.height)) {
-            baseObject.updateText(true);
-        }
+        // FIXED: Pixi v8 updateTransform(opts) is a property setter that does nothing with empty object — v7 compatibility removed
 
         const baseObjectWidth = baseObject._texture ? Math.abs(baseObject.scale.x) * baseObject._texture.orig.width : baseObject.width;
         const baseObjectHeight = baseObject._texture ? Math.abs(baseObject.scale.y) * baseObject._texture.orig.height : baseObject.height;
@@ -168,7 +235,7 @@ class ModulesObjectsProxy {
     }
 
     _checkSelectorProperties(key) {
-        if (!this._safeFlag && this._getSelectorProperties().includes(key)) {
+        if (!this._safeFlag && SELECTOR_PROPERTIES.includes(key)) {  // PERF: direct constant access instead of method call
             Urso.logger.error('ModulesObjectsProxy error: you are trying to change selector property: ' + key);
             Urso.logger.error('Notice: use functions addClass, removeClass, setId, setName');
         }
@@ -185,9 +252,17 @@ class ModulesObjectsProxy {
         if (
             typeof oldValue === 'undefined' ||
             !target.transitionProperty ||
-            !target.transitionDuration ||
-            !target.transitionProperty.split(' ').includes(propertyName)
+            !target.transitionDuration
         )
+            return;
+
+        // PERF: memoise string split to avoid allocating array on every property set with transitions
+        if (target._transitionPropertySource !== target.transitionProperty) {
+            target._transitionPropertyList = target.transitionProperty.split(' ');
+            target._transitionPropertySource = target.transitionProperty;
+        }
+
+        if (!target._transitionPropertyList.includes(propertyName))
             return;
 
         const baseNewValue = target._baseObject[propertyName];
@@ -217,80 +292,15 @@ class ModulesObjectsProxy {
     }
 
     _getSelectorProperties() {
-        return [
-            'id', 'name', 'class'
-        ];
+        return SELECTOR_PROPERTIES;
     }
 
     _getOriginalModelExceptions() {
-        return [
-            'parent', 'contents'
-        ];
+        return ORIGINAL_MODEL_EXCEPTIONS;
     }
 
     _getAliases() {
-        return {
-            'id': 'id',
-            'name': 'name', //'name',
-            'class': 'class',
-            'x': 'x',
-            'y': 'y',
-            'z': 'zIndex',
-            'angle': 'angle',
-            'anchorX': 'anchor.x', //'anchor.x',
-            'anchorY': 'anchor.y', //'anchor.y',
-            'width': 'width', //'width',
-            'height': 'height', //'height',
-            'stretchingType': 'stretchingType',
-            'scaleX': 'scale.x', //'scale.x',
-            'scaleY': 'scale.y', //'scale.y',
-            'alignX': 'alignX', //'alignX',
-            'alignY': 'alignY', //'alignY',
-            'parent': 'parent',
-            'rightOffset': 'rightOffset',
-            'bottomOffset': 'bottomOffset',
-            'alpha': 'alpha',
-            'visible': 'visible',
-            'text': 'text',
-            //'assetKey': 'function.setAssetKey', /todo
-            'frame': 'frame',
-            'blendMode': 'blendMode',
-            'tint': 'tint',
-            // FIXED: removed dead Pixi v4/v5 signal path — 'events.onInputUp._bindings.0._listener' does not exist in Pixi v8
-            'btnFrames.over': 'frames.over',
-            'btnFrames.out': 'frames.out',
-            'btnFrames.down': 'frames.down',
-            'btnFrames.up': 'frames.up',
-            'align': 'align',
-            'filters': 'filters',
-            'lineSpacing': 'lineSpacing',
-            'maxWidth': 'maxWidth',
-            'maxHeight': 'maxHeight',
-            'lineHeight': 'style.lineHeight',
-            'fontFamily': 'style.fontFamily',
-            'fontSize': 'style.fontSize',
-            'fontStyle': 'style.fontStyle',
-            'fontWeight': 'style.fontWeight',
-            'fill': 'style.fill',
-            'fillCustomColors': 'fillCustomColors',
-            'stroke': 'style.stroke.color',
-            'strokeThickness': 'style.stroke.width',
-            'dropShadow': 'style.dropShadow',
-            'dropShadowColor': 'style.dropShadow.color',
-            'dropShadowBlur': 'style.dropShadow.blur',
-            'dropShadowAngle': 'style.dropShadow.angle',
-            'dropShadowDistance': 'style.dropShadow.distance',
-            'wordWrap': 'style.wordWrap',
-            'wordWrapWidth': 'style.wordWrapWidth',
-            'leading': 'style.leading',
-            'letterSpacing': 'style.letterSpacing',
-            'textAlign': 'style.align',
-            'enabled': 'input.enabled',
-            // FIXED: removed cacheAsBitmap mapping — cacheAsTexture is a method in Pixi v8 and assignment destroys it; method-call mapping needed to fix
-            'ignoreParentMask': 'ignoreParentMask',
-            //baseObject functions
-            'toGlobal': 'toGlobal'
-        };
+        return ALIASES;
     }
 }
 
