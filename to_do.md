@@ -9,13 +9,14 @@ Line numbers are current as of that branch. Verified against the installed PixiJ
 1. [Asset loading: progress, errors, retry](#1-asset-loading-progress-errors-retry)
 2. [Lazy load by groups — remaining pieces](#2-lazy-load-by-groups--remaining-pieces)
 3. [Asset and cache layer](#3-asset-and-cache-layer)
-4. [Remaining PixiJS v8 debt](#4-remaining-pixijs-v8-debt)
-5. [Unfinished features](#5-unfinished-features)
-6. [Correctness and design issues](#6-correctness-and-design-issues)
-7. [Configuration and integration](#7-configuration-and-integration)
-8. [Follow-ups created by this branch](#8-follow-ups-created-by-this-branch)
-9. [Docs, tests, tooling](#9-docs-tests-tooling)
-10. [Suggested order](#10-suggested-order)
+4. [Performance](#4-performance)
+5. [Remaining PixiJS v8 debt](#5-remaining-pixijs-v8-debt)
+6. [Unfinished features](#6-unfinished-features)
+7. [Correctness and design issues](#7-correctness-and-design-issues)
+8. [Configuration and integration](#8-configuration-and-integration)
+9. [Follow-ups created by this branch](#9-follow-ups-created-by-this-branch)
+10. [Docs, tests, tooling](#10-docs-tests-tooling)
+11. [Suggested order](#11-suggested-order)
 
 ---
 
@@ -98,32 +99,115 @@ The option is read from config and then never applied; the code that would prefi
 
 ---
 
-## 4. Remaining PixiJS v8 debt
+## 4. Performance
 
-### 4.1 `fillCustomColors` is advertised but dead — `extra/pixiPatch.js`, `objects/models/text.js:27, 100-101`, `objects/proxy.js:275`
+Audited against the `pixijs-performance` guidance and the installed v8 source. The costs below are ordered by expected impact. Numbers come from a 1,000,000-iteration microbenchmark of the exact patterns in the code; the per-frame budget at 60fps is 16.7 ms.
+
+### 4.1 `_getAliases()` rebuilds a ~55-key object literal on EVERY property get and set — `objects/proxy.js:275-300`
+This is the single worst hot-path issue in the engine. `_getAliases()` returns a fresh object literal, and it is called from both proxy traps:
+
+```js
+_customGetLogic(object, key, reflectValue) {
+    const wrapKey = this._getAliases()[key];   // allocates ~55 keys, then reads one
+```
+
+Every scene object is wrapped in a `Proxy`, so this fires on *every* property access — including internal reads of `_baseObject`, `_uid`, `type`, and every method lookup, not just the mapped properties. Measured: **158x slower** than indexing a hoisted constant (468 ms vs 3.0 ms per million calls), plus ~55 key allocations per access feeding constant GC pressure.
+
+Fix: hoist to a module-level `const`, or build once in the constructor. The same applies to `_getSelectorProperties()` (`:262`) and `_getOriginalModelExceptions()` (`:268`), which allocate fresh arrays per call and are also invoked from the set trap.
+
+### 4.2 `isAdaptiveProperty()` allocates a key array per property set — `objects/propertyAdapter.js:76-78`
+```js
+isAdaptiveProperty(property) {
+    return Object.keys(this._dependencies).includes(property);
+}
+```
+Called from `proxy._setProperty` on every property set. `Object.keys()` allocates a 13-element array, then `.includes()` does a linear scan. Measured: **539x slower** than `property in this._dependencies` (444 ms vs 0.8 ms per million). One-line fix.
+
+### 4.3 `checkDeepEqual` uses `JSON.stringify` — and runs every frame — `lib/helper.js:373-375`, `scenes/pixiWrapper.js:330`
+```js
+checkDeepEqual(obj1, obj2) { return JSON.stringify(obj1) === JSON.stringify(obj2); }
+```
+`_checkMouse()` calls it once per frame to compare two `{x, y}` objects, so every frame does two `JSON.stringify` calls and two string allocations. Measured: **215x slower** than comparing the two fields directly (3499 ms vs 16 ms per million). Compare `x`/`y` inline in `_checkMouse`; leave the generic helper for cold paths, or document it as debug-only.
+
+### 4.4 `recursiveGet`/`recursiveSet` re-split the key string on every call — `lib/helper.js:177, 209`
+```js
+key = (typeof key === 'string') ? key.split(".") : key;
+```
+These are the workhorses behind every mapped proxy property (`'anchor.x'`, `'style.fontSize'`, …), so the split runs on every get and set that resolves through an alias. Measured: **3.7x slower** than memoising the split path (803 ms vs 220 ms per million). Cache split paths in a `Map` keyed by the string. Note `recursiveSet` also mutates its input array via `shift()`, so a cached array must be copied or the loop rewritten with an index.
+
+### 4.5 Creating one styled `Text` triggers ~18 separate re-renders — `objects/models/text.js:93-98`, `objects/service.js:227-234`
+The text model constructs `PIXI.Text` with only three style keys:
+```js
+const styles = { fontFamily: this.fontFamily, leading: this.leading, align: this.textAlign };
+this._baseObject = new PIXI.Text(this.text, styles);
+```
+The other 18 `style.*` properties in the proxy alias map (`fontSize`, `fill`, `stroke`, `dropShadow*`, `wordWrap*`, `letterSpacing`, …) are then applied one at a time by `_updateCommonProperties`, which loops `_originalModel` and sets each key individually. Each assignment reaches a `TextStyle` setter, which emits `update`, which calls `onViewUpdate()` — so a fully-styled text object re-renders its canvas and re-uploads to the GPU up to 18 times before it is ever shown. On a text-heavy scene this dominates scene build time.
+
+Fix: assemble the complete style object in `_addBaseObject` and pass it to the constructor once, leaving `_updateCommonProperties` to handle only non-style properties. While there, switch to the v8 options form — `new PIXI.Text({ text, style })` — since the positional form only survives behind a deprecation shim (`AbstractText.mjs`, `ensureTextOptions`).
+
+### 4.6 `refreshStyles()` re-runs every style selector on every object add/remove/destroy — `objects/service.js:173, 186, 222`, `objects/styles.js:22, 96-97`
+`Urso.objects.create()` and every add/remove/destroy call `refreshStyles()` with no argument. That runs `_resetInactualStyles()` (walks the whole style cache, calling `testObject` on each cached object) and then `_apply()` for **every selector in the template**, each of which performs a full `findAll(selector)` search.
+
+Building a scene of N objects with S style selectors is therefore O(N x S) selector searches, plus a full cache re-validation per object. `//todo optimization` is already on all three call sites. Fix: batch the refresh — create the whole tree with `doNotRefreshStylesFlag`, then refresh once — and scope `_apply` to the subtree being added rather than the world.
+
+### 4.7 `_checkMaxSize` does pointless work on every property set — `objects/proxy.js:104-160`
+Two problems, both v8-related:
+- `baseObject.updateTransform({})` (line 110). In v7 this recalculated the world transform. **In v8 `updateTransform(opts)` is a property setter** (`Container.mjs:874`) that assigns position/scale/rotation/skew/pivot/origin from an options object; passed `{}`, every field falls back to its current value. So it performs six `.set()` calls to achieve nothing, on every property set of any object with `maxWidth`/`maxHeight` — and the original intent (force a transform recalc before measuring) is silently lost, so the measurement below it may read stale bounds.
+- `baseObject.updateText(true)` (line 115) **does not exist in v8** — `Text.updateText` was removed. If that branch is entered (`!texture.orig.width`), it throws `TypeError: baseObject.updateText is not a function`.
+
+### 4.8 Culling is never enabled anywhere
+`CullerPlugin` is never registered, and `cullable` / `cullArea` / `cullableChildren` appear nowhere in `src/` (the only hit is inside the disabled `extra/pixiPatch.js`). Every object is submitted to the renderer every frame regardless of whether it is on screen. For a scene larger than the viewport this is pure GPU waste.
+
+Fix: register `CullerPlugin` before `app.init()`, expose `cullable`/`cullArea` as object-model properties through the proxy alias map, and set `cullableChildren = false` on static UI subtrees so the culler does not recurse into them.
+
+### 4.9 No render groups, no `cacheAsTexture`, no batching guidance
+- `objects/config.js:5` — `objectsToCache` is an empty array, so the object pool is off by default. That is a defensible default, but nothing documents when to turn it on.
+- Nothing in the engine ever calls `cacheAsTexture` or `enableRenderGroup`, and the proxy mapping for it was removed (see 9.1). Static UI panels and complex `Graphics` therefore re-render from scratch every frame.
+- `interactiveChildren` is never set to `false` on any container, so hit-testing recurses through every subtree on every pointer event.
+- The scene graph is built in template order with no type grouping, so an interleaved `IMAGE / GRAPHICS / IMAGE / GRAPHICS` template produces four draw calls where two would do. Worth a note in the docs at minimum.
+
+### 4.10 Renderer init leaves performance options unset — `scenes/pixiWrapper.js:51-55`
+```js
+await app.init({ background: "0x222222", resolution: 1 });
+```
+No `antialias`, `powerPreference`, `preference` (webgl/webgpu), `gcActive`/`gcMaxUnusedTime`/`gcFrequency`, and no `PrepareSystem` upload before a scene is shown — so the first frame after every scene load hitches while textures upload. See also 8 (Configuration) for the hardcoded `resolution: 1`, which is a correctness issue on high-DPI displays as well as a performance knob.
+
+### 4.11 Double FPS throttling — `scenes/pixiWrapper.js:265-292`
+`_fpsCheckAllowUpdate()` now both sets `this._app.ticker.maxFPS` *and* runs its own `currentTime - _lastUpdateTime` gate. Two independent throttles on the same clock can beat against each other and yield an effective rate below the configured limit. Pick one: `ticker.maxFPS` alone is the idiomatic v8 approach and lets Pixi skip the render too, whereas the manual gate only skips engine logic.
+
+### 4.12 Minor per-frame allocations
+- `lib/tween.js:230` — `new Date().getTime()` every frame; `performance.now()` avoids the `Date` allocation and has better resolution.
+- `observer/controller.js:31-32` — every `fire()` builds a concatenated `eventName + suffix` string and dispatches twice (global + scene-scoped). `MODULES_SCENES_UPDATE` fires every frame, so this is 60 string allocations/sec minimum, more with per-frame game events.
+- `objects/proxy.js:190` — `target.transitionProperty.split(' ')` allocates on every set for any object configured with transitions.
+
+---
+
+## 5. Remaining PixiJS v8 debt
+
+### 5.1 `fillCustomColors` is advertised but dead — `extra/pixiPatch.js`, `objects/models/text.js:27, 100-101`, `objects/proxy.js:275`
 `pixiPatch.js` targets v6/v7 internals (`PIXI.Text.prototype.drawLetterSpacing`, `PIXI.Container.prototype.renderAdvanced`, `PIXI.MeshMaterial`), none of which exist in v8. It is correctly disabled at `config/load.js:27` and `:186` — but the per-character text colouring it provided is still parsed, still assigned, and still mapped in the proxy, so the option is a silent no-op. Either reimplement on v8 (`SplitText`, or per-character `Text` objects) or remove the parameter, its proxy mapping, and its documentation.
 
-### 4.2 `baseModel.transform` returns `undefined` — `objects/baseModel.js:79-81`
+### 5.2 `baseModel.transform` returns `undefined` — `objects/baseModel.js:79-81`
 `Container.transform` was removed in v8 (no `get transform` in `Container.mjs`). Expose `localTransform` / `worldTransform`, or drop the getter.
 
-### 4.3 `config.appVersion` anticache is dead — `lib/loader.js:125`
+### 5.3 `config.appVersion` anticache is dead — `lib/loader.js:125`
 `defaultQueryString` is commented out, so the documented anticache mechanism does nothing. v8 equivalent: `Assets.init({ defaultSearchParams: { appVersion } })`.
 
-### 4.4 Dead v5 asset params — `assets/models/sound.js:9-13`
+### 5.4 Dead v5 asset params — `assets/models/sound.js:9-13`
 `params: { loadType: 1, xhrType: 'blob' }` are v5 `PIXI.Loader` options that v8 `Assets` ignores entirely. The real loading is done by the custom `SoundAsset` LoadParser in `extra/main.js`. Remove.
 
-### 4.5 Dead code in the Pixi wrapper — `scenes/pixiWrapper.js:35, 218, 65, 235`
+### 5.5 Dead code in the Pixi wrapper — `scenes/pixiWrapper.js:35, 218, 65, 235`
 - `_setPixiSettings()` (line 218) is never called and its body targets the removed `PIXI.settings`. v8 equivalents: `TextureSource.defaultOptions.scaleMode`, `AbstractRenderer.defaultOptions.resolution`. Reimplement or delete along with the commented call at line 35.
 - `_requestAnimFrame` (line 235) is dead now that `app.ticker` drives the loop; the commented call sits at line 65.
 
-### 4.6 `@urso/revolt-fx` is a v7-era dependency
+### 5.6 `@urso/revolt-fx` is a v7-era dependency
 It references `PIXI.BLEND_MODES`, which does not exist in v8 — every build prints `IMPORT_IS_UNDEFINED ... FX.js:521`. The `EMITTERFX` object type depends on it. Either upgrade/fork the package for v8 or confirm the affected code path is unreachable. It is also the one runtime dependency still bundled rather than externalised.
 
 ---
 
-## 5. Unfinished features
+## 6. Unfinished features
 
-### 5.1 Object types with no model — `modules/template/types.js`
+### 6.1 Object types with no model — `modules/template/types.js`
 Exported in `Urso.types.objects` and dispatched in `objects/service.js`, but the model classes do not exist. `getInstance` returns `false`, so creation fails with `ModulesObjectsCreate model type error` (`objects/service.js:126`):
 
 | Type | Dispatch | Status |
@@ -138,10 +222,10 @@ Exported in `Urso.types.objects` and dispatched in `objects/service.js`, but the
 
 Note: now that bare type selectors exist, these names are also reachable as selectors, which makes the phantom entries more visible.
 
-### 5.2 Editor component — `components/editor/api.js`
+### 6.2 Editor component — `components/editor/api.js`
 `addStyle()` (`:9-11`) and `editObject(id, key, value)` (`:75`) are empty. `_assetsKeys` is missing `AUDIOSPRITE`, `HTML`, `JSONATLAS`, `SOUND`, `SPINEATLAS`; `_objectsKeys` covers 6 of 25 object types. Finish, or mark the component experimental.
 
-### 5.3 Transport is unreachable through config — `modules/transport/*`
+### 6.3 Transport is unreachable through config — `modules/transport/*`
 - `config.useTransport` (`config/main.js:10`) is declared and documented in README §19.2 but referenced nowhere else in `src/`. `Urso.transport.init()` is never called by the engine, and nothing tells a game it must call it.
 - `transport/controller.js:2-9` — `_service` is `null` until `init()`, so every handler setter (`setOnConnectionHandler`, `setResponseHandler`, …) throws if called first.
 - The controller has no `singleton = true`, unlike every other module controller.
@@ -149,7 +233,7 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 - `transport/service.js:125` — `// TODO : SET VALIDATION MODELS`; messages are unvalidated.
 - `transport/connectionTypes/websocket.js:24` — reconnect uses a raw `setTimeout` instead of `Urso.setTimeout`, so it ignores `timeScale`.
 
-### 5.4 Smaller unfinished items
+### 6.4 Smaller unfinished items
 - `objects/baseModel.js:57` — `append: false` ("object will not created") is parsed but never checked anywhere.
 - `objects/baseModel.js:83` — `addChildAt(childObject, zIndex, …)` ignores `zIndex` and just calls `addChild`. Honour it (`zIndex` + `sortableChildren`) or drop the parameter.
 - `objects/models/toggle.js:83-87`, `objects/models/button.js:100-104` — `pixelPerfectOver` / `pixelPerfectClick` parse into empty `//todo` blocks; both options are silently ignored.
@@ -160,7 +244,7 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 
 ---
 
-## 6. Correctness and design issues
+## 7. Correctness and design issues
 
 - `objects/propertyAdapter.js:268` — `Math.atan(xCatet / yCatet)` carries `//todo or yCatet/xCatet ?`. An unresolved correctness question in the alignment math; worth a test rather than a comment.
 - `objects/propertyAdapter.js:306` — `// TODO: CHECK SCALE CAN BE NEGATIVE`; negative `scaleY` is currently rejected, which breaks flipped sprites.
@@ -168,7 +252,7 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 - `objects/styles.js:6-7` — the `Styles` singleton constructs a real `Models.Text` (and so a `PIXI.Text`) at startup purely to read defaults, and holds it forever.
 - `objects/service.js:173, 186, 222` — `Urso.objects.refreshStyles()` is called with no argument on every add/remove/destroy, re-walking the whole world. Self-labelled `//todo optimization`; a likely hot spot on object-heavy scenes.
 - `scenes/resolutions.js:13` — `//TODO optimization (performance)` on the resize path.
-- `lib/tween.js:251` — tweens are never garbage collected; `this._tweens` grows unbounded. A real leak on long sessions.
+- `lib/tween.js:248-250` — the `//todo remove old Tweens to garbage collect them` comment is stale: completed tweens *are* deleted on the line above it. What remains is that a tween which never completes (looping, or started and then abandoned) is never reclaimed, and `_update` iterates the map with `for...in` every frame. Delete the misleading comment; consider a sweep for long-idle tweens.
 - `lib/logger.js:23` — log level is not switched by `config.mode`, so production builds keep full logging.
 - `components/soundInitialPopup/controller.js:38` subscribes to the string literal `'components.soundInitialPopup.pointerAction.popupButton'`, which is not in `Urso.events`; every other component uses a constant. The tint `0xd4be69` at line 20 is likewise hardcoded.
 - `statesManager/action.js:28-30` — leftover random-timeout debug scaffolding in a comment; delete.
@@ -176,7 +260,7 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 
 ---
 
-## 7. Configuration and integration
+## 8. Configuration and integration
 
 - **`config.gameContainerSelector` is undocumented and undefined** — read at `pixiWrapper.js:50` but absent from `config/main.js`. `document.querySelector(undefined)` stringifies to the selector `"undefined"`, returns `null`, and silently falls back to `document.body`. Add it to `ConfigMain` with a default.
 - **Resolution is hardcoded to 1** — `pixiWrapper.js:52-54` passes `resolution: 1` and never sets `autoDensity`, so the canvas renders at 1× on high-DPI displays and ignores `Urso.device.getPixelRatio()`. This also makes the commented-out `resizeTo: parent` (line 53) moot. Expected v8 setup: `resolution: window.devicePixelRatio, autoDensity: true`.
@@ -185,7 +269,7 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 
 ---
 
-## 8. Follow-ups created by this branch
+## 9. Follow-ups created by this branch
 
 - **`cacheAsBitmap` is now unsupported.** The proxy mapping was removed because v8's `cacheAsTexture` is a method, not a property, and assigning to it destroyed the method. Re-enabling the feature needs a method-call mapping in `objects/proxy.js` (the existing `function.` convention only calls methods without arguments). Until then, setting `cacheAsBitmap` on an object silently does nothing.
 - **`Urso.scenes.getRenderer()` is a breaking change.** It returned the `Application`; it now returns `app.renderer` as its JSDoc always promised, with `getApp()` added for callers that want the Application. Needs a note in the README and a migration line in the changelog.
@@ -193,7 +277,7 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 
 ---
 
-## 9. Docs, tests, tooling
+## 10. Docs, tests, tooling
 
 - **Test coverage is a starting point, not a suite.** `npm test` runs two smoke suites (type selectors, lazy-load group state machine). Nothing covers the template→assets→objects→components pipeline, the instance factory's mode/mixin resolution, or the property proxy. A test that instantiates every path registered in `config/load.js` would catch §5.1 automatically.
 - **No linter or formatter.** Indentation is inconsistent across the codebase (2-space in components, 4-space in modules).
@@ -203,12 +287,15 @@ Note: now that bare type selectors exist, these names are also reachable as sele
 
 ---
 
-## 10. Suggested order
+## 11. Suggested order
 
 1. **§1** — asset loading progress, errors and retry. Everything downstream is untestable with real content while a single bad asset hangs the scene silently.
 2. **§2.1** — the `this.assets` split. It is the precondition for `unloadGroup` (§2.2) and removes the `initial`-group special-casing that `loadGroup` currently carries.
 3. **§3.1 + §3.2** — atlas key collisions. Silent data loss, and the fix is already written and commented out.
 4. **§2.2, §2.3, §2.4** — finish lazy loading: unload, placeholders, worked example.
-5. **§5.1** — decide implement-vs-remove for the five phantom object types before anyone writes a template against them.
-6. **§4** — remaining v8 debt; §4.1 (`fillCustomColors`) and §4.6 (`revolt-fx`) are the only two with user-visible impact.
-7. **§8 + §9** — document the breaking changes before the next publish.
+5. **§6.1** — decide implement-vs-remove for the five phantom object types before anyone writes a template against them.
+6. **§4.1 - §4.4** — the four hot-path allocation fixes. Together they are perhaps an hour of work, carry almost no behavioural risk, and are the highest performance-per-effort items in this list.
+7. **§4.5 + §4.6** — text construction and the style-refresh storm; these dominate scene build time.
+8. **§5** — remaining v8 debt; §5.1 (`fillCustomColors`) and §5.6 (`revolt-fx`) are the only two with user-visible impact.
+9. **§4.8 - §4.10** — culling, render groups and renderer init. Do these last: they need profiling on target hardware to size correctly, and §4.8 trades CPU for GPU rather than being a free win.
+10. **§9 + §10** — document the breaking changes before the next publish.
