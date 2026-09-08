@@ -40,11 +40,43 @@ class ModulesScenesPixiWrapper {
         this._createWorld();
         // FIXED: gameContainerSelector was read as undefined, which querySelector stringified to "undefined" selector — now guarded with truthy check
         const parent = (Urso.config.gameContainerSelector && document.querySelector(Urso.config.gameContainerSelector)) || document.body;
-        await app.init({
-            background: "0x222222",
-            // resizeTo: parent,
+
+        // ADDED: register CullerPlugin when culling is enabled — culling trades CPU (per-object
+        // bounds checks) for GPU savings, so it is opt-in and must be profiled, not assumed to help.
+        // Objects additionally have to opt in individually via the `cullable` property.
+        // FIXED: this was written as `require('pixi.js')`, which is undefined in this package —
+        // "type": "module" means every engine file is an ES module. It would have thrown
+        // ReferenceError the moment anyone set culling: true, and no test covers that path because
+        // the default is false. Use the PIXI global the rest of this file already relies on.
+        if (Urso.config.renderer && Urso.config.renderer.culling)
+            PIXI.extensions.add(PIXI.CullerPlugin);
+
+        // ADDED: build init options from config, omitting keys with undefined values so Pixi defaults apply
+        // ADDED: fall back to an empty object so a game that replaces Urso.config wholesale
+        // degrades to today's behaviour rather than throwing on a missing `renderer` key.
+        const rendererConfig = Urso.config.renderer || {};
+
+        const initOptions = {
+            background: rendererConfig.background !== undefined ? rendererConfig.background : "0x222222",
+            // resolution: 1 is hardcoded; NOT autoDensity — see resolutions.js comments
             resolution: 1
-        });
+        };
+
+        // ADDED: conditionally add renderer option keys only when configured (not undefined)
+        if (rendererConfig.antialias !== undefined)
+            initOptions.antialias = rendererConfig.antialias;
+        if (rendererConfig.powerPreference !== undefined)
+            initOptions.powerPreference = rendererConfig.powerPreference;
+        if (rendererConfig.preference !== undefined)
+            initOptions.preference = rendererConfig.preference;
+        if (rendererConfig.gcActive !== undefined)
+            initOptions.gcActive = rendererConfig.gcActive;
+        if (rendererConfig.gcMaxUnusedTime !== undefined)
+            initOptions.gcMaxUnusedTime = rendererConfig.gcMaxUnusedTime;
+        if (rendererConfig.gcFrequency !== undefined)
+            initOptions.gcFrequency = rendererConfig.gcFrequency;
+
+        await app.init(initOptions);
         parent.appendChild(app.canvas);
         app.stage.addChild(this._root)
         this._app = app

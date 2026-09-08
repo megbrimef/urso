@@ -202,7 +202,25 @@ Exported in `Urso.types.objects` and dispatched in `objects/service.js`, but the
 
 ## 7. Configuration and integration
 
-- **Resolution is hardcoded to 1** — `pixiWrapper.js:43-47` passes `resolution: 1` and never sets `autoDensity`, so the canvas renders at 1× on high-DPI displays. This cannot be fixed by flipping the option: `scenes/resolutions.js` already hand-rolls the same scheme, multiplying the backing size by `devicePixelRatio` (`:76-78`) and dividing the CSS size by it (`:165-166`). Enabling Pixi's `autoDensity` would double-apply it and break canvas sizing. Needs a coordinated redesign of `resolutions.js` and `pixiWrapper` together, which also unblocks the commented-out `resizeTo: parent`.
+- **CORRECTION — the engine is already DPI-correct; `resolution: 1` is right.** An earlier
+  revision of this file claimed the canvas "renders at 1x on high-DPI displays and ignores
+  `Urso.device.getPixelRatio()`". That was wrong. Traced through `scenes/resolutions.js`:
+  `_getWindowSize()` (`:70-82`) multiplies `innerWidth`/`innerHeight` by `devicePixelRatio`, so
+  every resolution figure downstream is in PHYSICAL pixels. `_applyResolutionToPixi` (`:155-169`)
+  then calls `renderer.resize()` with those physical counts — the backing store — and sets
+  `canvas.style` to `resolution / devicePixelRatio` — the CSS size. On a 2x display with an
+  800x600 viewport that is a 1600x1200 backing store at 800x600 CSS: an effective density of
+  exactly 2.00x. That IS `resolution: devicePixelRatio` + `autoDensity: true`, hand-rolled.
+  Passing `resolution: 1` to `app.init()` is therefore CORRECT, and enabling Pixi's `autoDensity`
+  would double-apply the scaling. **Do not "fix" this.**
+
+  What genuinely exists here is a deliberate cap, not a bug: `maxResolutionFactor` limits the
+  backing store to `ResolutionsConfig.maxSize()` (default 1920), so a 4K or high-DPI display
+  renders at reduced density to protect fill rate. There is also a commented-out
+  `if (devicePixelRatio > 2) devicePixelRatio = 2` in the `Resolutions` constructor showing the
+  same intent. Worth surfacing as an explicit, documented config knob rather than a side effect
+  of whatever `maxSize()` happens to return — but that is an ergonomics task, not a correctness one.
+
 - **`init()` ordering** — `_root` and `_createWorld()` run before `await app.init()` (`pixiWrapper.js:38-43`). It works, but the world is built against a renderer that does not exist yet; moving them after `init()` makes failure modes clearer.
 - **Globals** — `extra/main.js` assigns `window.PIXI`, `window.gsap` and `window.UrsoUtils`. Every engine file depends on the `PIXI` global rather than importing, which is why `extra/main.js` must load first; `soundManager/controller.js:18` reaches for `UrsoUtils.Howler` the same way. Document the load-order contract, or move to real imports.
 

@@ -64,7 +64,17 @@ const ALIASES = {
     'letterSpacing': 'style.letterSpacing',
     'textAlign': 'style.align',
     'enabled': 'input.enabled',
-    // FIXED: removed cacheAsBitmap mapping — cacheAsTexture is a method in Pixi v8 and assignment destroys it; method-call mapping needed to fix
+    // ADDED: cullable — Pixi v8 CullerPlugin performance property, skips rendering outside viewport
+    'cullable': 'cullable',
+    // ADDED: cullArea — Pixi v8 CullerPlugin performance property, pre-computed bounds for culling
+    'cullArea': 'cullArea',
+    // ADDED: interactiveChildren — Pixi v8 performance property, disables hit-testing recursion into subtree
+    'interactiveChildren': 'interactiveChildren',
+    // ADDED: cacheAsBitmap routes through the baseFunction convention because in Pixi v8
+    // cacheAsTexture is a METHOD, not a property — a plain path mapping would assign over
+    // the method and caching would silently never happen. Pixi's own cacheAsBitmap setter
+    // still exists but is deprecated, which is why we call cacheAsTexture directly.
+    'cacheAsBitmap': 'baseFunction.cacheAsTexture',
     'ignoreParentMask': 'ignoreParentMask',
     //baseObject functions
     'toGlobal': 'toGlobal'
@@ -158,6 +168,12 @@ class ModulesObjectsProxy {
             return true;
         }
 
+        // ADDED: baseFunction convention — calls a method on the underlying Pixi object with the assigned value
+        if (propertyName.startsWith('baseFunction.')) {
+            this._runBaseObjectFunction(propertyName, target, value);
+            return true;
+        }
+
         this._checkSelectorProperties(key);
 
         value = target.modifyValue(key, value);
@@ -232,6 +248,26 @@ class ModulesObjectsProxy {
         const funcName = property.replace('function.', '');
         if (target[funcName])
             target[funcName]();
+    }
+
+    // ADDED: calls a method on the underlying Pixi object, passing the assigned value — safely handles missing methods
+    _runBaseObjectFunction(property, target, value) {
+        const funcName = property.replace('baseFunction.', '');
+        const baseObject = target._baseObject;
+
+        // ADDED: baseModel initialises _baseObject to null, so a set arriving before
+        // _addBaseObject has run would throw on the property access below.
+        if (!baseObject) {
+            Urso.logger.error(`ModulesObjectsProxy: baseFunction.${funcName} — no baseObject yet`);
+            return;
+        }
+
+        if (typeof baseObject[funcName] !== 'function') {
+            Urso.logger.error(`ModulesObjectsProxy: baseFunction.${funcName} — method not found on baseObject`);
+            return;
+        }
+
+        baseObject[funcName](value);
     }
 
     _checkSelectorProperties(key) {
