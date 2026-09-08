@@ -42,6 +42,8 @@ class ModulesI18nController {
 
         if (jsonResource) {
             this.setLocale(localeKey);
+            // FIXED: missing return prevents cached locale from being used — avoid double loading
+            return;
         }
 
         //load locale by path

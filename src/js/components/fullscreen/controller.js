@@ -47,7 +47,11 @@ class ComponentsFullscreenController extends ComponentsBaseController {
   }
 
   get _isPortrait() {
-    return innerWidth > innerHeight ? Urso.device.ScreenOrientation.PORTRAIT : Urso.device.ScreenOrientation.LANDSCAPE;
+    // FIXED: was `innerWidth > innerHeight ? PORTRAIT : LANDSCAPE` — the ternary was inverted (width > height
+    // is landscape) and it returned an orientation constant from a getter every sibling treats as a boolean.
+    // Unlike Ios/Android/DeviceRotate this class tracks no `_orientation` state of its own, so the orientation
+    // is derived from the current window dimensions instead.
+    return innerHeight >= innerWidth;
   }
 
   get isFullscreen() {

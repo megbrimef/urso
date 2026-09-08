@@ -190,7 +190,8 @@ class ModulesObjectsStyles {
      */
     _restoreValueByKey(key, object, globalResetFlag) {
         //check own
-        if (object._originalModel[key])
+        if (typeof object._originalModel[key] !== 'undefined')
+            // FIXED: falsy check should be undefined check — only skip restoration if the key is actually defined in original model
             return;
 
         const tempObject = (object.type === Urso.types.objects.TEXT) ? this._tempTextObject : this._tempObject;
