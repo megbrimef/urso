@@ -299,6 +299,45 @@ class LibCache {
     getGlobalAtlas() {
         return this.globalAtlas;
     }
+
+    removeAsset(assetType, key) {
+        // ADDED: Remove asset from cache bucket, clearing texture sources and invalidating derived atlases — enables group unloading
+        if (!this.assetsList[assetType] || this.assetsList[assetType][key] === undefined) {
+            return false;
+        }
+
+        delete this.assetsList[assetType][key];
+
+        // ADDED: Clean up texture source tracking when removing textures — prevents collision detection against deleted sources
+        if (assetType === 'texture') {
+            delete this._textureSources[key];
+        } else if (assetType === 'atlas') {
+            // ADDED: Invalidate global atlas when removing atlases — derived atlas is stale until rebuilt
+            this.clearGlobalAtlas();
+        }
+
+        return true;
+    }
+
+    removeTexturesFromSource(sourceKey) {
+        // ADDED: Remove all atlas frames from a source to complete group cleanup — atlas frames are keyed by name not by atlas key
+        const textures = this.assetsList.texture;
+        const keysToRemove = [];
+
+        // Iterate snapshot to avoid mutation during iteration
+        for (const key of Object.keys(textures)) {
+            if (this._textureSources[key] === sourceKey) {
+                keysToRemove.push(key);
+            }
+        }
+
+        for (const key of keysToRemove) {
+            delete textures[key];
+            delete this._textureSources[key];
+        }
+
+        return keysToRemove.length;
+    }
 };
 
 export default LibCache;

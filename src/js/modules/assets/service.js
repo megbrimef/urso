@@ -13,6 +13,8 @@ class ModulesAssetsService {
         this._loadedGroups = [];
         // ADDED: Track in-flight group loads with pending callbacks — prevents duplicate simultaneous loads and queues callbacks
         this._loadingGroups = {};
+        // ADDED: Track group asset membership to enable unloading — maps group name to array of { type, key } records
+        this._groupAssetKeys = {};
     };
 
     /**
@@ -495,6 +497,12 @@ class ModulesAssetsService {
                 this._groups[model.loadingGroup] = [];
 
             this._groups[model.loadingGroup].push(model);
+
+            // ADDED: Record group asset membership for later unloading — tracks which assets belong to each group to enable removal
+            if (!this._groupAssetKeys[model.loadingGroup])
+                this._groupAssetKeys[model.loadingGroup] = [];
+
+            this._groupAssetKeys[model.loadingGroup].push({ type: model.type, key: model.key });
         }
     }
 
@@ -527,6 +535,73 @@ class ModulesAssetsService {
     isGroupLoading(name) {
         // ADDED: Query in-flight loads state — allows checking if a group load is in progress
         return this._loadingGroups.hasOwnProperty(name);
+    }
+
+    /**
+     * unload a lazy-loaded asset group and release GPU resources
+     * @param {String} name - group name
+     * @returns {Promise<Boolean>} false if group was never loaded, true if successfully unloaded
+     */
+    async unloadGroup(name) {
+        // ADDED: Unload group and clean up all associated assets — enables memory-efficient lazy loading transitions
+
+        // Return early if group was never loaded
+        if (!this._loadedGroups.includes(name)) {
+            return false;
+        }
+
+        // ADDED: Define type-to-bucket mapping based on _storeAsset in loader.js — translates asset type to cache bucket name
+        const typeToBucket = {
+            [Urso.types.assets.ATLAS]: 'atlas',
+            [Urso.types.assets.BITMAPFONT]: 'bitmapFont',
+            [Urso.types.assets.CONTAINER]: 'container',
+            [Urso.types.assets.FONT]: 'file',
+            [Urso.types.assets.HTML]: 'file',
+            [Urso.types.assets.IMAGE]: 'texture',
+            [Urso.types.assets.JSON]: 'json',
+            [Urso.types.assets.JSONATLAS]: 'jsonAtlas',
+            [Urso.types.assets.SOUND]: 'sound',
+            [Urso.types.assets.SPINE]: 'spine',
+            [Urso.types.assets.SPINEATLAS]: 'spineAtlas',
+        };
+
+        const entries = this._groupAssetKeys[name] || [];
+
+        // ADDED: Ask Pixi to release GPU resources for all group assets — prevents GPU memory leak
+        try {
+            await PIXI.Assets.unload(entries.map(e => e.key));
+        } catch (error) {
+            // ADDED: Log warning on unload failure but continue cleanup — partial failures should not block cache cleanup
+            Urso.logger.warn(`ModulesAssetsService: failed to unload PIXI assets for group "${name}": ${error.message}`);
+        }
+
+        // ADDED: Remove each asset from the engine cache — frees CPU memory and clears derived state
+        for (const entry of entries) {
+            const bucketName = typeToBucket[entry.type];
+            if (bucketName) {
+                Urso.cache.removeAsset(bucketName, entry.key);
+
+                // ADDED: For atlases, also remove their cached texture frames — frames are keyed by name not by atlas key
+                if (entry.type === Urso.types.assets.ATLAS) {
+                    Urso.cache.removeTexturesFromSource(entry.key);
+                }
+            }
+        }
+
+        // ADDED: Clear the asset from the deduplication cache so it can be registered again — resets loadability state
+        for (const entry of entries) {
+            const cacheKey = `${entry.type}_${entry.key}`;
+            const idx = this._addedAssetsCache.indexOf(cacheKey);
+            if (idx !== -1) {
+                this._addedAssetsCache.splice(idx, 1);
+            }
+        }
+
+        // ADDED: Mark group as unloaded and clear its tracked assets — allows it to be reloaded
+        this._loadedGroups = this._loadedGroups.filter(g => g !== name);
+        delete this._groupAssetKeys[name];
+
+        return true;
     }
 
     /**

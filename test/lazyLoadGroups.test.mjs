@@ -2,11 +2,22 @@
 import Service from '../src/js/modules/assets/service.js';
 
 const logged = [];
+const unloadCalls = [];
 global.Urso = {
-  logger: { error: (...a) => logged.push(a.join(' ')), warn: () => {} },
+  logger: { error: (...a) => logged.push(a.join(' ')), warn: (...a) => logged.push(a.join(' ')) },
   events: { MODULES_ASSETS_LAZYLOAD_FINISHED: 'lazy.finished', MODULES_ASSETS_GROUP_LOADED: 'group.loaded' },
   helper: { capitaliseFirstLetter: s => s.charAt(0).toUpperCase() + s.slice(1) },
-  types: { assets: { ATLAS: 1, JSONATLAS: 8, SPINE: 10 } },
+  types: { assets: { ATLAS: 1, JSONATLAS: 8, SPINE: 10, IMAGE: 6, JSON: 7 } },
+  cache: {
+    removeAsset: () => true,
+    removeTexturesFromSource: () => 0,
+  }
+};
+// ADDED: Stub PIXI.Assets.unload to track calls for test verification — enables testing GPU resource cleanup
+global.PIXI = {
+  Assets: {
+    unload: async (keys) => { unloadCalls.push(keys); }
+  }
 };
 
 const CONFIG = { loadingGroups: { initial: 0, bonus: 'bonus', outro: 'outro' }, lazyLoadGroups: ['bonus', 'outro'] };
@@ -100,6 +111,61 @@ console.log('\n[6] full lazy chain completes and re-arms for the next scene');
   check('both configured groups loaded in order', loads.join(',') === 'bonus,outro');
   check('LAZYLOAD_FINISHED emitted', emitted.includes('lazy.finished'));
   check('flag reset so a later scene can run again', s.lazyLoadProcessStarted === false);
+}
+
+console.log('\n[7] unloadGroup removes assets and allows reloading');
+{
+  loads = []; unloadCalls.length = 0; logged.length = 0;
+  const s = makeService();
+  // ADDED: Create mock cache methods for unloadGroup test — validates asset removal calls
+  let cacheRemovals = [];
+  global.Urso.cache.removeAsset = (type, key) => {
+    cacheRemovals.push({ type, key });
+    return true;
+  };
+  let textureSourceRemovals = [];
+  global.Urso.cache.removeTexturesFromSource = (sourceKey) => {
+    textureSourceRemovals.push(sourceKey);
+    return 5; // return number of frames removed
+  };
+
+  // Set up group with mix of asset types
+  s._groups = { bonus: [
+    { type: Urso.types.assets.ATLAS, key: 'atlas1', loadingGroup: 'bonus' },
+    { type: Urso.types.assets.IMAGE, key: 'img1', loadingGroup: 'bonus' },
+    { type: Urso.types.assets.JSON, key: 'data1', loadingGroup: 'bonus' }
+  ]};
+  // Manually set up asset tracking
+  s._groupAssetKeys['bonus'] = [
+    { type: Urso.types.assets.ATLAS, key: 'atlas1' },
+    { type: Urso.types.assets.IMAGE, key: 'img1' },
+    { type: Urso.types.assets.JSON, key: 'data1' }
+  ];
+
+  // Load the group first
+  await s.loadGroup(null, 'bonus');
+  check('group loaded', s.isGroupLoaded('bonus') === true);
+  check('load actually ran', loads.length === 1);
+
+  // Unload never-loaded group should return false
+  const unloadResult1 = await s.unloadGroup('never-loaded');
+  check('unloadGroup on never-loaded returns false', unloadResult1 === false);
+
+  // Now unload the loaded group
+  const unloadResult = await s.unloadGroup('bonus');
+  check('unloadGroup returns true', unloadResult === true);
+  check('isGroupLoaded false after unload', s.isGroupLoaded('bonus') === false);
+  check('PIXI.Assets.unload called with asset keys', unloadCalls.length === 1 && unloadCalls[0].includes('atlas1'));
+  check('cache.removeAsset called for each asset', cacheRemovals.length === 3);
+  check('removeTexturesFromSource called for atlases', textureSourceRemovals.includes('atlas1'));
+
+  // Clear tracking and reload the same group
+  loads.length = 0;
+  cacheRemovals.length = 0;
+  const reloadResult = await s.loadGroup(null, 'bonus');
+  check('group can be reloaded after unload', loads.length === 1);
+  check('isGroupLoaded true after reload', s.isGroupLoaded('bonus') === true);
+  check('second unload also works', await s.unloadGroup('bonus'));
 }
 
 console.log(`\n${fail === 0 ? 'ALL PASS' : 'FAILURES'} — ${pass} passed, ${fail} failed`);

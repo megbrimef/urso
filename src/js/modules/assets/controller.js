@@ -71,6 +71,16 @@ class ModulesAssetsController {
     }
 
     /**
+     * unload a lazy-loaded asset group and release GPU resources
+     * @param {String} name - group name
+     * @returns {Promise<Boolean>} false if group was never loaded, true if successfully unloaded
+     */
+    unloadGroup(name) {
+        // ADDED: Delegate to service unload with async support — exposes group unloading to public API
+        return this.getInstance('Service').unloadGroup(name);
+    }
+
+    /**
      * system; check webP support
      */
     checkWebPSupport() {
