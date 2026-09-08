@@ -6,8 +6,9 @@ let ConfigMain = {
     extendingChain: ['Urso.Core'], //chain that will be set as Urso.Game
     defaultScene: 'play', //default scene to display
     gamePath: '', //use assets from some gamePath directory, not from page was loaded
-    useBinPath: false, // use assets from bin directory, 
+    useBinPath: false, // use assets from bin directory,
     useTransport: false, // use transport module for connetcting with server
+    gameContainerSelector: false, // CSS selector for element the canvas is appended to; falls back to document.body if not set
     fps: {
         limit: 60, //max fps limit
         optimizeLowPerformance: false //down to 30 fps if lower 60

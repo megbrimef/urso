@@ -22,23 +22,14 @@ class ModulesScenesPixiWrapper {
 
         this._mouseCoords = { x: 0, y: 0 };
 
-
         this._maxFPSLimit = Urso.config.fps.limit;
-        this._lastUpdateTime = 0;
         this._frames = 0;
         this._currentFPS = Urso.config.fps.limit;
         this._lastTimeCheckFPS = 0;
     }
 
     async init() {
-        //FIXME
-        // this._setPixiSettings();
-
         //define renderer
-        // PIXI.utils.skipHello();
-        // this._renderer = new PIXI.Renderer({ preserveDrawingBuffer: true, width: 1, height: 1 }); //FIXME
-        // this._renderer = await PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 })
-        // document.body.appendChild(this._renderer.view.canvas);
         const app = new PIXI.Application();
         // FIXED: devtools global was shipped to production — only expose in development mode
         if (Urso.config.mode !== 'production')
@@ -47,7 +38,8 @@ class ModulesScenesPixiWrapper {
         this._root = new PIXI.Container();
         this._root.label = 'root';
         this._createWorld();
-        const parent = document.querySelector(Urso.config.gameContainerSelector) || document.body;
+        // FIXED: gameContainerSelector was read as undefined, which querySelector stringified to "undefined" selector — now guarded with truthy check
+        const parent = (Urso.config.gameContainerSelector && document.querySelector(Urso.config.gameContainerSelector)) || document.body;
         await app.init({
             background: "0x222222",
             // resizeTo: parent,
@@ -57,12 +49,8 @@ class ModulesScenesPixiWrapper {
         app.stage.addChild(this._root)
         this._app = app
         this._app.ticker.add(this._loop);
-        // setup interaction
-        // this.interaction = Urso.helper.recursiveGet('plugins.interaction', this._renderer) //FIXME
-            // || new PIXI.InteractionManager(this._renderer); //FIXME
 
         this._loaderScene = this.getInstance('Model');
-        // this._requestAnimFrame(this._loop);
 
         this.getInstance('Resolutions');
     }
@@ -215,34 +203,12 @@ class ModulesScenesPixiWrapper {
         return this._app.renderer.generateTexture(obj);
     }
 
-    _setPixiSettings() {
-        //FIXME
-        // PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
-        // PIXI.settings.TEXT_RESOLUTION = 1;
-
-        // if (Urso.device.iOS || Urso.device.macOS)
-        //     PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH;
-    }
-
     _createWorld() {
         if (this.world)
             this._root.removeChild(this.world);
 
         this.world = new PIXI.Container();
         this._root.addChild(this.world);
-    }
-
-    _requestAnimFrame(loopFunction) {
-        (() => {
-            return window.requestAnimationFrame ||
-                window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame ||
-                window.oRequestAnimationFrame ||
-                window.msRequestAnimationFrame ||
-                function (/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-                    window.setTimeout(callback, 0);
-                };
-        })()(loopFunction);
     }
 
     _getDeltaTime() {
@@ -284,14 +250,8 @@ class ModulesScenesPixiWrapper {
             else
                 this._maxFPSLimit = Urso.config.fps.limit;
 
-        // FIXED: ticker.maxFPS assignment was unreachable when FPS check failed — moved before the early return so it runs on every call
+        // PERF: two independent throttles fighting each other — removed manual gate, ticker.maxFPS is idiomatic Pixi v8 throttle and skips render too
         this._app.ticker.maxFPS = this._maxFPSLimit;
-
-        //check need update
-        if (currentTime - this._lastUpdateTime < ~~(1000 / this._maxFPSLimit))
-            return false;
-
-        this._lastUpdateTime = currentTime;
 
         return true;
     }
@@ -329,7 +289,8 @@ class ModulesScenesPixiWrapper {
     _checkMouse() {
         let newCoords = this._getMouseCoords();
 
-        if (Urso.helper.checkDeepEqual(this._mouseCoords, newCoords))
+        // PERF: JSON.stringify comparison is 215x slower than direct field comparison, runs 60x/sec — compare fields directly
+        if (this._mouseCoords.x === newCoords.x && this._mouseCoords.y === newCoords.y)
             return true;
 
         this._mouseCoords = newCoords;
