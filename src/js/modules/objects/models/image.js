@@ -21,7 +21,8 @@ class ModulesObjectsModelsImage extends ModulesObjectsBaseModel {
     }
 
     _addBaseObject() {
-        let texture = Urso.cache.getTexture(this.assetKey)
+        // ADDED: Use placeholder helper to resolve texture — enables fallback to stand-in asset during lazy load
+        let texture = this._resolveTextureWithPlaceholder(this.assetKey);
 
         if (!texture)
             Urso.logger.error('ModulesObjectsModelsImage assets error: no image with key: ' + this.assetKey);
@@ -31,6 +32,14 @@ class ModulesObjectsModelsImage extends ModulesObjectsBaseModel {
         else
             this._baseObject.texture = texture;
     };
+
+    /**
+     * refresh texture after placeholder swap
+     */
+    _refreshTexture() {
+        // ADDED: Re-run _addBaseObject to apply real texture when it arrives — safe to call multiple times due to re-entry guard
+        this._addBaseObject();
+    }
 }
 
 export default ModulesObjectsModelsImage;

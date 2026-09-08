@@ -15,6 +15,8 @@ class ModulesAssetsService {
         this._loadingGroups = {};
         // ADDED: Track group asset membership to enable unloading — maps group name to array of { type, key } records
         this._groupAssetKeys = {};
+        // ADDED: Store placeholder keys for lazy-loaded assets — maps asset key to placeholder asset key for fallback rendering
+        this._placeholders = {};
     };
 
     /**
@@ -479,6 +481,10 @@ class ModulesAssetsService {
         //set loadingGroup
         model.loadingGroup = loadingGroup || model.loadingGroup || this.getInstance('Config').loadingGroups.initial;
 
+        // ADDED: Record placeholder key if configured on asset — enables lazy-loaded objects to show stand-in texture
+        if (model.placeHolder)
+            this._placeholders[model.key] = model.placeHolder;
+
         //check if container
         if (model.contents) {
             for (let content of model.contents) {
@@ -535,6 +541,16 @@ class ModulesAssetsService {
     isGroupLoading(name) {
         // ADDED: Query in-flight loads state — allows checking if a group load is in progress
         return this._loadingGroups.hasOwnProperty(name);
+    }
+
+    /**
+     * get placeholder key for a lazy-loaded asset
+     * @param {String} assetKey - the asset key to look up
+     * @returns {String|Boolean} placeholder asset key or false if none configured
+     */
+    getPlaceholderKey(assetKey) {
+        // ADDED: Return placeholder key for lazy assets or false if none — enables objects to show stand-in while loading real texture
+        return this._placeholders[assetKey] || false;
     }
 
     /**

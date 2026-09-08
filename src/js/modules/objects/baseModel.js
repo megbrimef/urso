@@ -17,6 +17,10 @@ export default class ModulesObjectsBaseModel {
         this._templatePath = false;
         this._parsed = false;
         this._transitions = { tweens: {} };
+        // ADDED: Track asset key when placeholder is being shown — enables swap when real texture loads
+        this._placeholderAssetKey = false;
+        // ADDED: Store listener reference for unsubscription — enables cleanup on destroy
+        this._assetGroupLoadedListener = null;
     }
 
     /**
@@ -70,7 +74,14 @@ export default class ModulesObjectsBaseModel {
         Urso.objects.destroy(this, doNotRefreshStylesFlag);
     }
 
-    _customDestroy() { }
+    _customDestroy() {
+        // ADDED: Unsubscribe from asset group loaded event if listener was attached — prevents memory leak from orphaned subscriptions
+        if (this._assetGroupLoadedListener) {
+            // FIXED: Urso.events has no off() — see the note in _subscribeOnce.
+            this.removeListener(Urso.events.MODULES_ASSETS_GROUP_LOADED, this._assetGroupLoadedListener, true);
+            this._assetGroupLoadedListener = null;
+        }
+    }
 
     addChild(childObject, doNotRefreshStylesFlag) {
         Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
@@ -215,5 +226,74 @@ export default class ModulesObjectsBaseModel {
     sortChildren() {
         if (this._baseObject.children?.length > 0)
             this._baseObject.sortChildren();
+    }
+
+    /**
+     * resolve texture with fallback to placeholder if real texture not yet loaded
+     * @param {String} assetKey - the asset key to resolve
+     * @returns {PIXI.Texture|undefined} the resolved texture or undefined if no texture available
+     */
+    _resolveTextureWithPlaceholder(assetKey) {
+        // ADDED: Return real texture if cached and clear placeholder state — primary path for resolved assets
+        let texture = Urso.cache.getTexture(assetKey);
+        if (texture) {
+            this._placeholderAssetKey = false;
+            return texture;
+        }
+
+        // ADDED: Check for placeholder texture to show while real asset loads — enables visual feedback during lazy load
+        const placeholderKey = Urso.assets.getPlaceholderKey(assetKey);
+        if (placeholderKey) {
+            const placeholderTexture = Urso.cache.getTexture(placeholderKey);
+            if (placeholderTexture) {
+                this._placeholderAssetKey = assetKey;
+                return placeholderTexture;
+            }
+        }
+
+        // ADDED: Return undefined when no texture available — caller handles error logging to preserve original behaviour
+        this._placeholderAssetKey = false;
+        return undefined;
+    }
+
+    /**
+     * subscribe to asset group loaded event if using placeholder
+     */
+    _subscribeOnce() {
+        // ADDED: Subscribe to group loads only if placeholder is active — prevents unnecessary subscriptions
+        if (this._placeholderAssetKey) {
+            this._assetGroupLoadedListener = this._onAssetGroupLoaded.bind(this);
+            // FIXED: was Urso.events.on(...). `Urso.events` is the plain map of event-name CONSTANTS
+            // (observer/controller.js sets it to Events.list) and has no on/off — that call would have
+            // thrown TypeError the first time any object used a placeholder. The listener API is
+            // addListener/removeListener, injected onto every class prototype by the instance factory.
+            this.addListener(Urso.events.MODULES_ASSETS_GROUP_LOADED, this._assetGroupLoadedListener, true);
+        }
+    }
+
+    /**
+     * handle asset group loaded event to check for placeholder swap
+     * @param {String} groupName - the name of the group that finished loading
+     * @private
+     */
+    _onAssetGroupLoaded(groupName) {
+        // ADDED: Check if real texture is now available and swap it in — completes lazy loading transition
+        const realTexture = Urso.cache.getTexture(this._placeholderAssetKey);
+        if (realTexture) {
+            this._refreshTexture();
+            this._placeholderAssetKey = false;
+            // FIXED: Urso.events has no off() — see the note in _subscribeOnce.
+            this.removeListener(Urso.events.MODULES_ASSETS_GROUP_LOADED, this._assetGroupLoadedListener, true);
+            this._assetGroupLoadedListener = null;
+        }
+        // ADDED: If texture still not available, stay subscribed for next group — defers swap until real asset arrives
+    }
+
+    /**
+     * refresh texture on the object after placeholder swap
+     * Override in subclasses to implement model-specific refresh logic
+     */
+    _refreshTexture() {
+        // ADDED: Empty default implementation — subclasses override per their texture assignment patterns
     }
 }

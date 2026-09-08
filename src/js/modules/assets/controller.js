@@ -71,6 +71,16 @@ class ModulesAssetsController {
     }
 
     /**
+     * get placeholder key for a lazy-loaded asset
+     * @param {String} assetKey - the asset key to look up
+     * @returns {String|Boolean} placeholder asset key or false if none configured
+     */
+    getPlaceholderKey(assetKey) {
+        // ADDED: Return placeholder key for lazy assets or false if none — enables objects to show stand-in while loading real texture
+        return this.getInstance('Service').getPlaceholderKey(assetKey);
+    }
+
+    /**
      * unload a lazy-loaded asset group and release GPU resources
      * @param {String} name - group name
      * @returns {Promise<Boolean>} false if group was never loaded, true if successfully unloaded

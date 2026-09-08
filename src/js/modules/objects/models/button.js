@@ -188,7 +188,8 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
     }
 
     _changeTexture(key) {
-        let texture = Urso.cache.getTexture(this.buttonFrames[key]);
+        // ADDED: Use placeholder helper to resolve texture — enables fallback to stand-in asset during lazy load
+        let texture = this._resolveTextureWithPlaceholder(this.buttonFrames[key]);
 
         if (!texture) {
             if (key === 'out') {
@@ -202,6 +203,21 @@ class ModulesObjectsModelsButton extends ModulesObjectsBaseModel {
 
         this._baseObject.texture = texture;
         return true;
+    }
+
+    /**
+     * refresh texture after placeholder swap
+     */
+    _refreshTexture() {
+        // ADDED: Re-apply current frame state after placeholder swap — reconstructs correct frame from state flags
+        if (this._isDisabled)
+            this._changeTexture('disabled');
+        else if (this._isDown)
+            this._changeTexture('pressed');
+        else if (this._isOver)
+            this._changeTexture('over');
+        else
+            this._changeTexture('out');
     }
 }
 

@@ -28,10 +28,11 @@ class ModulesObjectsModelsImagesAnimation extends ModulesObjectsBaseModel {
     }
 
     _addBaseObject() {
-        let texture = Urso.cache.getTexture(this.assetKey)
+        // ADDED: Use placeholder helper to resolve texture — enables fallback to stand-in asset during lazy load
+        let texture = this._resolveTextureWithPlaceholder(this.assetKey);
 
         if (!texture)
-            Urso.logger.error('ModulesObjectsModelsImage assets error: no image ' + this.assetKey);
+            Urso.logger.error('ModulesObjectsModelsImagesAnimation assets error: no image ' + this.assetKey);
 
         this._defaultTexture = texture;
         this._baseObject = new PIXI.Sprite(this._defaultTexture);
@@ -108,6 +109,19 @@ class ModulesObjectsModelsImagesAnimation extends ModulesObjectsBaseModel {
         this._baseObject.texture = this._defaultTexture;
 
         this._onComplete();
+    }
+
+    /**
+     * refresh texture and animation frames after placeholder swap
+     */
+    _refreshTexture() {
+        // ADDED: Re-resolve base texture and rebuild animation frames from cache — enables smooth transition when real asset arrives
+        let texture = Urso.cache.getTexture(this._placeholderAssetKey);
+        if (texture) {
+            this._defaultTexture = texture;
+            this._baseObject.texture = texture;
+        }
+        this._createAnimationTextures();
     }
 
 }
