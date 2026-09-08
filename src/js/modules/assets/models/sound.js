@@ -6,11 +6,7 @@ class ModulesAssetsModelsSound extends ModulesAssetsBaseModel {
 
         this.type = Urso.types.assets.SOUND;
 
-        // TODO: CHANGE TO CONSTANTS!
-        this.params = {
-            loadType: 1,
-            xhrType: 'blob'
-        };
+        // FIXED: Removed dead Pixi v5 loader options — Pixi v8 Assets ignores these; actual sound loading uses custom SoundAsset LoadParser
     }
 }
 

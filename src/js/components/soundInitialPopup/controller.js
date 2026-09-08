@@ -35,7 +35,8 @@ class ComponentsSoundInitialPopupController extends ComponentsBaseController {
     }
 
     _subscribeOnce() {
-        this.addListener('components.soundInitialPopup.pointerAction.popupButton', this._tintHandler.bind(this));
+        // FIXED: Use event constant instead of magic string
+        this.addListener(Urso.events.COMPONENTS_SOUND_INITIAL_POPUP_POINTER_ACTION, this._tintHandler.bind(this));
         this.addListener(Urso.events.MODULES_OBJECTS_HIT_AREA_PRESS, this._buttonPressHandler.bind(this));
     }
 }

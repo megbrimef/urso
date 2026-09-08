@@ -76,8 +76,18 @@ export default class ModulesObjectsBaseModel {
         Urso.objects.addChild(this, childObject, doNotRefreshStylesFlag);
     }
 
+    // FIXED: Pixi v8 removed Container.transform; replaced with localTransform and worldTransform
     get transform() {
-        return this._baseObject.transform;
+        // Backwards compatibility: return localTransform (Pixi v8 renamed from transform)
+        return this._baseObject.localTransform;
+    }
+
+    get localTransform() {
+        return this._baseObject.localTransform;
+    }
+
+    get worldTransform() {
+        return this._baseObject.worldTransform;
     }
 
     addChildAt(childObject, zIndex, doNotRefreshStylesFlag) {

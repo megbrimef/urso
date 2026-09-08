@@ -61,8 +61,8 @@ class ComponentsSoundInitialPopupTemplate {
                         name: 'soundInitialPopupButtonYesHit',
                         width: 200,
                         height: 70,
-                        onOverCallback: () => this.emit('components.soundInitialPopup.pointerAction.popupButton', {buttonName: 'yes', pointerOver: true}),
-                        onOutCallback: () => this.emit('components.soundInitialPopup.pointerAction.popupButton', {buttonName: 'yes', pointerOver: false}),
+                        onOverCallback: () => this.emit(Urso.events.COMPONENTS_SOUND_INITIAL_POPUP_POINTER_ACTION, {buttonName: 'yes', pointerOver: true}),
+                        onOutCallback: () => this.emit(Urso.events.COMPONENTS_SOUND_INITIAL_POPUP_POINTER_ACTION, {buttonName: 'yes', pointerOver: false}),
                     },
                 ]
             },
@@ -98,8 +98,8 @@ class ComponentsSoundInitialPopupTemplate {
                         name: 'soundInitialPopupButtonNoHit',
                         width: 200,
                         height: 70,
-                        onOverCallback: () => this.emit('components.soundInitialPopup.pointerAction.popupButton', {buttonName: 'no', pointerOver: true}),
-                        onOutCallback: () => this.emit('components.soundInitialPopup.pointerAction.popupButton', {buttonName: 'no', pointerOver: false}),
+                        onOverCallback: () => this.emit(Urso.events.COMPONENTS_SOUND_INITIAL_POPUP_POINTER_ACTION, {buttonName: 'no', pointerOver: true}),
+                        onOutCallback: () => this.emit(Urso.events.COMPONENTS_SOUND_INITIAL_POPUP_POINTER_ACTION, {buttonName: 'no', pointerOver: false}),
                     },
                 ]
             }

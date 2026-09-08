@@ -20,8 +20,6 @@ class LibLogger {
         }
     }
 
-    //todo set log level (dev/prod)
-
     log() {
         if (!this._logLevel['LOG']) return;
 
@@ -50,7 +48,10 @@ class LibLogger {
      * setup logging levels
      */
     _setupLevels() {
-        const logLevelsString = Urso.helper.parseGetParams('logLevel') || Urso.config.defaultLogLevel;
+        // FIXED: Added production mode detection — in production, default to ERROR-only unless URL parameter overrides it
+        const urlLogLevel = Urso.helper.parseGetParams('logLevel');
+        const defaultLevel = Urso.config.mode === 'production' && !urlLogLevel ? '0' : Urso.config.defaultLogLevel;
+        const logLevelsString = urlLogLevel || defaultLevel;
         const logLevelsArray = logLevelsString.split(',');
 
         for (const [index, level] of Object.entries(LEVELS)) {

@@ -228,7 +228,8 @@ class Tween {
     }
 
     _update() {
-        const curTime = (new Date()).getTime();
+        // PERF: Changed from Date.getTime() to performance.now() — avoids Date object allocation and provides sub-millisecond resolution
+        const curTime = performance.now();
 
         // pause ?
         if (this.gamePaused) {
@@ -247,8 +248,9 @@ class Tween {
 
         for (const k in this._tweens) {
             if (this._tweens[k]._complete) {
+                // FIXED: Completed tweens are reclaimed here — a tween which never completes (looping or abandoned) is still never reclaimed
                 delete this._tweens[k]
-                continue; // todo remove old Tweens to garbage collect them (delete this._tweens[k];) if tween dont using in 1-5 min ?
+                continue;
             } else if (this._tweens[k]._started && !this._tweens[k]._paused) {
                 this._calcStep(this._tweens[k]);
             }

@@ -5,9 +5,11 @@ class ModulesObserverConfig {
     }
 
     list = {
+        // FIXED: Added event constant for soundInitialPopup component pointer action
         COMPONENTS_FULLSCREEN_CHANGE: 'components.fullscreen.change',
         COMPONENTS_FULLSCREEN_SWITCH: 'components.fullscreen.switch',
         COMPONENTS_LAYERS_SWITCHER_SWITCH: 'components.layersSwitcher.switch',
+        COMPONENTS_SOUND_INITIAL_POPUP_POINTER_ACTION: 'components.soundInitialPopup.pointerAction.popupButton',
         EXTRA_BROWSEREVENTS_KEYPRESS_EVENT: 'extra.browserEvents.window.keypress.event',
         EXTRA_BROWSEREVENTS_POINTER_EVENT: 'extra.browserEvents.window.pointer.event',
         EXTRA_BROWSEREVENTS_WINDOW_PRE_RESIZE: 'extra.browserEvents.window.pre.resize',

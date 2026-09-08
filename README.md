@@ -63,8 +63,7 @@ Game dependencies are installed with commands:
 - npm install
 
 After installing dependencies, to launch the game you need to execute:
-- yarn start
-- npm run start
+- npm run dev
 
 2. Project Structure
 --------------------

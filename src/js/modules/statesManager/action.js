@@ -23,11 +23,8 @@ class ModulesStatesManagerAction {
      */
     run(onFinishCallback) {
         this._preRunUpdateAction(onFinishCallback);
+        // FIXED: Removed debug scaffolding comment block
         Urso.statesManager.runAction(this.name, this._onFinish);
-
-        //TODO remove temp for debug
-        //let timeout = Math.floor(Math.random() * 2000);
-        //Urso.statesManager.runAction(this.name, () => setTimeout(() => { this._onFinish(); }, timeout));
     }
 
     /**
