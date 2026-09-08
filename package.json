@@ -2,7 +2,18 @@
   "name": "@urso/core",
   "version": "0.9.8-dev",
   "description": "HTML5 game engine",
+  "files": [
+    "build",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "build/js/index.js",
+  "exports": {
+    ".": {
+      "import": "./build/js/index.js"
+    }
+  },
   "author": "Megbrimef",
   "license": "MIT",
   "type": "module",
@@ -10,7 +21,9 @@
     "dev": "vite",
     "build:prod": "vite build",
     "serve": "vite preview",
-    "watch": "vite build --watch"
+    "watch": "vite build --watch",
+    "test": "node test/selectors.test.mjs && node test/lazyLoadGroups.test.mjs",
+    "prepublishOnly": "npm run build:prod"
   },
   "repository": {
     "type": "git",
@@ -25,11 +38,11 @@
   },
   "homepage": "https://github.com/megbrimef/urso#readme",
   "dependencies": {
-    "pixi.js": "^8.10.2",
-    "@urso/revolt-fx": "^0.2.0",
     "@esotericsoftware/spine-pixi-v8": "^4.2.84",
+    "@urso/revolt-fx": "^0.2.0",
     "gsap": "^3.13.0",
-    "howler": "^2.2.4"
+    "howler": "^2.2.4",
+    "pixi.js": "^8.10.2"
   },
   "devDependencies": {
     "@vitejs/plugin-legacy": "^6.1.1",
