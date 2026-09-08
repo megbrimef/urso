@@ -40,7 +40,9 @@ class ModulesScenesPixiWrapper {
         // this._renderer = await PIXI.autoDetectRenderer({ preserveDrawingBuffer: true, width: 1, height: 1 })
         // document.body.appendChild(this._renderer.view.canvas);
         const app = new PIXI.Application();
-        window.__PIXI_APP__ = app;
+        // FIXED: devtools global was shipped to production — only expose in development mode
+        if (Urso.config.mode !== 'production')
+            window.__PIXI_APP__ = app;
         //root and world
         this._root = new PIXI.Container();
         this._root.label = 'root';
@@ -147,6 +149,15 @@ class ModulesScenesPixiWrapper {
      * @returns {Object} - PIXI.Renderer
      */
     getRenderer() {
+        // FIXED: getRenderer returned the Application instead of the Renderer — now returns app.renderer as promised
+        return this._app.renderer;
+    }
+
+    /**
+     * get PIXI Application
+     * @returns {Object} - PIXI.Application
+     */
+    getApp() {
         return this._app;
     }
 
@@ -200,8 +211,8 @@ class ModulesScenesPixiWrapper {
      * @returns {Object} - pixi.Texture
      */
     generateTexture(obj) {
-        //FIXME
-        // return this._renderer.generateTexture(obj);
+        // FIXED: generateTexture was fully commented out and returned undefined — restored implementation using app.renderer
+        return this._app.renderer.generateTexture(obj);
     }
 
     _setPixiSettings() {
@@ -247,17 +258,17 @@ class ModulesScenesPixiWrapper {
     };
 
     _loop() {
-        // if (this._loopStopped)
-        //     return false;
+        // FIXED: FPS limiter was ignored and pause state was never checked — now return false if stopped/paused and only update when FPS check allows
+        if (this._loopStopped)
+            return false;
 
-        // this._requestAnimFrame(this._loop);
+        if (this._loopPaused)
+            return false;
 
-        // if (!this._loopPaused) {
-            // if (!)
-            //     return;
-        this._fpsCheckAllowUpdate()
+        if (!this._fpsCheckAllowUpdate())
+            return false;
+
         this._update();
-        // }
 
         return true;
     };
@@ -273,13 +284,15 @@ class ModulesScenesPixiWrapper {
             else
                 this._maxFPSLimit = Urso.config.fps.limit;
 
+        // FIXED: ticker.maxFPS assignment was unreachable when FPS check failed — moved before the early return so it runs on every call
+        this._app.ticker.maxFPS = this._maxFPSLimit;
+
         //check need update
         if (currentTime - this._lastUpdateTime < ~~(1000 / this._maxFPSLimit))
             return false;
 
         this._lastUpdateTime = currentTime;
 
-        this._app.ticker.maxFPS = this._maxFPSLimit;
         return true;
     }
 
@@ -324,10 +337,8 @@ class ModulesScenesPixiWrapper {
     };
 
     _getMouseCoords() {
-        /*const globalCoords = Urso.helper.mobileAndTabletCheck() ?
-            this.interaction?.eventData?.data?.global || { x: 0, y: 0 } :
-            this.interaction.mouse.global;*/
-        const globalCoords = this.interaction?.eventData?.data?.global || { x: 0, y: 0 };
+        // FIXED: mouse coords were always {0,0} because this.interaction doesn't exist in Pixi v8 — read from app.renderer.events.pointer.global instead
+        const globalCoords = this._app.renderer.events.pointer.global || { x: 0, y: 0 };
 
         const coords = {
             x: ~~(globalCoords.x / this.world.scale.x),
@@ -360,11 +371,11 @@ class ModulesScenesPixiWrapper {
             return;
         }
 
+        // FIXED: interval callback was empty and burned a timer — restored to call _update when tab is hidden and not stopped/paused
         this.passiveCallIntervalId = setInterval(() => {
-            //FIXME
-            // if (!this._loopStopped && !this._loopPaused) {
-            //     this._update();
-            // }
+            if (!this._loopStopped && !this._loopPaused) {
+                this._update();
+            }
         }, 16);
     }
 
