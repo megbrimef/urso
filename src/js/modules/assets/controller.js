@@ -39,12 +39,35 @@ class ModulesAssetsController {
     }
 
     /**
-     * load assets group bu name
+     * load assets group by name
      * @param {String} name
      * @param {Function} callback
+     * @param {Function} updateCallback
+     * @returns {Promise} resolves when group finishes loading
      */
     loadGroup(name, callback, updateCallback = () => { }) {
-        this.getInstance('Service').loadGroup(null, name, callback, updateCallback);
+        // FIXED: Return the service promise so callers can await the load — maintains callback API while adding Promise support
+        return this.getInstance('Service').loadGroup(null, name, callback, updateCallback);
+    }
+
+    /**
+     * check if a group has already been loaded
+     * @param {String} name - group name
+     * @returns {Boolean}
+     */
+    isGroupLoaded(name) {
+        // ADDED: Query if group is cached — allows UI to check asset availability without triggering loads
+        return this.getInstance('Service').isGroupLoaded(name);
+    }
+
+    /**
+     * check if a group is currently loading
+     * @param {String} name - group name
+     * @returns {Boolean}
+     */
+    isGroupLoading(name) {
+        // ADDED: Query if group load is in progress — allows UI to show loading states for on-demand assets
+        return this.getInstance('Service').isGroupLoading(name);
     }
 
     /**

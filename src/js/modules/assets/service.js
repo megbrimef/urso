@@ -9,6 +9,10 @@ class ModulesAssetsService {
         this._currentQuality = 'auto';
         this._addedAssetsCache = [];
         this.lazyLoadProcessStarted = false;
+        // ADDED: Track loaded groups to prevent reloading and enable state queries — supports deduplication on repeated calls
+        this._loadedGroups = [];
+        // ADDED: Track in-flight group loads with pending callbacks — prevents duplicate simultaneous loads and queues callbacks
+        this._loadingGroups = {};
     };
 
     /**
@@ -72,23 +76,78 @@ class ModulesAssetsService {
      * @param {Object} assetsSpace
      * @param {String} group
      * @param {Function} callback
-     * @returns
+     * @returns {Promise}
      */
     loadGroup(assetsSpace, group, callback = () => { }, updateCallback = () => { }) {
-        if (!assetsSpace) //global space
-            assetsSpace = this.assets;
+        // FIXED: Return a Promise for async chaining — allows awaiting group loads and detecting when complete
+        return new Promise((resolve) => {
+            const config = this.getInstance('Config');
 
-        if (!assetsSpace[group])
-            return Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
+            // FIXED: the `initial` group must never be cached as "loaded" — unlike a named lazy group it is a
+            // FRESH per-scene assets space (see _createNewAssetsSpace), so treating it as a one-time global
+            // group made every scene after the first skip its own preload and render with no assets at all.
+            const isInitialGroup = group === config.loadingGroups.initial;
 
-        //we need load and parse atlases at first (!)
-        const loadRestAssetsCallback = () => { this._loadGroupRestAssets(assetsSpace, group, callback, updateCallback) };
+            if (!assetsSpace) //global space
+                assetsSpace = this.assets;
 
-        const loadAtlasesCallback = () => {
-            this._loadGroupAtlases(assetsSpace, group, loadRestAssetsCallback, Urso.types.assets.ATLAS);
-        }
-        
-        this._loadGroupAtlases(assetsSpace, group, loadAtlasesCallback, Urso.types.assets.JSONATLAS);
+            // FIXED: If group already loaded, invoke callback immediately and continue chain — prevents redundant loads
+            if (!isInitialGroup && this._loadedGroups.includes(group)) {
+                callback();
+                resolve();
+                return;
+            }
+
+            // FIXED: If group is currently loading, queue this callback to run when it completes — prevents duplicate simultaneous loads
+            if (!isInitialGroup && this._loadingGroups[group]) {
+                this._loadingGroups[group].push(() => { callback(); resolve(); });
+                return;
+            }
+
+            // FIXED: No assets registered yet for this group is not an error — skip it silently if it's a known config group, only error if unknown
+            if (!assetsSpace[group]) {
+                // FIXED: `group` is a VALUE of loadingGroups (e.g. 'lazyPart1'), not a key, so it must be
+                // matched against Object.values — indexing by key only worked when a group's key and value
+                // happened to be spelled identically, and never for `initial` (key 'initial', value 0).
+                const isKnownGroup = Object.values(config.loadingGroups).includes(group);
+
+                if (!isKnownGroup) {
+                    Urso.logger.error('ModulesAssetsService group error, no assets:' + group + ' Check ModulesAssetsConfig please');
+                }
+                // FIXED: Always call callback regardless of error state — keeps lazy chain moving in all cases
+                callback();
+                resolve();
+                return;
+            }
+
+            // Mark this group as in-flight with an empty callback queue (named lazy groups only)
+            if (!isInitialGroup)
+                this._loadingGroups[group] = [];
+
+            //we need load and parse atlases at first (!)
+            const loadRestAssetsCallback = () => {
+                this._loadGroupRestAssets(assetsSpace, group, () => {
+                    // FIXED: When load completes, mark group as loaded, drain queued callbacks, and resolve this promise — enables state tracking
+                    if (!isInitialGroup) {
+                        this._loadedGroups.push(group);
+                        const queuedCallbacks = this._loadingGroups[group] || [];
+                        delete this._loadingGroups[group];
+                        callback();
+                        queuedCallbacks.forEach(cb => cb());
+                    } else {
+                        callback();
+                    }
+
+                    resolve();
+                }, updateCallback);
+            };
+
+            const loadAtlasesCallback = () => {
+                this._loadGroupAtlases(assetsSpace, group, loadRestAssetsCallback, Urso.types.assets.ATLAS);
+            }
+
+            this._loadGroupAtlases(assetsSpace, group, loadAtlasesCallback, Urso.types.assets.JSONATLAS);
+        });
     }
 
     preloadAllImagesInGPU() {
@@ -160,7 +219,7 @@ class ModulesAssetsService {
         
         for (let assetModel of assetsSpace[group])
             if (assetModel.type !== Urso.types.assets.ATLAS && assetModel.type !== Urso.types.assets.JSONATLAS)
-                if (!Urso.cache.getFile(assetModel.path)) {
+                if (!Urso.cache.getFile(assetModel.key)) { // FIXED: cache is keyed by asset key, not path — changed lookup from assetModel.path to assetModel.key
                     //filter noAtlas Spine files
 
                     //FIXME remove noAtlasSpine
@@ -212,7 +271,7 @@ class ModulesAssetsService {
             const assetKey = assetModel.key;
             let imageData = Urso.cache.getAtlas(assetKey);
             //FIXME
-            if(!assetModel.cacheTextures) return;
+            if(!assetModel.cacheTextures) continue; // FIXED: return exits entire method, should skip only this iteration — changed to continue
     
             for (let [key, val] of Object.entries(imageData.textures)) {
                 Urso.cache.addTexture(key, val);
@@ -449,6 +508,26 @@ class ModulesAssetsService {
     }
 
     /**
+     * check if a group has already been loaded
+     * @param {String} name - group name
+     * @returns {Boolean}
+     */
+    isGroupLoaded(name) {
+        // ADDED: Query loaded groups state — allows checking if a group is already in memory
+        return this._loadedGroups.includes(name);
+    }
+
+    /**
+     * check if a group is currently loading
+     * @param {String} name - group name
+     * @returns {Boolean}
+     */
+    isGroupLoading(name) {
+        // ADDED: Query in-flight loads state — allows checking if a group load is in progress
+        return this._loadingGroups.hasOwnProperty(name);
+    }
+
+    /**
      * continue lazy load process (with current step)
      * @param {Number} step
      */
@@ -459,6 +538,8 @@ class ModulesAssetsService {
         const lazyLoadGroups = this.getInstance('Config').lazyLoadGroups;
 
         if (step >= lazyLoadGroups.length) {
+            // FIXED: Reset lazyLoadProcessStarted flag before emitting finish event — allows subsequent scenes to run their own lazy load chain
+            this.lazyLoadProcessStarted = false;
             this.emit(Urso.events.MODULES_ASSETS_LAZYLOAD_FINISHED);
             return;
         }
