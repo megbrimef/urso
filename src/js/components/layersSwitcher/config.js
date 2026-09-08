@@ -1,25 +1,33 @@
 class ComponentsLayersSwitcher {
-    
+
     constructor() {
 
-        //allLayers config example
+        // CHANGED: Game-specific layer selectors replaced with empty array — removed game coupling
+        // Example from reference slot game (note: .backround typo fixed to .background):
+        /*
         this.allLayers = [
             '^granny',
             '^mainButton',
             '^logo',
-            '.backround',
+            '.background',
             '^bonusPopup',
             '.baseGame',
             '.bonusGame'
         ];
+        */
+        this.allLayers = [];
 
-        //groups layers config example
+        // CHANGED: Game-specific layer groups replaced with empty object — removed game coupling
+        // Example from reference slot game (note: .backround typo fixed to .background):
+        /*
         this.groupsLayers = {
             'mainElements': ['^logo', '^mainButton', '.baseGame'],
-            'background': ['.backround'],
+            'background': ['.background'],
             'granny': ['^granny'],
             'bonusGame': ['.bonusGame', '^bonusPopup']
         };
+        */
+        this.groupsLayers = {};
     }
 }
 

@@ -2,6 +2,9 @@ class ModulesStatesManagerConfigStates {
     constructor() {
         this.singleton = true;
 
+        // CHANGED: Game-specific state graph replaced with empty object — removed slot-game coupling
+        // Example from reference slot game:
+        /*
         this.contents = {
             START_GAME: {
                 action: 'gameInit',
@@ -66,6 +69,8 @@ class ModulesStatesManagerConfigStates {
                 ]
             }
         };
+        */
+        this.contents = {};
     }
 
     get() {
