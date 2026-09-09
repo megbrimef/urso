@@ -96,6 +96,57 @@ Every `fire()` concatenates a new string for the scene-scoped dispatch and walks
 - `components/deviceRotate/controller.js` — builds a div with classes `fullscreen`, `device-rotate`, `fullscreen-info` and loads `assets/images/fullscreen/rotate.png`. Neither the stylesheet nor the image exists in this repo, so the overlay is invisible unless the game supplies both. Document the contract or ship a minimal injected style.
 - `observer/events.js:29-30` — `MODULES_OBJECTS_TEXTINPUT_BLUR` and `..._INPUT` are unreachable now that the `TEXTINPUT` object type is gone. Left in place deliberately in case external code references them; remove on the next breaking release.
 
+### 3.4 Replace `@urso/revolt-fx` with `@pixi/particle-emitter`
+**This is a dependency choice, not a bug fix.** `@urso/revolt-fx` is not broken — see §7.1, it is
+v8-native and its build warning is benign. The case for moving is maintenance and ecosystem: the
+particle system is currently a single-maintainer fork pinned at `0.2.0`, whose authoring tool is a
+third-party site (`editor.revoltfx.electronauts.net`), whereas `@pixi/particle-emitter` is the
+mainstream PixiJS particle library. Note `@pixi/particle-emitter` is a *supplemental* package, not
+one of the deprecated v7 `@pixi/*` core sub-packages, so the scope name is not itself a red flag.
+
+**Verify this FIRST — it gates everything else.** Confirm which release of
+`@pixi/particle-emitter` actually supports PixiJS v8 and whether it is current. I have not verified
+this and it is the whole premise of the task: the 5.x line targeted Pixi v7, and v8 support was an
+open question for some time. If there is no v8-capable release, this item is dead and revolt-fx
+should simply stay.
+
+**Code surface is small.** Exactly one file imports it — `objects/models/emitterFx.js:2` — and it
+uses a narrow API:
+```js
+this._bundle = new particlesFx.FX();
+this._bundle.initBundle(fx_settings_data);
+this._emitter = this._bundle.getParticleEmitter(emitterName);
+this._emitter.init(this._baseObject, true, 1);
+this._emitter.start();  this._emitter.stop(false);
+this._emitter.on.completed.add(cb);
+this._bundle.update();          // driven from MODULES_SCENES_UPDATE
+```
+The revolt-fx side of that list is verified against the source in this repo. The
+`@pixi/particle-emitter` side below is from its documented API and is **not** verified here —
+confirm it alongside the version check above, do not take it as given: it has no bundle concept,
+you construct an `Emitter(container, config)` directly and drive it with
+`emitter.update(deltaSeconds)`. If that holds, the model's `_createBundle` / `_bundle` layer
+disappears rather than being ported, and `update()` must pass elapsed **seconds** where the
+current code passes nothing at all.
+
+**The real cost is the config format, not the code.** revolt-fx bundles are authored in its own
+editor and carry emitter definitions plus a texture/spritesheet mapping; `@pixi/particle-emitter`
+uses a completely different JSON schema authored at `pixijs.io/particle-emitter/editor/`. Any game
+with existing effects has those bundles as data files. Decide up front whether to write a converter
+or re-author the effects, and expect that to dominate the work.
+
+**Also affects the public template surface.** The `EMITTERFX` object type takes `cfg`,
+`spritesheetFilter` and `autostart` (`emitterFx.js` `setupParams`), and `spritesheetFilter` exists
+specifically to resolve revolt-fx's `mc_commonPart_01` movieclip naming convention out of
+`Urso.cache`. That convention has no equivalent in `@pixi/particle-emitter`, so either the
+parameter goes or it needs redefining — a breaking change for templates either way. Consider
+whether the type should be renamed (it is `EMITTERFX` after the fx library) and note that
+`EMITTER: 10` was removed as a phantom type, so that numeric slot is free but deliberately unreused.
+
+Doing this would also close the loose end in §6: revolt-fx is the one runtime dependency still
+bundled rather than externalised.
+
+
 ---
 
 ## 4. Correctness and design issues
@@ -123,7 +174,7 @@ Every `fire()` concatenates a new string for the scene-scoped dispatch and walks
 - **`build/js/index.js` is no longer loadable via a plain `<script>` tag.** Externalising `pixi.js`, `gsap`, `howler` and the spine runtime was correct for an npm library (3.2 MB → ~350 KB, no duplicate Pixi), but the output now carries bare imports and needs a resolver. Document the supported consumption path, and decide whether a second self-contained IIFE/UMD build is worth shipping.
 - **Production mode silences the host page's `console.log`.** `lib/logger.js:19` does `window.log = console.log = () => {}` when the LOG level is off. That has always been there, but the default level included LOG so it never fired; now that `config.mode === 'production'` defaults to ERROR-only, a production build overwrites the global `console.log` for the whole page, not just the engine. Aggressive for a library — either keep it and document it loudly, or scope the suppression to `window.log`.
 - **`_fpsCheckAllowUpdate()` always returns `true`** (verified: no `return false` remains). Removing the duplicate manual gate left it a pure side-effect call — update the FPS counter, set `ticker.maxFPS` — so the `if (!this._fpsCheckAllowUpdate()) return false;` guard in `_loop` is dead. Rename it `_updateFpsLimit()` and drop the guard, or give it a real return contract.
-- **The `@urso/revolt-fx` build warning is noise.** See §7; it is benign but misleading enough that someone will try to "fix" it. Either silence it with a Rollup `onwarn` filter in `vite.config.js` matching that specific code and module, or leave a pointer comment. Separately, revolt-fx is the one runtime dependency still bundled rather than externalised — a consistency question, not a bug.
+- **The `@urso/revolt-fx` build warning is noise.** See §7; it is benign but misleading enough that someone will try to "fix" it. Either silence it with a Rollup `onwarn` filter in `vite.config.js` matching that specific code and module, or leave a pointer comment. Separately, revolt-fx is the one runtime dependency still bundled rather than externalised — a consistency question, not a bug, and one that §3.4 would close outright if the library is replaced.
 
 ---
 
