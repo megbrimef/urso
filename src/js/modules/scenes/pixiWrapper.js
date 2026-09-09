@@ -263,15 +263,16 @@ class ModulesScenesPixiWrapper {
         if (this._loopPaused)
             return false;
 
-        if (!this._fpsCheckAllowUpdate())
-            return false;
+        // FIXED: _fpsCheckAllowUpdate was renamed to _updateFpsLimit and no longer returns a value; call it as a side-effect to update FPS counter and limit
+        this._updateFpsLimit();
 
         this._update();
 
         return true;
     };
 
-    _fpsCheckAllowUpdate() {
+    _updateFpsLimit() {
+        // FIXED: renamed from _fpsCheckAllowUpdate to better reflect actual behavior (no longer gates frames, only updates FPS counter and limit) and removed dead return true
         const currentTime = Urso.time.get();
         this._updateCurrentFPS(currentTime);
 
@@ -284,8 +285,6 @@ class ModulesScenesPixiWrapper {
 
         // PERF: two independent throttles fighting each other — removed manual gate, ticker.maxFPS is idiomatic Pixi v8 throttle and skips render too
         this._app.ticker.maxFPS = this._maxFPSLimit;
-
-        return true;
     }
 
     _updateCurrentFPS(currentTime) {

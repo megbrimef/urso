@@ -9,6 +9,8 @@ let ConfigMain = {
     useBinPath: false, // use assets from bin directory,
     useTransport: false, // use transport module for connetcting with server
     gameContainerSelector: false, // CSS selector for element the canvas is appended to; falls back to document.body if not set
+    // FIXED: added silenceConsoleLog flag to gate overwriting the global console.log — this affects the entire host page, not just the engine, so it is disabled by default. Only enable when a production build deliberately wants total silence.
+    silenceConsoleLog: false, // when the LOG level is disabled, also overwrite the global console.log for the entire host page; defaults to false to not break host page console
     fps: {
         limit: 60, //max fps limit
         optimizeLowPerformance: false //down to 30 fps if lower 60

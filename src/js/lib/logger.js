@@ -12,11 +12,15 @@ class LibLogger {
         this._logLevel = {};
         this._setupLevels();
 
-        //log
+        // FIXED: always assign window.log so engine code calling bare log() works; only overwrite global console.log if silenceConsoleLog is true (defaults to false)
         if (this._logLevel['LOG']) {
             window.log = console.log.bind(console);
         } else {
-            window.log = console.log = () => { }
+            window.log = () => { }
+            // Only silence the global console.log if explicitly configured to do so, since it affects the entire host page
+            if (Urso.config && Urso.config.silenceConsoleLog) {
+                console.log = () => { }
+            }
         }
     }
 
