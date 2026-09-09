@@ -35,8 +35,22 @@ Frames are keyed by basename, so `icon.png` in two atlases both resolve to `icon
 
 The namespacing fix, `addFolderPathInAtlasTextureKey`, is still read from config at `:272` and never applied — the code that would prefix a frame key with its folder path is commented out at `:289`. It cannot simply be uncommented: it references an undefined `folderPath`, calls `addFile` rather than `addTexture`, and iterates a mistyped `imageData.texture`. Implementing it changes the key format for every frame in a subfolder, so it needs the same kind of decision the collision reporting got.
 
-### 1.2 Global atlas rebuild is O(N²) — `lib/cache.js:23-31, 157`
-`addAtlas` calls `clearGlobalAtlas()` on every atlas, and the `globalAtlas` getter rebuilds the whole `spine.TextureAtlas` on next access, re-walking every spine skin and attachment via `_getMeshFrameNames()`. Loading N atlases while reading the global atlas between them rebuilds N times. Add a rebuild-once-after-batch flag.
+### 1.2 Every new atlas invalidates the whole global spine atlas — `lib/cache.js`
+CORRECTION to an earlier entry, which called this O(N²). Traced: the only live reader of
+`getGlobalAtlas()` is `objects/models/spine.js` when a SPINE object is created (the two other
+references are commented out), and `addAtlas` is only called from `lib/loader.js` during loading.
+So in the normal flow every atlas loads first and the first spine object then triggers exactly ONE
+rebuild — not N.
+
+The real cost appears with lazy loading, which now works: any group carrying an atlas calls
+`addAtlas` → `clearGlobalAtlas()`, so the next spine creation rebuilds the entire
+`spine.TextureAtlas` from scratch, re-walking every loaded atlas AND every skin and attachment of
+every loaded spine via `_getMeshFrameNames()`. That is one full rebuild per lazy group containing
+an atlas, mid-game. Bounded, but it lands at exactly the wrong moment.
+
+Worth doing: rebuild incrementally by appending the new atlas's pages rather than discarding
+everything, or defer the rebuild to an idle frame. Measure first — the cost scales with total
+spine attachment count, which this repo has no fixture for.
 
 ### 1.3 Texture resolution is never applied — `assets/service.js:403`
 `//TODO change resolution of base texture`. The `qualityFactors` in `assets/config.js` decide *which file* is fetched but not how it renders, so HD assets draw at the wrong size.

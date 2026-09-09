@@ -7,6 +7,25 @@ const KNOWN_TEXTURE_EXTENSIONS = new Set([
     'png', 'jpg', 'jpeg', 'webp', 'avif', 'gif', 'bmp', 'svg', 'ktx', 'ktx2', 'basis', 'dds'
 ]);
 
+// FIXED: this normalisation existed TWICE — once in addTexture and once in _createGlobalAtlas —
+// and the two drifted apart. addTexture was corrected to strip only real image extensions, while
+// _createGlobalAtlas still stripped the last dot-segment of ANY frame name. For a frame called
+// `ui.button.normal` the texture cache then held `ui.button.normal` while the spine atlas region
+// was named `ui.button`, so a spine attachment referencing it could not resolve. Both callers now
+// share this one function so they cannot diverge again.
+const stripTextureExtension = (key) => {
+    const lastDotIndex = key.lastIndexOf('.');
+
+    if (lastDotIndex > 0 && lastDotIndex < key.length - 1) {
+        const extension = key.substring(lastDotIndex + 1).toLowerCase();
+
+        if (KNOWN_TEXTURE_EXTENSIONS.has(extension))
+            return key.substring(0, lastDotIndex);
+    }
+
+    return key;
+};
+
 class LibCache {
     _globalAtlas = null
 
@@ -86,11 +105,10 @@ class LibCache {
             textureAtlas.pages.push(page);
 
             for (const frameName in atlas.data.frames) {
-                let normalizedName = frameName;
-                if (frameName.includes('.')) {
-                    const nameSplit = frameName.split('.');
-                    normalizedName = nameSplit.splice(0, nameSplit.length - 1).join('.');
-                }
+                // FIXED: was stripping the last dot-segment of any frame name, which disagreed
+                // with the texture cache for names like `ui.button.normal`. Shares addTexture's
+                // normalisation now so region names and texture keys always match.
+                const normalizedName = stripTextureExtension(frameName);
 
                 const frame = atlas.data.frames[frameName];
                 const region = new spine.TextureAtlasRegion(page, normalizedName);
@@ -200,13 +218,7 @@ class LibCache {
         // FIXED: extension stripping is now guarded by whitelist — only strip if the final
         // segment after the dot is a known texture extension (case-insensitive match).
         // This prevents atlas frames named ui.button.normal from silently becoming ui.button.
-        const lastDotIndex = key.lastIndexOf('.');
-        if (lastDotIndex > 0 && lastDotIndex < key.length - 1) {
-            const extension = key.substring(lastDotIndex + 1).toLowerCase();
-            if (KNOWN_TEXTURE_EXTENSIONS.has(extension)) {
-                key = key.substring(0, lastDotIndex);
-            }
-        }
+        key = stripTextureExtension(key);
 
         // FIXED: detect texture cache collisions by frame basename and name both atlases — prevents silent data loss when two atlases contain frames with the same name
         const previousSource = this._textureSources[key];

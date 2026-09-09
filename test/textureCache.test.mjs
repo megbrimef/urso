@@ -102,6 +102,13 @@ const afterSecond = cache.getTexture('sprite');
 check("after first registration, cache returns first value", afterFirst === firstValue);
 check("after second registration (collision), cache returns second value", afterSecond === secondValue);
 
+// NOTE: the normalisation asserted in [1] is shared with _createGlobalAtlas, which names the
+// spine atlas regions. They used to be two separate copies and drifted apart: addTexture was
+// corrected to strip only real image extensions while _createGlobalAtlas still stripped the last
+// dot-segment of any name, so `ui.button.normal` became `ui.button` as a spine region but stayed
+// intact as a texture key, and spine attachments on such frames could not resolve. Both now call
+// one helper. If [1] is ever changed, the spine region names change with it.
+
 console.log('\n[6] re-registering from the SAME atlas is not a collision');
 errors.length = 0;
 cache.assetsList.texture = {}; // reset
