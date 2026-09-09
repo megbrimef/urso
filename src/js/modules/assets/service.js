@@ -251,7 +251,6 @@ class ModulesAssetsService {
      */
     _processLoadedAtlases(assetsSpace, group) {
         const atlases = assetsSpace[group].filter(assetModel => assetModel.type === Urso.types.assets.ATLAS);
-        const { addFolderPathInAtlasTextureKey } = this.getInstance('Config');
 
         for (let assetModel of atlases) {
             const assetKey = assetModel.key;
@@ -264,17 +263,13 @@ class ModulesAssetsService {
                 Urso.cache.addTexture(key, val, assetKey);
             }
 
-            // for (const name of Object.keys(imageData.texture)) {
-            //     let texture = imageData.textures[name];
-            //     let newFilename = name;
-
-            //     if (addFolderPathInAtlasTextureKey && !name.includes('/'))
-            //         newFilename = folderPath + '/' + name;
-
-            //     Urso.cache.addFile(newFilename, texture);
-
-
-            // }
+            // REMOVED: the addFolderPathInAtlasTextureKey namespacing block. It could never have run
+            // as written — it referenced an undefined `folderPath`, called addFile rather than
+            // addTexture, and iterated a mistyped `imageData.texture`. Its two documented meanings
+            // also contradicted each other: the config comment said true adds a folder path, while
+            // models/atlas.js documented the opposite (basename-only) as the norm. Frame keys are
+            // simply the frame name minus a known image extension; collisions between atlases are
+            // reported by LibCache.addTexture instead of being avoided by namespacing.
         }
     }
 

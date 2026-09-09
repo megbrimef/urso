@@ -7,8 +7,15 @@ class ModulesAssetsModelsAtlas extends ModulesAssetsBaseModel {
         this.type = Urso.types.assets.ATLAS;
     }
 
-    // cacheTextures: if true - add atlas parced textures in Urso textures cache with it's file name as asset key. 
-    // Example - atlas texture with path 'atlasPath/image/image_01.png' will be saved in cache with a key 'image_01'.
+    // cacheTextures: if true, each frame parsed out of this atlas is registered in the Urso texture
+    // cache under its own key.
+    // CORRECTED: this comment used to claim a frame at 'atlasPath/image/image_01.png' is cached as
+    // 'image_01'. It is not — the key is the frame name with a known image extension stripped and
+    // nothing else, so that frame is cached as 'atlasPath/image/image_01'. There is no directory
+    // stripping and no folder prefixing; the addFolderPathInAtlasTextureKey option that once
+    // implied otherwise never worked and has been removed.
+    // Two atlases sharing a frame basename therefore still collide, last write winning — LibCache
+    // reports that with an error naming the frame and both atlases.
     setupParams(params) {
         super.setupParams(params);
 

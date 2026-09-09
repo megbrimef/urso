@@ -30,10 +30,22 @@ Treat the un-actioned items below as leads to verify, not as confirmed defects.
 
 ## 1. Asset and cache layer
 
-### 1.1 Atlas frame keys still collide — `assets/service.js:272, 289`
-Frames are keyed by basename, so `icon.png` in two atlases both resolve to `icon`. A **decision was taken** to keep the flat key format (existing templates depend on it) and instead make the collision loud, which is done: it now errors naming the frame and both atlases. The overwrite itself is unchanged, so the last atlas loaded still wins.
+### 1.1 Atlas frame keys collide, and always will
+Frames are keyed by basename, so `icon.png` in two atlases both resolve to `icon`. The chosen
+resolution was to keep the flat key format and make the collision loud, which is done: LibCache
+errors naming the frame and both atlases, and last-write-wins is preserved.
 
-The namespacing fix, `addFolderPathInAtlasTextureKey`, is still read from config at `:272` and never applied — the code that would prefix a frame key with its folder path is commented out at `:289`. It cannot simply be uncommented: it references an undefined `folderPath`, calls `addFile` rather than `addTexture`, and iterates a mistyped `imageData.texture`. Implementing it changes the key format for every frame in a subfolder, so it needs the same kind of decision the collision reporting got.
+The `addFolderPathInAtlasTextureKey` option that once implied namespacing has been REMOVED rather
+than implemented. It could never have run as written (undefined `folderPath`, wrong cache method,
+mistyped property), and its two documented meanings contradicted each other — the config comment
+said `true` adds a folder path while `models/atlas.js` documented basename-only as the norm. No
+default preserved existing behaviour for both bare and path-carrying frame names, so there was no
+safe way to make it real without a decision, and the decision was to drop it.
+
+What remains open is only the underlying limitation: two atlases with a same-named frame cannot
+both be cached. Anyone hitting the collision error today renames a frame. Genuine namespacing would
+mean choosing a key format (folder-prefixed, or atlas-key-prefixed) and migrating every template
+that references a frame, which is a deliberate breaking change rather than a bug fix.
 
 ### 1.2 Every new atlas invalidates the whole global spine atlas — `lib/cache.js`
 CORRECTION to an earlier entry, which called this O(N²). Traced: the only live reader of

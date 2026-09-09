@@ -64,6 +64,17 @@ Gradient fills remain fully supported and work as before—use `fill` as an arra
 }
 ```
 
+### addFolderPathInAtlasTextureKey config option removed
+
+The `addFolderPathInAtlasTextureKey` option is gone from `Modules.Assets.Config`. It never had any
+effect — the code meant to honour it was commented out and could not have run — so removing it
+changes no behaviour. Atlas frame keys are the frame name with a known image extension stripped,
+exactly as before.
+
+If you relied on it being `true`, note it was doing nothing; two atlases containing a frame with the
+same basename still collide, and `LibCache` now reports that with an error naming the frame and both
+atlases.
+
 ### Extra.PixiPatch namespace removed
 
 The `Extra.PixiPatch` namespace entry and `src/js/extra/pixiPatch.js` have been removed. This was a Pixi v6/v7 compatibility shim.
