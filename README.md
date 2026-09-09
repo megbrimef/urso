@@ -10,6 +10,8 @@ URSO — The HTML5 Game Framework
 - Clone [examples repository](https://github.com/megbrimef/urso-examples) to fast learning
 - Join [discord channel](https://discord.gg/JauD9CbDHA) to ask questions and read changelogs
 
+**Upgrading from an earlier version?** See [MIGRATION.md](MIGRATION.md) for breaking changes and new APIs in this release.
+
 ### How to ###
 ```js
 require('@urso/core');
@@ -194,12 +196,13 @@ Search modifier — first symbol of passed argument:
 - '^' — search by name;
 - '.' — search by class;
 - '#' — search by identifier (id);
-- '' — if not specified, search by object type.
+- (bare word) — search by object type (e.g., 'button' matches Urso.types.objects.BUTTON).
 
-Selector — combination of modifier and searched name. Example: '.logo' will search for objects that have 'logo' in class.
+Selector — combination of modifier and searched name. Example: '.logo' will search for objects that have 'logo' in class. A bare selector 'button' will search by object type.
 
 Combined selectors:
 - Urso.find('^nameContainer .classText') — search in '^nameContainer' object for objects with 'classText' class at any nesting level.
+- Urso.find('button .title') — search for BUTTON objects containing TEXT children.
 
 9. Event Routers and Event-Driven Model (Observer)
 ---------------------------------------------------
@@ -310,6 +313,15 @@ Events:
 Prioritization:
 - Group queue corresponds to order in lazyLoadGroups array (see src/js/modules/assets/config in Core repository).
 - Example: loadingGroup: "lazy" and "afterLazy"; in config this.loadingGroups = { initial: 0, lazy: "lazy", afterLazy: "afterLazy" }, and this.lazyLoadGroups = [ this.loadingGroups.lazy, this.loadingGroups.afterLazy ] — priority "lazy", then "afterLazy".
+
+Runtime asset group API:
+- Urso.assets.loadGroup(name, callback, updateCallback) — load a group; returns a promise and accepts callbacks. updateCallback receives progress (0–1).
+- Urso.assets.isGroupLoaded(name) — returns true if the group has finished loading.
+- Urso.assets.isGroupLoading(name) — returns true if the group is currently loading.
+- Urso.assets.getPlaceholderKey(assetKey) — returns the placeholder asset key for a lazy asset, or false if none configured.
+- Urso.assets.unloadGroup(name) — unload a group and release GPU resources; returns a promise.
+
+These methods allow UI components to display loading states and to manage memory by freeing no-longer-needed groups.
 
 14. States Manager and Components.StateDriven
 ----------------------------------------------
@@ -508,6 +520,8 @@ Usage:
 Object types (Urso.types.objects)
 - BITMAPTEXT, BUTTON, BUTTONCOMPOSITE, CHECKBOX, COLLECTION, COMPONENT, CONTAINER, EMITTERFX, GRAPHICS, GROUP, HITAREA, IMAGE, IMAGESANIMATION, MASK, NINESLICEPLANE, SLIDER, SPINE, TEXT, TOGGLE, WORLD
 
+Note: ATLASIMAGE, DRAGCONTAINER, EMITTER, SCROLLBOX, and TEXTINPUT have been removed; use IMAGE and EMITTERFX instead where applicable.
+
 Creation
 - Urso.objects.create(params, parent?)
 
@@ -654,7 +668,9 @@ Add Debug component to scene for monitoring
 
 28.3. Assets/Loader/Cache
 - assets.preload(assets, onComplete, onProgress?, onError?)
-- assets.loadGroup(groupName, onComplete, onProgress?, onError?)
+- assets.loadGroup(groupName, onComplete, onProgress?, onError?) — also returns a promise
+- assets.isGroupLoaded(groupName), isGroupLoading(groupName)
+- assets.getPlaceholderKey(assetKey), unloadGroup(groupName)
 - loader.add(key, url); loader.load(cb); loader.onProgress.add(cb)
 - cache.get/has/set/remove/clear
 
@@ -663,7 +679,7 @@ Add Debug component to scene for monitoring
 - Model properties: position, scale, anchor, visibility, etc.
 
 28.5. Scenes
-- scenes.display(name), getFps(), getFpsData(), pause(), resume()
+- scenes.display(name), getRenderer(), getApp(), getFps(), getFpsData(), pause(), resume()
 
 28.6. I18n
 - Urso.i18n.get(localeId, localeVariables?)

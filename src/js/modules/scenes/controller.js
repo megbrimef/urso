@@ -109,6 +109,17 @@ class ModulesScenesController {
     }
 
     /**
+     * get the PIXI Application
+     * FIXED: getApp() existed on PixiWrapper but had no passthrough here, so Urso.scenes.getApp()
+     * was undefined. That left callers of the old getRenderer() — which used to return the
+     * Application — with no supported way to reach it after the change.
+     * @returns {Object} - PIXI.Application
+     */
+    getApp() {
+        return this.getInstance('PixiWrapper').getApp();
+    }
+
+    /**
      * global timeScale getter
      */
     get timeScale() {
