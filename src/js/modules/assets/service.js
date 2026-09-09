@@ -155,25 +155,7 @@ class ModulesAssetsService {
         });
     }
 
-    preloadAllImagesInGPU() {
-        //FIXME
-        // const world = Urso.findOne('^WORLD')._baseObject;
-
-        // Urso.cache.globalAtlas.pages.forEach(({ baseTexture }) => {
-        //     const texture = new PIXI.Texture(baseTexture);
-        //     const sprite = new PIXI.Sprite(texture);
-
-        //     sprite.x = -10000;
-        //     sprite.y = -10000;
-
-        //     world.addChild(sprite);
-
-        //     setTimeout(() => {
-        //         world.removeChild(sprite);
-        //         sprite.destroy()
-        //     }, 1);
-        // });
-    }
+    // REMOVED: preloadAllImagesInGPU — was an empty stub that never did anything. To preload GPU resources use renderer.prepare (requires import 'pixi.js/prepare')
 
     /**
      * create new assets space for loading
@@ -302,20 +284,7 @@ class ModulesAssetsService {
      * @param {String} group
      */
     async _processLoadedAssets(assetsSpace, group) {
-        //FIXME
         for (let assetModel of assetsSpace[group]) {
-            //FIXME
-            // if (assetModel.type === Urso.types.assets.IMAGE)
-            //     this._processLoadedImage(assetModel);
-
-            //FIXME
-            // if (assetModel.type === Urso.types.assets.BITMAPFONT)
-            //     this._processLoadedBitmapFont(assetModel);
-
-            //FIXME
-            // if (assetModel.type === Urso.types.assets.FONT)
-            //     await this._processLoadedFont(assetModel);
-
             if(assetModel.type === Urso.types.assets.SPINEATLAS) {
                 this._processLoadedSpineAtlas(assetModel);
             }
@@ -335,43 +304,7 @@ class ModulesAssetsService {
         });
     }
 
-    /**
-     * process loaded font
-     * @param {Object} source
-     */
-    async _processLoadedFont(source) {
-        const data = Urso.cache.getFile(source.key);
-        const font = new FontFace(source.key, data);
-        await font.load();
-    }
-
-    /**
-     * process loaded bitmap font
-     * @param {Object} source
-     */
-    _processLoadedBitmapFont(assetModel) {
-        this._updateFontKey(assetModel.key)
-    }
-
-    /**
-     * Update font key if cannot use original
-     * @param {String} fontName
-     * @returns
-     */
-    _updateFontKey(fontName) {
-        const fontData = Urso.cache.getBitmapFont(fontName);
-
-        if (PIXI.BitmapFont.available[fontName] || !fontData)
-            return;
-
-        const savedFont = PIXI.BitmapFont.available[fontData.bitmapFont.font];
-
-        if (savedFont) {
-            Urso.logger.warn(`bitmapFont ${fontData.bitmapFont.font} was rewritten with key ${fontName}`);
-            PIXI.BitmapFont.available[fontName] = savedFont;
-            delete PIXI.BitmapFont.available[fontData.bitmapFont.font];
-        }
-    }
+    // REMOVED: _processLoadedFont, _processLoadedBitmapFont, _updateFontKey — Pixi v8 ships loadWebFont and loadBitmapFont natively
 
     /**
      * get current assets resolution
@@ -382,40 +315,7 @@ class ModulesAssetsService {
         return qualityFactors[this._currentQuality] || defaultQualityFactor || 1;
     }
 
-    /**
-     * process loaded image
-     * @param {Object} assetModel
-     */
-    _processLoadedImage(assetModel) {
-        const resolution = this.getCurrentResolution();
-
-        const assetKey = assetModel.key;
-        //textures cache
-        let imageData = Urso.cache.getImage(assetKey);
-
-        if (!imageData) {
-            //from atlas ?!
-            let texture = Urso.cache.getFile(assetModel.path);
-
-            if (!texture)
-                return Urso.logger.error('ModulesAssetsService process Loaded Image error: no image ', assetModel);
-
-            Urso.cache.addTexture(assetKey, texture); //TODO change resolution of base texture
-        } else {
-            //regular image
-            Urso.cache.addTexture(assetKey, imageData);
-        }
-
-        if (assetModel.preloadGPU) {
-            let tempOblect = Urso.objects.create({
-                type: Urso.types.objects.IMAGE,
-                assetKey: assetKey,
-                x: -10000, y: -10000
-            }, false, true, true);
-
-            setTimeout(() => { tempOblect.destroy() }, 1)
-        }
-    }
+    // REMOVED: _processLoadedImage — Pixi v8 Assets already returns usable textures
 
     /**
      * add asset

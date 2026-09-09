@@ -157,6 +157,8 @@ class LibLoader {
                             case Urso.types.assets.ATLAS:
                                 //FIXME
                                 // this._loader.add(asset.key, jsonData, params, (resource) => this._storeAsset(asset, resource));
+                                // REMOVED: replaced silent skip with error log — ATLAS sourced from JSONATLAS is not currently supported
+                                Urso.logger.error(`LibLoader: ATLAS asset "${asset.key}" sourced from a JSONATLAS is not currently supported. The atlas will not be available. Objects referencing its frames will fail with "no image with key" errors. To use this atlas, load it from its own file path instead.`);
                                 break;
                         }
 

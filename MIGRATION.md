@@ -68,6 +68,20 @@ Gradient fills remain fully supported and work as before—use `fill` as an arra
 
 The `Extra.PixiPatch` namespace entry and `src/js/extra/pixiPatch.js` have been removed. This was a Pixi v6/v7 compatibility shim.
 
+### preloadAllImagesInGPU removed from Urso.assets
+
+`Urso.assets.preloadAllImagesInGPU()` has been removed. This method was an empty stub that never did anything.
+
+If you need to preload GPU resources, use the Pixi v8 renderer's `prepare` plugin instead. Import it and call it on the renderer obtained from `Urso.scenes.getRenderer()`:
+
+```js
+import 'pixi.js/prepare';
+
+const renderer = Urso.scenes.getRenderer();
+const sprites = [/* create sprites */];
+renderer.prepare.upload(sprites);
+```
+
 ## New Features
 
 ### Asset group runtime API

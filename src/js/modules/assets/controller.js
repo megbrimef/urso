@@ -97,12 +97,7 @@ class ModulesAssetsController {
         this.getInstance('Service').checkWebPSupport();
     }
 
-    /**
-     * preload all images in global atlas into GPU
-     */
-    preloadAllImagesInGPU() {
-        this.getInstance('Service').preloadAllImagesInGPU();
-    }
+    // REMOVED: preloadAllImagesInGPU — was an empty stub that never did anything. To preload GPU resources use renderer.prepare (requires import 'pixi.js/prepare')
 }
 
 export default ModulesAssetsController;
