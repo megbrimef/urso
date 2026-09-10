@@ -124,57 +124,6 @@ Every `fire()` concatenates a new string for the scene-scoped dispatch and walks
 - `components/deviceRotate/controller.js` — builds a div with classes `fullscreen`, `device-rotate`, `fullscreen-info` and loads `assets/images/fullscreen/rotate.png`. Neither the stylesheet nor the image exists in this repo, so the overlay is invisible unless the game supplies both. Document the contract or ship a minimal injected style.
 - `observer/events.js:29-30` — `MODULES_OBJECTS_TEXTINPUT_BLUR` and `..._INPUT` are unreachable now that the `TEXTINPUT` object type is gone. Left in place deliberately in case external code references them; remove on the next breaking release.
 
-### 3.4 Replace `@urso/revolt-fx` with `@pixi/particle-emitter`
-**This is a dependency choice, not a bug fix.** `@urso/revolt-fx` is not broken — see §6.1, it is
-v8-native and its build warning is benign. The case for moving is maintenance and ecosystem: the
-particle system is currently a single-maintainer fork pinned at `0.2.0`, whose authoring tool is a
-third-party site (`editor.revoltfx.electronauts.net`), whereas `@pixi/particle-emitter` is the
-mainstream PixiJS particle library. Note `@pixi/particle-emitter` is a *supplemental* package, not
-one of the deprecated v7 `@pixi/*` core sub-packages, so the scope name is not itself a red flag.
-
-**Verify this FIRST — it gates everything else.** Confirm which release of
-`@pixi/particle-emitter` actually supports PixiJS v8 and whether it is current. I have not verified
-this and it is the whole premise of the task: the 5.x line targeted Pixi v7, and v8 support was an
-open question for some time. If there is no v8-capable release, this item is dead and revolt-fx
-should simply stay.
-
-**Code surface is small.** Exactly one file imports it — `objects/models/emitterFx.js:2` — and it
-uses a narrow API:
-```js
-this._bundle = new particlesFx.FX();
-this._bundle.initBundle(fx_settings_data);
-this._emitter = this._bundle.getParticleEmitter(emitterName);
-this._emitter.init(this._baseObject, true, 1);
-this._emitter.start();  this._emitter.stop(false);
-this._emitter.on.completed.add(cb);
-this._bundle.update();          // driven from MODULES_SCENES_UPDATE
-```
-The revolt-fx side of that list is verified against the source in this repo. The
-`@pixi/particle-emitter` side below is from its documented API and is **not** verified here —
-confirm it alongside the version check above, do not take it as given: it has no bundle concept,
-you construct an `Emitter(container, config)` directly and drive it with
-`emitter.update(deltaSeconds)`. If that holds, the model's `_createBundle` / `_bundle` layer
-disappears rather than being ported, and `update()` must pass elapsed **seconds** where the
-current code passes nothing at all.
-
-**The real cost is the config format, not the code.** revolt-fx bundles are authored in its own
-editor and carry emitter definitions plus a texture/spritesheet mapping; `@pixi/particle-emitter`
-uses a completely different JSON schema authored at `pixijs.io/particle-emitter/editor/`. Any game
-with existing effects has those bundles as data files. Decide up front whether to write a converter
-or re-author the effects, and expect that to dominate the work.
-
-**Also affects the public template surface.** The `EMITTERFX` object type takes `cfg`,
-`spritesheetFilter` and `autostart` (`emitterFx.js` `setupParams`), and `spritesheetFilter` exists
-specifically to resolve revolt-fx's `mc_commonPart_01` movieclip naming convention out of
-`Urso.cache`. That convention has no equivalent in `@pixi/particle-emitter`, so either the
-parameter goes or it needs redefining — a breaking change for templates either way. Consider
-whether the type should be renamed (it is `EMITTERFX` after the fx library) and note that
-`EMITTER: 10` was removed as a phantom type, so that numeric slot is free but deliberately unreused.
-
-Doing this would also close the loose end in §6: revolt-fx is the one runtime dependency still
-bundled rather than externalised.
-
-
 ---
 
 ## 4. Correctness and design issues
@@ -236,8 +185,7 @@ the build is warning-free, and there are six test suites where there were none.
 3. **§4** — the correctness questions, starting with the alignment-math `atan` and negative
    `scaleY`. Both want a test rather than an opinion.
 4. **§2.3** — the observer's per-fire string allocation; small and self-contained.
-5. **§3.4** — replacing revolt-fx, gated on confirming a v8-capable `@pixi/particle-emitter` exists.
-6. **§7** — widen coverage toward the template pipeline and the property proxy, where the two late
+5. **§7** — widen coverage toward the template pipeline and the property proxy, where the two late
    bugs this branch caught were both hiding.
-7. **§1.2 – §1.4, §3.1, §3.3, §5** — the remainder, none of it urgent. Several need fixtures this
+6. **§1.2 – §1.4, §3.1, §3.3, §5** — the remainder, none of it urgent. Several need fixtures this
    repo lacks (spine, `bin` assets, a JSONATLAS).
