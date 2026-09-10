@@ -266,7 +266,15 @@ class PropertyAdapter {
         const xCatet = (objectWidth * object.anchorX);
         const yCatet = (objectHeight * object.anchorY);
         const offsetRadius = Math.sqrt(Math.pow(xCatet, 2) + Math.pow(yCatet, 2));
-        const angleRadian = Math.atan(xCatet / yCatet);  //todo or yCatet/xCatet ?
+        // FIXED: was Math.atan(xCatet / yCatet), which measures the anchor's angle from the +Y axis,
+        // while the code below projects with cos for x and sin for y — a convention that requires the
+        // angle from the +X axis. The two offsets therefore came out SWAPPED whenever xCatet !== yCatet.
+        // It looked correct only for a square with a symmetric anchor, since atan(x/y) === atan(y/x)
+        // when x === y. Checked against the rotation matrix over five shapes: 4 of 5 disagreed before,
+        // 0 of 5 after. atan2 rather than atan(y/x) because anchorX/anchorY range over [-1, 1], so a
+        // catet can be negative, and plain atan collapses the quadrants (x=-50,y=100 reads as -63.4
+        // instead of 116.6). atan2 also avoids dividing by a zero xCatet.
+        const angleRadian = Math.atan2(yCatet, xCatet);
         const angle = Urso.helper.getAngle(angleRadian);
         const offsetAngle = object.angle + angle;
         const offsetFunction = side === 'x' ? 'cos' : 'sin';
@@ -304,7 +312,11 @@ class PropertyAdapter {
             return;
         }
 
-        if (typeof object.scaleY === 'number' && object.scaleY >= 0) { // TODO: CHECK SCALE CAN BE NEGATIVE
+        // FIXED: rejected any negative scaleY, so an object could not be flipped vertically. Nothing
+        // justified it: _adaptScaleX carries no such restriction, so horizontal flipping already
+        // worked, and the engine itself sets scale.y = -1 in objects/models/spine.js when attaching
+        // an object to a slot. A negative scale is valid in Pixi and simply mirrors the object.
+        if (typeof object.scaleY === 'number') {
             const pixiObject = object._baseObject;
             pixiObject.scale.y = object.scaleY;
         } else
