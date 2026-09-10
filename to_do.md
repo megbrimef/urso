@@ -6,7 +6,7 @@ Every item below was re-checked against the current source before being kept. Li
 
 ## Read this before acting on anything here
 
-Three findings in earlier revisions of this file turned out to be **wrong**, each from reading code statically without tracing the whole path. They are recorded in §7 rather than deleted, because in every case the "fix" would have broken working code:
+Three findings in earlier revisions of this file turned out to be **wrong**, each from reading code statically without tracing the whole path. They are recorded in §6 rather than deleted, because in every case the "fix" would have broken working code:
 
 - `@urso/revolt-fx` is **not** a v7-era dependency; its `PIXI.BLEND_MODES` reference is deliberate v8 feature detection.
 - The engine is **already DPI-correct**; `resolution: 1` is right and `autoDensity` would double-apply.
@@ -21,10 +21,9 @@ Treat the un-actioned items below as leads to verify, not as confirmed defects.
 3. [Unfinished features](#3-unfinished-features)
 4. [Correctness and design issues](#4-correctness-and-design-issues)
 5. [Configuration and integration](#5-configuration-and-integration)
-6. [Follow-ups created by this branch](#6-follow-ups-created-by-this-branch)
-7. [Corrections — do not "fix" these](#7-corrections--do-not-fix-these)
-8. [Docs, tests, tooling](#8-docs-tests-tooling)
-9. [Suggested order](#9-suggested-order)
+6. [Corrections — do not "fix" these](#6-corrections--do-not-fix-these)
+7. [Docs, tests, tooling](#7-docs-tests-tooling)
+8. [Suggested order](#8-suggested-order)
 
 ---
 
@@ -67,11 +66,14 @@ spine attachment count, which this repo has no fixture for.
 ### 1.3 Texture resolution is never applied — `assets/service.js:403`
 `//TODO change resolution of base texture`. The `qualityFactors` in `assets/config.js` decide *which file* is fetched but not how it renders, so HD assets draw at the wrong size.
 
-### 1.4 Other pipeline gaps
-- `lib/loader.js:157` — the `ATLAS`-sourced-from-`JSONATLAS` branch is still commented out, so such an atlas is skipped entirely.
-- `assets/service.js` `_processLoadedAssets` — no longer post-processes `IMAGE` (resolution), `BITMAPFONT` or `FONT`; only `SPINEATLAS` survives. v8's `Assets` handles web fonts and bitmap fonts natively, so verify and delete the dead branches, or reimplement.
-- `assets/service.js` `preloadAllImagesInGPU()` — empty body. Implement with v8's `renderer.prepare` (needs `import 'pixi.js/prepare'`) or remove it and its controller passthrough.
-- `noAtlasSpine` — eight references across `assets/service.js` and `lib/loader.js`, half-disabled and self-labelled `FIXME remove noAtlasSpine`.
+### 1.4 The noAtlasSpine path is half-disabled — `assets/service.js`
+Eight references, self-labelled `FIXME remove noAtlasSpine`. Spine assets flagged `noAtlas` are
+routed into a separate load pass whose metadata handling is commented out. Either finish it or
+delete the branch — but it needs a spine fixture to exercise, which this repo does not have.
+
+The other gaps once listed here are closed: the dead `_processLoadedImage` / `_processLoadedFont` /
+`_processLoadedBitmapFont` post-processing is deleted, `preloadAllImagesInGPU` is removed, and an
+`ATLAS` sourced from a `JSONATLAS` now logs an error naming the asset instead of vanishing.
 
 ---
 
@@ -95,7 +97,7 @@ this._fireLocal(eventName + this._getLocalSuffix(), params);
 Every `fire()` concatenates a new string for the scene-scoped dispatch and walks two listener lists. `MODULES_SCENES_UPDATE` fires every frame, so that is at least 60 string allocations a second. Cache the suffixed name per event, or key local listeners by a nested map instead of a concatenated string.
 
 ### 2.4 The DPI cap is implicit — `scenes/resolutions.js`
-`maxResolutionFactor` limits the backing store to `ResolutionsConfig.maxSize()` (default 1920), so a 4K or high-DPI display renders at reduced density to protect fill rate. There is also a commented-out `if (devicePixelRatio > 2) devicePixelRatio = 2` in the `Resolutions` constructor showing the same intent. This is deliberate and correct (see §7), but it is a side effect of whatever `maxSize()` happens to return rather than a documented knob. Surface it as explicit config. Ergonomics, not correctness.
+`maxResolutionFactor` limits the backing store to `ResolutionsConfig.maxSize()` (default 1920), so a 4K or high-DPI display renders at reduced density to protect fill rate. There is also a commented-out `if (devicePixelRatio > 2) devicePixelRatio = 2` in the `Resolutions` constructor showing the same intent. This is deliberate and correct (see §6), but it is a side effect of whatever `maxSize()` happens to return rather than a documented knob. Surface it as explicit config. Ergonomics, not correctness.
 
 ---
 
@@ -194,21 +196,11 @@ bundled rather than externalised.
 
 ---
 
-## 6. Follow-ups created by this branch
-
-- **`Urso.scenes.getRenderer()` is a breaking change.** It returned the `Application`; it now returns `app.renderer` as its JSDoc always promised, with `getApp()` added for callers that want the Application. Needs a README note and a changelog migration line.
-- **`build/js/index.js` is no longer loadable via a plain `<script>` tag.** Externalising `pixi.js`, `gsap`, `howler` and the spine runtime was correct for an npm library (3.2 MB → ~350 KB, no duplicate Pixi), but the output now carries bare imports and needs a resolver. Document the supported consumption path, and decide whether a second self-contained IIFE/UMD build is worth shipping.
-- **Production mode silences the host page's `console.log`.** `lib/logger.js:19` does `window.log = console.log = () => {}` when the LOG level is off. That has always been there, but the default level included LOG so it never fired; now that `config.mode === 'production'` defaults to ERROR-only, a production build overwrites the global `console.log` for the whole page, not just the engine. Aggressive for a library — either keep it and document it loudly, or scope the suppression to `window.log`.
-- **`_fpsCheckAllowUpdate()` always returns `true`** (verified: no `return false` remains). Removing the duplicate manual gate left it a pure side-effect call — update the FPS counter, set `ticker.maxFPS` — so the `if (!this._fpsCheckAllowUpdate()) return false;` guard in `_loop` is dead. Rename it `_updateFpsLimit()` and drop the guard, or give it a real return contract.
-- **The `@urso/revolt-fx` build warning is noise.** See §7; it is benign but misleading enough that someone will try to "fix" it. Either silence it with a Rollup `onwarn` filter in `vite.config.js` matching that specific code and module, or leave a pointer comment. Separately, revolt-fx is the one runtime dependency still bundled rather than externalised — a consistency question, not a bug, and one that §3.4 would close outright if the library is replaced.
-
----
-
-## 7. Corrections — do not "fix" these
+## 6. Corrections — do not "fix" these
 
 Recorded because each was reported as a defect in an earlier revision of this file, and acting on any of them would break working code.
 
-### 7.1 `@urso/revolt-fx` is v8-native
+### 6.1 `@urso/revolt-fx` is v8-native
 Its `package.json` declares `peerDependencies: { "pixi.js": "^8.x" }`, and the `PIXI['BLEND_MODES']` reference at `FX.js:521` is deliberate v8 feature detection:
 ```js
 if (PIXI['BLEND_MODES'] === undefined && typeof value == 'number')
@@ -216,15 +208,15 @@ if (PIXI['BLEND_MODES'] === undefined && typeof value == 'number')
 ```
 with `FX._blendModes = ['normal', 'add', 'multiply', 'screen']`. The **absence** of `BLEND_MODES` is how it detects v8, and it then maps a legacy numeric blend mode onto the v8 string form. The `IMPORT_IS_UNDEFINED` line on every build is Rollup correctly reporting the import resolves to undefined — exactly what the code tests for.
 
-### 7.2 The engine is already DPI-correct; `resolution: 1` is right
+### 6.2 The engine is already DPI-correct; `resolution: 1` is right
 `scenes/resolutions.js` `_getWindowSize()` multiplies `innerWidth`/`innerHeight` by `devicePixelRatio`, so every resolution figure downstream is in **physical pixels**. `_applyResolutionToPixi` passes those to `renderer.resize()` (the backing store) and sets `canvas.style` to `resolution / devicePixelRatio` (the CSS size). Traced on a 2× display with an 800×600 viewport: a 1600×1200 backing store at 800×600 CSS — an effective density of exactly **2.00×**. That *is* `resolution: devicePixelRatio` + `autoDensity`, hand-rolled. Passing `resolution: 1` to `app.init()` is therefore correct, and enabling Pixi's `autoDensity` would double-apply the scaling.
 
-### 7.3 `refreshStyles` was never 13 ms at 100 objects
+### 6.3 `refreshStyles` was never 13 ms at 100 objects
 An early benchmark reported 13 ms per refresh at 100 objects and 1.4 s at 2000. Those numbers came from the harness's own `findAll` doing a linear scan of the world. The real `Find.do()` resolves the last selector rule through the objects cache, so `findAll` is O(matching). Corrected figures with an index-backed stub: ~2 ms at 100 objects, ~10 ms at 500, ~33 ms at 2000.
 
 ---
 
-## 8. Docs, tests, tooling
+## 7. Docs, tests, tooling
 
 - **Test coverage is a starting point.** `npm test` runs six Node smoke suites (102 assertions): type selectors, lazy-load groups, the loader's success/error/retry contract, texture-cache keys, asset placeholders, and styles. Uncovered: the template→assets→objects→components pipeline, the instance factory's mode/mixin resolution, and the property proxy. Two real bugs this branch caught late — a call to a non-existent `Urso.events.on`, and a `require()` in an ES module — both lived in paths no test executed. That is the argument for widening coverage, not a general plea for more tests.
 - **No linter or formatter.** Indentation is inconsistent (2-space in components, 4-space in modules).
@@ -233,12 +225,19 @@ An early benchmark reported 13 ms per refresh at 100 objects and 1.4 s at 2000. 
 
 ---
 
-## 9. Suggested order
+## 8. Suggested order
 
-1. **§6** — document the breaking changes before this branch goes anywhere. `getRenderer()`, the non-script-tag build, and the `console.log` override all affect consumers and none is discoverable from the code.
-2. **§1.1** — atlas frame collisions. Now loud rather than silent, but still last-write-wins; the namespacing fix needs a key-format decision.
-3. **§2.1 / §2.2** — culling and render groups, once you can profile a real scene on target hardware. The knobs exist; what is missing is evidence.
-4. **§1.2 – §1.4** — the remaining asset-pipeline gaps.
-5. **§3.2** — transport, if any game actually uses it; it is currently unreachable through config.
-6. **§4** — the correctness questions, starting with the alignment-math `atan` and negative `scaleY`, both of which want a test rather than an opinion.
-7. **§8** — widen coverage toward the pipeline and the property proxy, where the two late bugs hid.
+Everything blocking a review or merge is done: the breaking changes are documented in MIGRATION.md,
+the build is warning-free, and there are six test suites where there were none.
+
+1. **§2.1 / §2.2** — culling and render groups, once you can profile a real scene on target
+   hardware. The knobs exist and default to today's behaviour; what is missing is evidence.
+2. **§3.2** — transport, if any game actually uses it. It is currently unreachable through config.
+3. **§4** — the correctness questions, starting with the alignment-math `atan` and negative
+   `scaleY`. Both want a test rather than an opinion.
+4. **§2.3** — the observer's per-fire string allocation; small and self-contained.
+5. **§3.4** — replacing revolt-fx, gated on confirming a v8-capable `@pixi/particle-emitter` exists.
+6. **§7** — widen coverage toward the template pipeline and the property proxy, where the two late
+   bugs this branch caught were both hiding.
+7. **§1.2 – §1.4, §3.1, §3.3, §5** — the remainder, none of it urgent. Several need fixtures this
+   repo lacks (spine, `bin` assets, a JSONATLAS).
