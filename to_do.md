@@ -125,7 +125,7 @@ Every `fire()` concatenates a new string for the scene-scoped dispatch and walks
 - `observer/events.js:29-30` — `MODULES_OBJECTS_TEXTINPUT_BLUR` and `..._INPUT` are unreachable now that the `TEXTINPUT` object type is gone. Left in place deliberately in case external code references them; remove on the next breaking release.
 
 ### 3.4 Replace `@urso/revolt-fx` with `@pixi/particle-emitter`
-**This is a dependency choice, not a bug fix.** `@urso/revolt-fx` is not broken — see §7.1, it is
+**This is a dependency choice, not a bug fix.** `@urso/revolt-fx` is not broken — see §6.1, it is
 v8-native and its build warning is benign. The case for moving is maintenance and ecosystem: the
 particle system is currently a single-maintainer fork pinned at `0.2.0`, whose authoring tool is a
 third-party site (`editor.revoltfx.electronauts.net`), whereas `@pixi/particle-emitter` is the
