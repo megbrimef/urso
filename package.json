@@ -1,6 +1,6 @@
 {
   "name": "@urso/core",
-  "version": "0.9.8-dev",
+  "version": "0.11.0-dev",
   "description": "HTML5 game engine",
   "files": [
     "build",
