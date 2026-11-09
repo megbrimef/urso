@@ -68,9 +68,14 @@ class ModulesScenesResolutions {
     };
 
     _getWindowSize() {
+        // ADDED: follow a container (e.g. a wrapper's 16:9 UI box) instead of the window,
+        // so the canvas and a host page's HUD do not drift apart
+        const container = Urso.config.sizeContainerSelector && document.querySelector(Urso.config.sizeContainerSelector);
+        const useContainer = container && container.offsetWidth && container.offsetHeight;
+
         let windowSize = {
-            width: window.innerWidth,
-            height: window.innerHeight
+            width: useContainer ? container.offsetWidth : window.innerWidth,
+            height: useContainer ? container.offsetHeight : window.innerHeight
         };
 
         if (window.devicePixelRatio && window.devicePixelRatio !== 1) {

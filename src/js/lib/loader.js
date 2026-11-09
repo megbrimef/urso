@@ -3,6 +3,33 @@
 // prevents re-setting the same param value. This is clearer than tracking on the resolver itself.
 let _searchParamsApplied = false;
 
+// ADDED: once per game — whether the browser decodes AVIF (a promise until answered, then
+// true / false) and the bin/uber.json bundle (a promise once requested). LibLoader is created per asset group.
+let _avifSupported = null;
+let _uberJson = null;
+
+// ADDED: collapse the doubled slashes a gamePath with a trailing slash glued to '/bin/...' produced
+// (`v0.1.0//bin/...`): a local server serves it, a CDN on S3 answers 403 AccessDenied. A protocol's '//' is kept.
+const collapseSlashes = (path) => path.replace(/([^:/])\/{2,}/g, '$1/');
+
+// ADDED: a json of bin/uber.json for a path under bin/; given away once — the PIXI loaders keep (and may change)
+// what they get. An atlas under avif/ is its PNG / JPEG twin with the image's extension changed.
+function takeFromUber(files, key) {
+    const twin = key.match(/^(.*\/)avif\/([^/]+)$/);
+    const from = twin && !files[key] ? twin[1] + twin[2] : key;
+    const json = files[from];
+
+    if (!json)
+        return null;
+
+    delete files[from];
+
+    if (from === key)
+        return json;
+
+    return { ...json, meta: { ...json.meta, image: json.meta.image.replace(/\.\w+$/, '.avif') } };
+}
+
 class LibLoader {
     constructor() {
         this.RELOAD_DELAY = 250;
@@ -43,7 +70,7 @@ class LibLoader {
         }
 
         if (!Urso.config.useBinPath) {
-            return `${Urso.config.gamePath}assets/${path}`;
+            return collapseSlashes(`${this._getGamePath()}assets/${path}`);
         }
 
         const quality = Urso.getInstance('Modules.Assets.Service').getQuality();
@@ -53,8 +80,104 @@ class LibLoader {
             splitted.splice(1, 0, quality);
         }
 
-        return `${Urso.config.gamePath}/bin/${splitted.join('/')}`;
+        // ADDED: an atlas from images/<quality>/avif/ where the browser decodes AVIF
+        if (_avifSupported === true && asset.type === Urso.types.assets.ATLAS)
+            splitted.splice(splitted.length - 1, 0, 'avif');
+
+        return this._getBinPath(splitted.join('/'));
     };
+
+    /**
+     * ADDED: Urso.config.gamePath with a trailing slash. A wrapper may set it without one, and assets/ paths are
+     * glued straight to it (`v0.1.0assets/...`). An empty gamePath stays empty.
+     * @returns {String}
+     */
+    _getGamePath() {
+        const gamePath = Urso.config.gamePath || '';
+        return (gamePath && !gamePath.endsWith('/')) ? `${gamePath}/` : gamePath;
+    }
+
+    /**
+     * ADDED: a path under bin/. With an empty gamePath it stays root-relative ('/bin/...'), as before.
+     * @param {String} path - path inside bin/
+     * @returns {String}
+     */
+    _getBinPath(path) {
+        return collapseSlashes(`${Urso.config.gamePath || ''}/bin/${path}`);
+    }
+
+    /**
+     * ADDED: opt-in AVIF atlases (Urso.config.useAvifAtlases, bin/ only, `?avif=0` turns it
+     * off for a session). Asks PIXI's own detector once per game.
+     * @returns {Promise<Boolean>}
+     */
+    async _detectAvif() {
+        if (_avifSupported === null) {
+            const enabled = Urso.config.useAvifAtlases && Urso.config.useBinPath
+                && Urso.helper?.parseGetParams?.()['avif'] !== '0'
+                && PIXI.detectAvif;
+
+            _avifSupported = enabled
+                ? Promise.resolve().then(() => PIXI.detectAvif.test()).catch(() => false)
+                : Promise.resolve(false);
+        }
+
+        if (_avifSupported instanceof Promise)
+            _avifSupported = !!(await _avifSupported);
+
+        return _avifSupported;
+    }
+
+    /**
+     * ADDED: opt-in bundle of every json of bin/ in one file, bin/uber.json
+     * (Urso.config.useUberJson, bin/ only, `?uber=0` turns it off for a session). It is fetched once, before the
+     * first assets, and PIXI's fetch answers a json found there without a request (the atlas and skeleton loaders
+     * read their json through it). A json not in it, or no uber.json at all, loads as before.
+     * Layers may wrap this method (e.g. to count the file in a load progress).
+     * @param {String} url
+     * @returns {Promise}
+     */
+    _loadUberJson(url) {
+        const href = new URL(url, location.href).href;
+
+        return fetch(href)
+            .then(r => (r.ok ? r.json() : Promise.reject(new Error(`${r.status} ${href}`))))
+            .then(files => {
+                const prefix = href.slice(0, href.lastIndexOf('/') + 1);
+                const adapter = PIXI.DOMAdapter.get();
+
+                PIXI.DOMAdapter.set({
+                    ...adapter,
+                    fetch: (u, options) => {
+                        const abs = new URL(u, location.href).href.split('?')[0];
+                        const key = abs.startsWith(prefix) && abs.slice(prefix.length);
+                        const json = key && takeFromUber(files, key);
+
+                        if (!json)
+                            return adapter.fetch(u, options);
+
+                        return Promise.resolve({ ok: true, status: 200, statusText: 'OK', json: async () => json });
+                    },
+                });
+            })
+            .catch(e => Urso.logger.warn('LibLoader: no bin/uber.json, one request per json', e));
+    }
+
+    /**
+     * ADDED: AVIF detection and bin/uber.json before the first load; both opt-in, no-ops by default
+     */
+    async _prepareBinBundles() {
+        await this._detectAvif();
+
+        const useUber = Urso.config.useUberJson && Urso.config.useBinPath
+            && Urso.helper?.parseGetParams?.()['uber'] !== '0';
+
+        if (!_uberJson && useUber && this._assetsQuery.length)
+            _uberJson = this._loadUberJson(this._getBinPath('uber.json'));
+
+        if (_uberJson)
+            await _uberJson;
+    }
 
     /**
      * store loaded asset in cache
@@ -123,6 +246,9 @@ class LibLoader {
         }
 
         this._isRunning = true;
+
+        // ADDED: AVIF detection and bin/uber.json, both opt-in
+        await this._prepareBinBundles();
         this._lastLoadFailed = false;
         this._iterationNumber++;
         const currentIteration = this._iterationNumber;

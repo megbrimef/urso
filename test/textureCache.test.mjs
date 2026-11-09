@@ -125,5 +125,24 @@ check('same-source re-registration still overwrites', cache.getTexture('icon').v
 cache.addTexture('icon.png', { v: 3 }, 'game_atlas');
 check('a different atlas still reports the collision', errors.length === 1);
 
+console.log('\n[hires] meta.hires frames get half-size orig/trim');
+{
+  global.PIXI = {
+    Rectangle: class { constructor(x, y, width, height) { Object.assign(this, { x, y, width, height }); } },
+    Texture: class { constructor(o) { Object.assign(this, o); } },
+  };
+  const t = (w) => ({ source: 's', frame: { w }, orig: { x: 0, y: 0, width: w, height: w }, trim: null, label: 'l' });
+  const sheet = { data: { meta: { hires: ['big'] } }, textures: { 'big.png': t(200), 'small.png': t(100) } };
+  const small = sheet.textures['small.png'];
+  cache._applyHiresFrames(sheet);
+  check('hires frame orig halved', sheet.textures['big.png'].orig.width === 100);
+  check('hires frame keeps its source frame', sheet.textures['big.png'].frame.w === 200);
+  check('other frames untouched', sheet.textures['small.png'] === small);
+  const plain = { data: { meta: {} }, textures: { 'a.png': t(10) } };
+  const before = plain.textures['a.png'];
+  cache._applyHiresFrames(plain);
+  check('atlas without meta.hires untouched', plain.textures['a.png'] === before);
+}
+
 console.log(`\n${fail === 0 ? 'ALL PASS' : 'FAILURES'} — ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

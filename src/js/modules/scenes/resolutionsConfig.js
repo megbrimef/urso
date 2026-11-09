@@ -53,7 +53,16 @@ class ModulesScenesResolutionsConfig {
         return this.adaptiveConfig;
     };
 
+    /**
+     * max canvas side in device pixels. By default the largest config resolution, so on a screen with more device
+     * pixels (125-150% OS scaling, 2K monitors, phones) the browser stretches the canvas: soft art, jagged edges.
+     * ADDED: Urso.config.maxCanvasSize (e.g. a GPU-safe 4096) lets the canvas take every
+     * device pixel up to that size.
+     */
     maxSize() {
+        if (Urso.config.maxCanvasSize > 0)
+            return Urso.config.maxCanvasSize;
+
         return Math.max(this.maxWidth(), this.maxHeight());
     };
 

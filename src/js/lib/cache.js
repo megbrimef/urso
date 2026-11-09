@@ -182,9 +182,34 @@ class LibCache {
     };
 
     addAtlas(key, someData) {
+        this._applyHiresFrames(someData);
         this._setDataToAssetsList('atlas', key, someData);
         this.clearGlobalAtlas();
     };
+
+    /**
+     * ADDED: an atlas page may mix 1x pictures and 2x ones, listed in its meta.hires
+     * (names without '.png'), so that e.g. all symbols share one texture. Spine sizes a region by its attachment
+     * and does not care; a plain sprite takes its size from the texture, so a 2x picture's texture gets half the
+     * size — twice the pixels, drawn at the size of the 1x picture. Atlases without meta.hires are untouched.
+     * @param {Object} sheet - PIXI.Spritesheet
+     */
+    _applyHiresFrames(sheet) {
+        const hires = sheet?.data?.meta?.hires;
+
+        if (!Array.isArray(hires) || !hires.length || !sheet.textures)
+            return;
+
+        const half = r => r && new PIXI.Rectangle(r.x / 2, r.y / 2, r.width / 2, r.height / 2);
+
+        for (const name of hires) {
+            const frame = `${name}.png`;
+            const t = sheet.textures[frame];
+
+            if (t)
+                sheet.textures[frame] = new PIXI.Texture({ source: t.source, frame: t.frame, orig: half(t.orig), trim: half(t.trim), label: t.label });
+        }
+    }
 
     addBinary(key, someData) {
         this._setDataToAssetsList('binary', key, someData);

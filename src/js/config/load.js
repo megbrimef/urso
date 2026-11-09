@@ -100,6 +100,7 @@ import ModulesObjectsModelsWorld from "../modules/objects/models/world";
 import ModulesObserverController from "../modules/observer/controller";
 import ModulesObserverEvents from "../modules/observer/events";
 
+import ModulesScenesAdditiveBatcher from "../modules/scenes/additiveBatcher";
 import ModulesScenesController from "../modules/scenes/controller";
 import ModulesScenesModel from "../modules/scenes/model";
 import ModulesScenesPixiWrapper from "../modules/scenes/pixiWrapper";
@@ -274,6 +275,7 @@ window.Urso = {
         Events: ModulesObserverEvents,
       },
       Scenes: {
+        AdditiveBatcher: ModulesScenesAdditiveBatcher,
         Controller: ModulesScenesController,
         Model: ModulesScenesModel,
         PixiWrapper: ModulesScenesPixiWrapper,

@@ -56,6 +56,15 @@ class ModulesScenesPixiWrapper {
         // degrades to today's behaviour rather than throwing on a missing `renderer` key.
         const rendererConfig = Urso.config.renderer || {};
 
+        // ADDED: mipmaps for every loaded texture — art drawn smaller than its pixels is
+        // filtered instead of skipping pixels (jagged edges in small windows, phones in landscape)
+        if (rendererConfig.autoGenerateMipmaps !== undefined)
+            PIXI.TextureSource.defaultOptions.autoGenerateMipmaps = rendererConfig.autoGenerateMipmaps;
+
+        // ADDED: 'add' and 'normal' blended elements in one batch (see additiveBatcher.js)
+        if (rendererConfig.additiveBatching && Urso.helper.parseGetParams()['addBatch'] !== '0')
+            this.getInstance('AdditiveBatcher').register();
+
         const initOptions = {
             background: rendererConfig.background !== undefined ? rendererConfig.background : "0x222222",
             // resolution: 1 is hardcoded; NOT autoDensity — see resolutions.js comments
